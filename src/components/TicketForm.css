@@ -1,0 +1,136 @@
+.ticket-form-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(84, 80, 80, 0.1);
+  padding: 24px;
+  width: 100%;
+  max-width: 600px;
+  margin: 20px auto;
+}
+
+.ticket-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.ticket-form-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 24px;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #666;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.close-button:hover {
+  background: #f5f5f5;
+}
+
+.ticket-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-weight: 500;
+  color: #333;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.cancel-button,
+.submit-button {
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-button {
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  color: #666;
+}
+
+.submit-button {
+  background: #007bff;
+  border: none;
+  color: white;
+}
+
+.cancel-button:hover {
+  background: #eee;
+}
+
+.submit-button:hover {
+  background: #0056b3;
+}
+
+.cancel-button:disabled,
+.submit-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #dc3545;
+  background: #fff5f5;
+  padding: 12px;
+  border-radius: 4px;
+  margin-top: 16px;
+}
+
+.success-message {
+  text-align: center;
+  color: #28a745;
+  padding: 20px;
+}
+
+.success-message p {
+  margin: 8px 0;
+  font-size: 16px;
+} 

@@ -1,0 +1,458 @@
+.app-sidebar {
+    width: 250px;
+    height: calc(100vh - 60px);
+    background-color: rgb(10 8 38 / var(--tw-bg-opacity, 1));
+    position: fixed;
+    top: 60px;
+    left: 0;
+    transition: all 0.3s ease;
+    z-index: 900;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .app-sidebar.collapsed {
+    width: 60px;
+  }
+  
+  .sidebar-toggle {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    /* Remove background and border-radius for outline-only icon */
+    background: none;
+    border-radius: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    z-index: 1000;
+    color: white;
+}
+
+.toggle-icon {
+    background: none;
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+  
+  .sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 40px 0 20px 0; /* Add top padding to push content down */
+  }
+  .sidebar-section-title {
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    margin-left: 20px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+.sidebar-section-title svg {
+    margin-left: 8px;
+    flex-shrink: 0;
+}
+  
+  .sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .sidebar-nav li {
+    margin-bottom: 5px;
+  }
+  
+  .sidebar-nav a {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: #ccc;
+    text-decoration: none;
+    transition: background-color 0.2s, color 0.2s;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  
+  .sidebar-nav a:hover {
+    background-color: rgb(55 48 163 / 0.5); /* bg-indigo-800/50 */
+    color: white;
+  }
+  
+  .sidebar-nav a.active {
+    background-color:  rgb(234 58 112 / var(--tw-bg-opacity, 1));
+    color: white;
+    padding-left: 17px;
+  }
+  
+  .sidebar-nav .icon {
+    font-size: 20px;
+    margin-right: 18px;
+    width: 24px;
+    text-align: center;
+    flex-shrink: 0;
+    transition: color 0.2s;
+  }
+  
+  
+  
+  .app-sidebar.collapsed .sidebar-nav a {
+    padding: 12px 0;
+    justify-content: center;
+  }
+
+  .app-sidebar.collapsed .icon {
+    margin-right: 0;
+    font-size: 22px;
+  }
+
+  .app-sidebar.collapsed .label {
+    display: none;
+  }
+
+  /* Custom scrollbar styles */
+  .app-sidebar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .app-sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+  }
+
+  .app-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+  }
+
+  .app-sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+  
+  /* Submenu styling */
+  .has-submenu {
+    position: relative;
+  }
+
+  .has-submenu .menu-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: #ccc;
+    text-decoration: none;
+    transition: background-color 0.2s, color 0.2s;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .has-submenu .menu-item:hover {
+    background-color: rgb(55 48 163 / 0.5); /* bg-indigo-800/50 */
+    color: white;
+  }
+
+  .submenu-arrow {
+    margin-left: auto;
+    font-size: 10px;
+    transition: transform 0.2s;
+    color: #ccc;
+  }
+
+  .has-submenu.expanded .submenu-arrow {
+    color: white;
+  }
+
+  .submenu {
+    list-style: none;
+    padding-left: 20px;
+    margin: 0;
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.3s ease-out;
+  }
+
+  .has-submenu.expanded .submenu {
+    max-height: 500px;
+    transition: max-height 0.5s ease-in;
+  }
+
+  .submenu li {
+    margin: 0;
+  }
+
+  .submenu li a {
+    padding: 8px 15px 8px 30px;
+    font-size: 14px;
+    color: #ccc;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .submenu li a:hover {
+    color: white;
+    background-color:  rgb(55 48 163 / 0.5); /* bg-indigo-800/50 */
+  }
+
+  .submenu li a.active {
+    color: white;
+    background-color: rgb(234 58 112 / var(--tw-bg-opacity, 1));
+    border-left: 3px solid #4a90e2;
+    padding-left: 27px;
+  }
+
+  /* Collapsed Sidebar - Submenu adjustments */
+  .app-sidebar.collapsed .has-submenu .submenu {
+    display: none;
+  }
+
+  .app-sidebar.collapsed .has-submenu .menu-item {
+    justify-content: center;
+  }
+
+  .app-sidebar.collapsed .submenu-arrow {
+    display: none;
+  }
+
+  /* User Profile Section Styling */
+  .profile-section {
+    margin-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 10px;
+  }
+
+  .profile-section .menu-item {
+    color: #fff;
+    background-color: rgba(74, 144, 226, 0.2);
+    border-radius: 4px;
+    margin: 0 10px;
+    padding: 12px 10px;
+  }
+
+  .profile-section .menu-item:hover {
+    background-color: rgba(74, 144, 226, 0.3);
+  }
+
+  .profile-section .label {
+    font-weight: 500;
+  }
+
+  .profile-section .submenu li a {
+    border-left: 2px solid rgba(74, 144, 226, 0.5);
+    margin-left: 10px;
+  }
+
+  .profile-section .submenu li a:hover {
+    background-color: rgba(74, 144, 226, 0.15);
+  }
+
+  /* Update the support-item class to handle collapsed state */
+.support-item {
+    position: sticky;
+    bottom: 0;
+    padding: 15px;
+    background-color: rgb(10 8 38); /* Match sidebar background */
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 1;
+    transition: all 0.3s ease; /* Match sidebar transition */
+}
+
+/* Add specific styling for collapsed state */
+.app-sidebar.collapsed .support-item {
+    padding: 15px 0;
+    display: flex;
+    justify-content: center;
+}
+
+/* Make sure the support button aligns correctly in collapsed state */
+.app-sidebar.collapsed .support-button {
+    width: 40px;
+    justify-content: center;
+    padding: 10px 0;
+    margin: 0 auto;
+}
+
+/* Hide text in collapsed state */
+.app-sidebar.collapsed .support-text {
+    display: none;
+}
+
+  /* Update scrollbar to not interfere with support button */
+  .sidebar-nav::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .sidebar-nav::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+  }
+
+  .sidebar-nav::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+  }
+
+  .sidebar-nav::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .header-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 1000;
+  }
+
+  .logo {
+    height: 40px;
+  }
+
+  .mobile-header {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background-color: rgb(10 8 38);
+    z-index: 1001;
+    padding: 0 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    align-items: center;
+  }
+
+  .mobile-menu-icon {
+    font-size: 28px;
+    cursor: pointer;
+    color: white;
+    display: flex;
+    align-items: center;
+  }
+
+  .mobile-title {
+    color: white;
+    margin-left: 20px;
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  .mobile-menu-button {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    z-index: 999;
+  }
+
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 997;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .sidebar-backdrop.active {
+    opacity: 1;
+  }
+
+  .menu-btn {
+    display: none;
+    cursor: pointer;
+    padding: 8px;
+    margin-right: 16px;
+    color: rgb(10 8 38);
+  }
+
+  @media (max-width: 768px) {
+    .mobile-header {
+      display: flex;
+    }
+    
+    .app-sidebar {
+      top: 60px;
+      background-color: rgb(10 8 38);
+    }
+
+    .menu-btn {
+      display: flex;
+      align-items: center;
+    }
+  
+    .header-container {
+      padding: 0 16px;
+      background-color: white;
+      justify-content: flex-start;
+      gap: 20px;
+    }
+
+    .app-sidebar {
+      position: fixed;
+      left: -280px;
+      top: 60px;
+      height: calc(100vh - 60px);
+      transition: left 0.3s ease;
+    }
+
+    .app-sidebar.mobile-open {
+      left: 0;
+    }
+
+    .app-sidebar.mobile-closed {
+      left: -280px;
+    }
+
+    .sidebar-toggle {
+      display: none;
+    }
+  }
+
+  .hamburger-menu {
+    width: 30px;
+    height: 24px;
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 4px 0;
+  }
+
+  .hamburger-menu span {
+    display: block;
+    height: 3px;
+    width: 100%;
+    background-color: white;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+  }
+

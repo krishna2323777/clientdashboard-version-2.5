@@ -1,0 +1,226 @@
+/* Corporate Hub Styles */
+.corporate-hub-container {
+  min-height: 100vh;
+  background: #220938;
+  color: #fff;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  padding: 48px 16px;
+}
+
+.corporate-hub-content {
+  max-width: 1100px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.corporate-hub-badge {
+  display: inline-block;
+  background: transparent;
+  color: #3b82f6;
+  border-radius: 999px;
+  padding: 6px 22px;
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 18px;
+  letter-spacing: 0.5px;
+  border: 2px solid #3b82f6;
+}
+
+.corporate-hub-title {
+  font-weight: 900;
+  font-size: 44px;
+  color: #fff;
+  margin: 0 0 12px 0;
+  line-height: 1.1;
+}
+
+.corporate-hub-subtitle {
+  color: #e0e7ff;
+  font-size: 20px;
+  margin: 0 0 48px 0;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.corporate-services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin-top: 48px;
+  max-width: 1200px;
+  margin: 48px auto 0 auto;
+}
+
+.corporate-service-card {
+  background: rgba(45, 53, 97, 0.6);
+  border-radius: 20px;
+  padding: 32px;
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  position: relative;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.corporate-service-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(59, 130, 246, 0.6);
+  box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2);
+}
+
+.corporate-service-card.coming-soon {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.corporate-service-card.coming-soon:hover {
+  transform: none;
+  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: none;
+}
+
+.corporate-service-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.corporate-service-icon {
+  font-size: 1.5rem;
+}
+
+.corporate-service-badge {
+  background: #3b82f6;
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.corporate-service-title {
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+}
+
+.corporate-service-description {
+  color: #e0e7ff;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 20px 0;
+  flex: 1;
+}
+
+.corporate-service-grade {
+  color: #3b82f6;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.corporate-service-button {
+  background: #ef4a7b;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(239, 74, 123, 0.10);
+}
+
+.corporate-service-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(239, 74, 123, 0.18);
+}
+
+.corporate-service-coming-soon {
+  text-align: center;
+}
+
+.corporate-service-coming-soon-icon {
+  color: #ef4444;
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.corporate-service-coming-soon-text {
+  color: #ef4444;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .corporate-services-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+  
+  .corporate-hub-title {
+    font-size: 36px;
+  }
+  
+  .corporate-hub-subtitle {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .corporate-services-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .corporate-hub-title {
+    font-size: 28px;
+  }
+  
+  .corporate-hub-subtitle {
+    font-size: 16px;
+  }
+  
+  .corporate-service-card {
+    padding: 24px;
+    min-height: 240px;
+  }
+  
+  .corporate-hub-container {
+    padding: 32px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .corporate-hub-title {
+    font-size: 24px;
+  }
+  
+  .corporate-hub-subtitle {
+    font-size: 14px;
+  }
+  
+  .corporate-service-card {
+    padding: 20px;
+    min-height: 220px;
+  }
+  
+  .corporate-service-title {
+    font-size: 1.25rem;
+  }
+  
+  .corporate-service-description {
+    font-size: 0.9rem;
+  }
+} 

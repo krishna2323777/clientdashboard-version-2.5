@@ -1,0 +1,285 @@
+/* Modal Overlay */
+.doc-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(10, 10, 42, 0.85);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto; /* allow scrolling if modal is too tall */
+}
+
+/* Modal Box */
+.doc-modal {
+  background: #18143a;
+  border-radius: 22px;
+  box-shadow: 0 8px 40px 0 #00000055;
+  width: 600px;
+  max-width: 98vw;
+  padding: 2.2rem 2.5rem 1.5rem 2.5rem;
+  position: relative;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;      /* don't exceed 90% of viewport height */
+  overflow-y: auto;      /* scroll inside modal if needed */
+  box-sizing: border-box;
+}
+
+.doc-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.2rem;
+}
+
+.doc-modal-title {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.doc-modal-close {
+  background: none;
+  border: none;
+  color: #FF4D80;
+  font-size: 2rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 0.2rem;
+  transition: color 0.2s;
+}
+.doc-modal-close:hover {
+  color: #FF6699;
+}
+
+/* Stepper */
+.doc-modal-stepper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2.2rem;
+  gap: 0.5rem;
+}
+.step {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #18143a;
+  border: 2.5px solid #FF4D80;
+  color: #FF4D80;
+  font-weight: 700;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  transition: border 0.2s, color 0.2s;
+}
+.step.active {
+  background: #FF4D80;
+  color: #fff;
+  border-color: #FF4D80;
+}
+.step-label {
+  font-size: 1.05rem;
+  color: #9CA3AF;
+  margin: 0 0.3rem 0 0.3rem;
+  font-weight: 500;
+}
+.step-label.active {
+  color: #fff;
+  font-weight: 700;
+}
+.step-line {
+  flex: 1 1 0;
+  height: 3px;
+  background: linear-gradient(90deg, #FF4D80 0%, #FF6699 100%);
+  border-radius: 2px;
+  margin: 0 0.2rem;
+}
+
+/* Modal Content */
+.doc-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+.doc-modal-question {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.2rem;
+}
+
+.doc-modal-cards-row {
+  display: flex;
+  flex-direction: row;
+  gap: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+.doc-modal-card {
+  background: #18143a;
+  border: 2.5px solid #29255a;
+  border-radius: 16px;
+  padding: 1.2rem 1.1rem 1rem 1.1rem;
+  min-width: 210px;
+  max-width: 260px;
+  flex: 1 1 0;
+  cursor: pointer;
+  transition: border 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 12px #FF4D8033;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.doc-modal-card.selected {
+  border: 2.5px solid #FF4D80;
+  box-shadow: 0 4px 24px #FF4D8044;
+}
+.doc-modal-card-title {
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.2rem;
+}
+.doc-modal-card-desc {
+  font-size: 0.98rem;
+  color: #D1D5DB;
+  margin-bottom: 0.5rem;
+}
+.doc-modal-card-count {
+  font-size: 0.95rem;
+  color: #FF4D80;
+  font-weight: 600;
+}
+
+/* Document Requirements List */
+.doc-modal-req-list {
+  background: #151233;
+  border-radius: 12px;
+  padding: 1.2rem 1.2rem 1rem 1.2rem;
+  margin-top: 0.5rem;
+}
+.doc-modal-req-title {
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.7rem;
+}
+.doc-modal-req-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  margin-bottom: 0.7rem;
+}
+.doc-modal-req-dot {
+  font-size: 1.1rem;
+  color: #FF4D80;
+  margin-top: 0.2rem;
+}
+.doc-modal-req-name {
+  font-size: 1.01rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.1rem;
+}
+.doc-modal-req-star {
+  color: #FF4D80;
+  font-size: 1.1em;
+  margin-left: 0.1em;
+}
+.doc-modal-req-desc {
+  font-size: 0.97rem;
+  color: #D1D5DB;
+  margin-bottom: 0.1rem;
+}
+.doc-modal-req-formats {
+  font-size: 0.93rem;
+  color: #9CA3AF;
+}
+
+/* Modal Footer */
+.doc-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+.doc-modal-cancel {
+  background: none;
+  border: 2px solid #29255a;
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border 0.2s, color 0.2s, background 0.2s;
+}
+.doc-modal-cancel:hover {
+  border-color: #FF4D80;
+  color: #FF4D80;
+  background: #18143a;
+}
+.doc-modal-continue {
+  background: linear-gradient(90deg, #FF4D80 0%, #FF6699 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.7rem 2.2rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 12px #FF4D8033;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+.doc-modal-continue:hover {
+  background: linear-gradient(90deg, #FF6699 0%, #FF4D80 100%);
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 8px 32px #FF6699aa;
+}
+
+@media (max-width: 700px) {
+  .doc-modal {
+    padding: 1.1rem 0.5rem 0.7rem 0.5rem;
+    width: 99vw;
+    min-width: 0;
+  }
+  .doc-modal-stepper {
+    flex-direction: column;
+    gap: 0.2rem;
+    align-items: flex-start;
+  }
+  .doc-modal-cards-row {
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  .doc-modal-req-list {
+    padding: 0.7rem 0.5rem 0.5rem 0.5rem;
+  }
+  .doc-modal-footer {
+    flex-direction: column;
+    gap: 0.7rem;
+    align-items: stretch;
+  }
+}
+
+/* Custom Scrollbar for Modal */
+.doc-modal, .doc-modal-overlay {
+  scrollbar-width: thin;
+  scrollbar-color: #1A1A4A #18143a;
+}
+
+.doc-modal::-webkit-scrollbar, .doc-modal-overlay::-webkit-scrollbar {
+  width: 8px;
+  background: #18143a;
+}
+.doc-modal::-webkit-scrollbar-thumb, .doc-modal-overlay::-webkit-scrollbar-thumb {
+  background: #1A1A4A;
+  border-radius: 8px;
+}
+.doc-modal::-webkit-scrollbar-thumb:hover, .doc-modal-overlay::-webkit-scrollbar-thumb:hover {
+  background: #12123A;
+}

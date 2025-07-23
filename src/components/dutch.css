@@ -1,0 +1,596 @@
+
+  
+  .registration-header {
+ 
+    border-bottom: 1px solid #e9ecef;
+  }
+  
+  .header-content {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .header-content h1 {
+    color: #597591;
+    margin-bottom: 1rem;
+  }
+  
+  .progress-steps {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+  
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6c757d;
+  }
+  
+  .step.completed {
+    color: #28a745;
+  }
+  
+  .step.active {
+    color: #007bff;
+  }
+  
+  .step span {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+   
+    color: white;
+  }
+  
+  .registration-layout {
+    display: flex;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    gap: 2rem;
+  }
+  
+  .sidebar {
+    width: 250px;
+    flex-shrink: 0;
+  }
+  
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .sidebar li {
+    padding: 1rem;
+    cursor: pointer;
+    color: #495057;
+    border-left: 3px solid transparent;
+  }
+  
+  .sidebar li.active {
+    background: #f8f9fa;
+    border-left-color: #007bff;
+    color: #007bff;
+  }
+  
+  .main-content {
+    flex: 1;
+  }
+  
+  
+  
+  .section-header {
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  
+  
+  .key-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .key-steps .step {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 4px;
+  }
+  
+  .step-number {
+    background: #007bff;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .deadlines-section {
+    margin-top: 2rem;
+  }
+  
+  .deadline-items {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .deadline-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 4px;
+  }
+  
+  .deadline-dot {
+    width: 12px;
+    height: 12px;
+    background: #007bff;
+    border-radius: 50%;
+    margin-top: 0.5rem;
+  }
+  
+  .deadline-content h4 {
+    margin: 0;
+    color: #2c3e50;
+  }
+  
+  .deadline-content p {
+    margin: 0.5rem 0 0;
+    color: #495057;
+  }
+  
+  .post-registration {
+ 
+    color: #333333;
+    padding: 2rem;
+    min-height: 100vh;
+
+    width: 100%;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+  }
+  
+  .title {
+    color: #fff9f9;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .description {
+    color: #cbc9c9;
+    margin-bottom: 2rem;
+    max-width: 800px;
+    line-height: 1.5;
+  }
+  
+  .sections {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 3rem;
+  }
+  
+  .section {
+    background-color:rgb(30 27 63 / 1);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    color:#fff;
+
+  }
+  
+  .section.active {
+   
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .section-header {
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+  }
+  
+  .arrow {
+    color: #666666;
+    font-size: 0.8rem;
+  }
+  
+  .deadlines {
+    background-color: #1d1d3b;
+    border-radius: 8px;
+    padding: 2rem;
+  }
+  
+  .deadlines h2 {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .deadline-items {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .deadline-item {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .deadline-marker {
+    width: 8px;
+    height: 8px;
+    background-color: #ff4b76;
+    border-radius: 50%;
+    margin-top: 0.5rem;
+  }
+  
+  .deadline-content h4 {
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+  
+  .deadline-content p {
+    color: #b4b4c7;
+    font-size: 0.9rem;
+  }
+  
+  .header-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .tab-btn {
+    background: transparent;
+    border: none;
+    color: #666666;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+  }
+  
+  .tab-btn.active {
+    color: #007bff;
+    border-bottom: 2px solid #007bff;
+  }
+  
+  
+
+  
+  .content-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .step-number {
+    width: 24px;
+    height: 24px;
+    background-color: #333363;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.9rem;
+  }
+  
+  .arrow {
+    font-size: 0.8rem;
+    color: #6e6e8f;
+    transition: transform 0.2s;
+  }
+  
+  .section.active .arrow {
+    transform: rotate(0deg);
+    color: #fff;
+  }
+  
+  
+  
+  .step-marker {
+    background-color: #007bff;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+  
+  .step {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 0.5rem 0;
+  }
+  
+  .step p {
+    margin: 0;
+    color: #666666;
+    line-height: 1.4;
+  }
+  
+  .dutch-deadlines {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 24px;
+    margin-top: 32px;
+    border: 1px solid #e9ecef;
+  }
+  
+  .dutch-deadlines-title {
+    color: #333333;
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 24px;
+  }
+  
+  .dutch-deadline-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .dutch-deadline-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .dutch-deadline-marker {
+    width: 12px;
+    height: 12px;
+    background: #007bff;
+    border-radius: 4px;
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+  
+  .dutch-deadline-content {
+    flex: 1;
+  }
+  
+  .dutch-deadline-content h4 {
+    color: #333333;
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0 0 4px 0;
+  }
+  
+  .dutch-deadline-content p {
+    color: #666666;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+  }
+  
+  .deadline-items {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .deadline-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .deadline-icon {
+    margin-top: 4px;
+  }
+  
+  .deadline-content {
+    flex: 1;
+  }
+  
+  .deadline-content h4 {
+    color: #333333;
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0 0 4px 0;
+  }
+  
+  .deadline-content p {
+    color: #666666;
+    font-size: 14px;
+    margin: 0;
+    line-height: 1.4;
+  }
+  
+  .dutch-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 8px 0;
+  }
+  
+  .dutch-step-box {
+    background-color: #007bff;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  
+  .dutch-step p {
+ 
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    flex: 1;
+  }
+  
+  .content-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  
+  .section-content {
+    
+    padding: 24px;
+    border-top: 1px solid #e9ecef;
+  }
+  
+  .section-content h3 {
+    color: #c9c6e5;
+    margin: 0;
+    font-size: 18px;
+  }
+  
+  .steps-title {
+    color: #bec3ed;
+    font-size: 14px;
+    margin: 16px 0 0;
+    font-weight: 500;
+  }
+
+  /* Mobile Responsive Styles */
+  @media screen and (max-width: 768px) {
+    .post-registration {
+      padding: 1rem;
+    }
+  
+    .title {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+  
+    .description {
+      font-size: 14px;
+      margin-bottom: 1.5rem;
+    }
+  
+    .sections {
+      gap: 0.75rem;
+    }
+  
+    .section {
+      margin-bottom: 0.75rem;
+    }
+  
+    .section-header {
+      padding: 15px;
+      font-size: 14px;
+    }
+  
+    .section-content {
+      padding: 15px;
+    }
+  
+    .section-content h3 {
+      font-size: 16px;
+    }
+  
+    .content-steps {
+      gap: 10px;
+    }
+  
+    .dutch-step {
+      flex-direction: column;
+      gap: 8px;
+    }
+  
+    .dutch-step-box {
+      width: fit-content;
+    }
+  
+    .dutch-step p {
+      font-size: 13px;
+    }
+  
+    .dutch-deadlines {
+      padding: 15px;
+      margin-top: 24px;
+    }
+  
+    .dutch-deadlines-title {
+      font-size: 16px;
+      margin-bottom: 16px;
+    }
+  
+    .dutch-deadline-list {
+      gap: 12px;
+    }
+  
+    .dutch-deadline-item {
+      gap: 10px;
+    }
+  
+    .dutch-deadline-content h4 {
+      font-size: 14px;
+    }
+  
+    .dutch-deadline-content p {
+      font-size: 13px;
+    }
+  
+    /* Improve touch targets */
+    .section-header,
+    .dutch-step,
+    .dutch-deadline-item {
+      min-height: 44px;
+    }
+  
+    /* Add scroll indicators */
+    .steps-nav::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 30px;
+      background: linear-gradient(to right, transparent, #ffffff);
+      pointer-events: none;
+    }
+  }
+  
+  /* Small mobile devices */
+  @media screen and (max-width: 320px) {
+    .post-registration {
+      padding: 0.75rem;
+    }
+  
+    .section-header {
+      padding: 12px;
+      font-size: 13px;
+    }
+  
+    .dutch-step p,
+    .dutch-deadline-content p {
+      font-size: 12px;
+    }
+  
+    .dutch-deadline-content h4 {
+      font-size: 13px;
+    }
+  }

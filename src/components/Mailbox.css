@@ -1,0 +1,496 @@
+.mailbox-container {
+  background: #220938;
+  color: #fff;
+  padding: 32px 40px;
+  min-height: 100vh;
+  font-family: 'Inter', Arial, sans-serif;
+}
+
+.mailbox-container h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.2em;
+  font-weight: 700;
+}
+
+.mailbox-container p {
+  color: #b8b8ff;
+  margin-bottom: 2em;
+}
+
+.mailbox-actions {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.mailbox-actions button {
+  background:#220938;
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.mailbox-actions button.active,
+.mailbox-actions button:hover {
+  background: #ff4b8b;
+  color: #fff;
+}
+
+.mailbox-toolbar {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 18px;
+  align-items: center;
+}
+
+.mailbox-toolbar input {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  
+  color: #fff;
+  font-size: 1rem;
+}
+
+.mailbox-toolbar button {
+  background:#32124d;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.mailbox-toolbar button:hover {
+  background: #ff4b8b;
+  color: #fff;
+}
+
+.mailbox-list {
+  margin-top: 18px;
+  background: #32124d;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.mailbox-list-header,
+.mailbox-list-item {
+  display: grid;
+  grid-template-columns: 3fr 1fr auto;
+  align-items: center;
+  padding: 18px 24px;
+}
+
+.mailbox-list-header {
+ 
+  color: #b8b8ff;
+  font-weight: 600;
+  font-size: 1.1rem;
+  border-bottom: 1px solid #29295a;
+}
+
+.mailbox-list-item {
+  border-bottom: 1px solid #29295a;
+  font-size: 1rem;
+}
+
+.mailbox-list-item:last-child {
+  border-bottom: none;
+}
+
+.mail-tag {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 2px 10px;
+  border-radius: 8px;
+  background: #3a3b5a;
+  color: #b8b8ff;
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+.mail-tag.important {
+  background: #ff4b8b;
+  color: #fff;
+}
+
+.mail-status {
+  font-weight: 600;
+  font-size: 1em;
+}
+
+.mail-status.new {
+  color: #ff4b8b;
+}
+
+.mail-status.scanned {
+  color: #00ffb8;
+}
+
+.mail-status.forwarded {
+  color: #b8b8ff;
+}
+
+.mail-official {
+  font-size: 
+  0.85em;
+  color: #b8b8ff;
+  margin-top: 2px;
+}
+
+.mailbox-list-item button {
+  background: #29295a;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  margin-right: 8px;
+  font-size: 1.2em;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.mailbox-list-item button:hover {
+  background: #ff4b8b;
+  color: #fff;
+}
+
+.mailbox-input {
+  background: #23234a;
+  color: white;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.mailbox-input:focus {
+  outline: 2px solid #ff4b8b;
+  border-color: #ff4b8b;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ffffff;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Shipments Tab Styles */
+.shipments-tab {
+  margin-top: 2rem;
+  color: white;
+}
+
+.shipments-tab h2 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Update shipments table for smaller size */
+.shipments-table {
+  width: 100%;
+  background: rgba(30, 20, 60, 0.5);
+  border-radius: 12px;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  font-size: 0.8rem;
+  max-width: 95%;
+  margin: 1rem auto;
+}
+
+.shipments-table thead tr {
+  background: #23234a;
+  height: 32px;
+}
+
+.shipments-table th {
+  padding: 0.5rem 0.8rem;
+  text-align: left;
+  font-weight: 600;
+  color: #b8b8ff;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.shipments-table tbody {
+  max-height: calc(100vh - 400px);
+  overflow-y: auto;
+}
+
+.shipments-table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background-color 0.2s ease;
+  line-height: 1;
+  height: 36px;
+}
+
+.shipments-table tbody tr:hover {
+  background: rgba(35, 35, 74, 0.5);
+}
+
+.shipments-table td {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.75rem;
+  color: #fff;
+}
+
+/* Status badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.7rem;
+  min-width: 60px;
+}
+
+.status-badge.pending {
+  background: #6C5DD3;
+  color: white;
+}
+
+.status-badge.delivered {
+  background: #4CAF50;
+  color: white;
+}
+
+.status-badge.transit {
+  background: #FFB300;
+  color: white;
+}
+
+.status-badge.cancelled {
+  background: #FF5252;
+  color: white;
+}
+
+/* Document action buttons */
+.document-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.document-button {
+  padding: 0.2rem;
+  background: #29295a;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.document-button:hover {
+  background: #6C5DD3;
+  transform: translateY(-2px);
+}
+
+.document-button svg {
+  width: 10px;
+  height: 10px;
+}
+
+/* Refresh button */
+.refresh-button {
+  padding: 0.6rem 1.2rem;
+  background: #6C5DD3;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.refresh-button:hover {
+  background: #7b6ae6;
+  transform: translateY(-2px);
+}
+
+/* Empty state */
+.no-shipments {
+  text-align: center;
+  padding: 3rem;
+  color: #b8b8ff;
+  background: rgba(35, 35, 74, 0.5);
+  border-radius: 16px;
+  margin-top: 1.5rem;
+}
+
+/* Responsive table */
+@media (max-width: 1200px) {
+  .shipments-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+/* Table header sticky on scroll */
+.shipments-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+/* Add these mobile responsive styles at the end of your existing CSS */
+
+@media screen and (max-width: 768px) {
+  .mailbox-container {
+    padding: 16px;
+  }
+
+  .mailbox-container h1 {
+    font-size: 1.8rem;
+  }
+
+  /* Mobile actions bar */
+  .mailbox-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .mailbox-actions button {
+    flex: 1;
+    min-width: calc(50% - 8px);
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  /* Mobile toolbar */
+  .mailbox-toolbar {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .mailbox-toolbar input {
+    width: 100%;
+    order: -1;
+  }
+
+  .mailbox-toolbar button {
+    flex: 1;
+    min-width: calc(50% - 8px);
+    padding: 8px;
+    font-size: 0.9rem;
+  }
+
+  /* Mobile mail list */
+  .mailbox-list-header {
+    display: none; /* Hide headers on mobile */
+  }
+
+  .mailbox-list-item {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  /* Stack mail info vertically */
+  .mailbox-list-item > span {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  /* Mobile actions row */
+  .mailbox-list-item > span:last-child {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    margin-top: 8px;
+  }
+
+  /* Prepare Shipment Form */
+  .shipment-form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+    padding: 1.5rem !important;
+  }
+
+  /* Shipments Table */
+  .shipments-table {
+    display: block;
+    max-width: 100%;
+    margin: 0;
+  }
+
+  .shipments-table thead {
+    display: none; /* Hide table headers on mobile */
+  }
+
+  .shipments-table tbody tr {
+    display: block;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: rgba(30, 20, 60, 0.5);
+    border-radius: 8px;
+  }
+
+  .shipments-table td {
+    display: grid;
+    grid-template-columns: 40% 60%;
+    padding: 0.5rem;
+    text-align: left;
+    font-size: 0.85rem;
+  }
+
+  .shipments-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #b8b8ff;
+  }
+
+  /* Mobile services cards */
+  .mailbox-services-cards {
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+
+  .mailbox-service-card {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  /* Mobile date picker */
+  .react-datepicker-wrapper {
+    width: 100%;
+  }
+
+  /* Modal adjustments */
+  .confirmation-dialog {
+    width: 90% !important;
+    margin: 1rem !important;
+    padding: 1rem !important;
+  }
+}

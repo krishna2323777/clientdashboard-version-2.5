@@ -1,0 +1,397 @@
+:root {
+  --main-bg: #181a2a;
+  --card-bg: #23244d;
+  --accent: #e94560;
+  --text-main: #fff;
+  --text-muted: #bfc9da;
+  --positive: #19e28a;
+  --border: #3a3b5a;
+}
+
+.cta-container {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 24px;
+  max-width: 1200px;
+  margin: auto;
+  background-color: var(--main-bg);
+  color: var(--text-main);
+}
+
+.cta-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.cta-header h1 {
+  font-size: 32px;
+  font-weight: bold;
+  color: var(--text-main);
+}
+
+.cta-header-controls {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.processing-indicator {
+  color: #ffae00;
+  font-style: italic;
+}
+
+.cta-dropdown {
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.cta-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 7px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.cta-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.cta-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.cta-tab {
+  padding: 10px 20px;
+  border: none;
+  background: var(--card-bg);
+  border-radius: 6px 6px 0 0;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.cta-tab.active {
+  background: var(--main-bg);
+  color: var(--text-main);
+  font-weight: bold;
+  border-bottom: 2px solid var(--accent);
+}
+
+.upload-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.cta-file-input {
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--main-bg);
+  color: var(--text-main);
+}
+
+.cta-upload-button {
+  background-color: var(--accent);
+  color: #fff;
+}
+
+.summary-cards {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.summary-card {
+  flex: 1;
+  background: var(--card-bg);
+  padding: 24px 16px;
+  border-radius: 12px;
+  text-align: center;
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.summary-card h4 {
+  margin-bottom: 8px;
+  font-size: 18px;
+  color: var(--text-muted);
+}
+
+.summary-card p {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--text-main);
+}
+
+.optimization-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+}
+
+.optimization-item {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  color: var(--text-main);
+}
+
+.optimization-item .impact {
+  font-weight: bold;
+  color: var(--positive);
+  margin-top: 6px;
+}
+
+.trend-metrics {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 20px;
+  align-items: flex-start;
+}
+
+.trend-chart, .key-metrics {
+  flex: 1;
+  background: var(--card-bg);
+  padding: 24px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  min-height: 370px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.key-metrics ul {
+  list-style: none;
+  padding: 0;
+}
+
+.key-metrics li {
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 18px;
+}
+
+.key-metrics li strong {
+  color: var(--text-main);
+}
+
+.key-metrics li span {
+  color: var(--positive);
+  font-weight: bold;
+}
+
+.key-metrics li:last-child {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+h3, h4 {
+  color: var(--text-main);
+}
+
+.cta-content, .overview-tab, .trend-metrics {
+  background: none;
+}
+
+/* Card border and background for all main boxes */
+.overview-tab, .trend-metrics, .cta-content > div {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 24px;
+  padding: 16px 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* For positive values */
+.positive {
+  color: var(--positive) !important;
+}
+
+.trend-chart {
+  position: relative;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px 16px 48px 16px;
+  min-height: 350px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin-bottom: 24px;
+}
+
+.trend-chart .recharts-legend-wrapper {
+  position: absolute !important;
+  left: 0;
+  right: 0;
+  bottom: 16px;
+  margin: 0 auto;
+  text-align: center;
+  width: 100% !important;
+  pointer-events: none;
+}
+
+.trend-chart .recharts-wrapper {
+  padding-top: 16px;
+}
+ 
+/* Mobile Responsive Styles */
+@media screen and (max-width: 768px) {
+  .cta-container {
+    padding: 16px;
+  }
+
+  .cta-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .cta-header h1 {
+    font-size: 24px;
+  }
+
+  .cta-header-controls {
+    width: 100%;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .cta-dropdown, .cta-button {
+    width: 100%;
+  }
+
+  .cta-tabs {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .cta-tab {
+    flex: 1;
+    min-width: calc(50% - 8px);
+    padding: 8px 12px;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .summary-cards {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .summary-card {
+    padding: 16px;
+  }
+
+  .summary-card h4 {
+    font-size: 16px;
+  }
+
+  .summary-card p {
+    font-size: 20px;
+  }
+
+  .trend-metrics {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .trend-chart, .key-metrics {
+    width: 100%;
+    min-height: auto;
+    padding: 16px;
+  }
+
+  .key-metrics li {
+    font-size: 16px;
+  }
+
+  .key-metrics li:last-child {
+    font-size: 18px;
+  }
+
+  .upload-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cta-file-input {
+    width: 100%;
+  }
+
+  .optimization-item {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  /* Chart responsiveness */
+  .trend-chart {
+    height: 300px;
+    padding: 12px 8px 40px 8px;
+  }
+
+  .trend-chart .recharts-wrapper {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .trend-chart .recharts-surface {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .trend-chart .recharts-legend-wrapper {
+    bottom: 8px;
+    font-size: 12px;
+  }
+}
+
+/* Small mobile devices */
+@media screen and (max-width: 480px) {
+  .cta-container {
+    padding: 12px;
+  }
+
+  .cta-header h1 {
+    font-size: 20px;
+  }
+
+  .cta-tab {
+    min-width: 100%;
+    margin-bottom: 4px;
+  }
+
+  .summary-card h4 {
+    font-size: 14px;
+  }
+
+  .summary-card p {
+    font-size: 18px;
+  }
+
+  .key-metrics li {
+    font-size: 14px;
+  }
+
+  .key-metrics li:last-child {
+    font-size: 16px;
+  }
+
+  .trend-chart {
+    height: 250px;
+  }
+}

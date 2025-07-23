@@ -1,0 +1,375 @@
+/* CorporateChanges.css */
+
+.corporate-changes-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #172b4d;
+  background-color: #fff;
+}
+
+/* Navigation Tabs */
+.navigation-tabs {
+  display: flex;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 2rem;
+}
+
+.nav-tab {
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  color: #64748b;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.nav-tab:hover {
+  color: #3b82f6;
+}
+
+
+/* Page Header */
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-header h1 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.subtitle {
+  color: #64748b;
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* Change Types Grid */
+.changes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.change-card {
+  display: flex;
+  align-items: flex-start;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  background-color: #fff;
+}
+
+.change-icon {
+  font-size: 1.5rem;
+  margin-right: 1rem;
+  background-color: #f8fafc;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.resign-icon {
+  background-color: #f9e9e9;
+  color: #e11d48;
+}
+
+.share-icon {
+  background-color: #e6f5f1;
+  color: #10b981;
+}
+
+.office-icon {
+  background-color: #e6f5fe;
+  color: #0ea5e9;
+}
+
+.transfer-icon {
+  background-color: #f0f1ff;
+  color: #6366f1;
+}
+
+.salary-icon {
+  background-color: #f6f7c4;
+  color: #ca8a04;
+}
+
+.change-content {
+  flex: 1;
+}
+
+.change-content h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.change-description {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin: 0 0 1rem 0;
+}
+
+.complexity-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.simple {
+  background-color: #e6f5fe;
+  color: #0ea5e9;
+}
+
+.medium {
+  background-color: #fff7ed;
+  color: #f97316;
+}
+
+.complex {
+  background-color: #fef2f2;
+  color: #ef4444;
+}
+
+.start-process-btn {
+  display: block;
+  width: 100%;
+  background-color: #fff;
+  color: #3b82f6;
+  border: 1px solid #3b82f6;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.start-process-btn:hover {
+  background-color: #3b82f6;
+  color: white;
+}
+
+/* Active Changes Section */
+.active-changes-section {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.active-changes-section h2 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.active-changes-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.active-change-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.active-change-item:last-child {
+  border-bottom: none;
+}
+
+.change-info {
+  display: flex;
+  align-items: center;
+}
+
+.change-type-icon {
+  font-size: 1.25rem;
+  margin-right: 1rem;
+  color: #3b82f6;
+}
+
+.change-info h4 {
+  margin: 0 0 0.25rem 0;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.change-info p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.change-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.progress-badge {
+  font-size: 0.8rem;
+  color: #f59e0b;
+  background-color: #fffbeb;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.continue-btn {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.continue-btn:hover {
+  background-color: #2563eb;
+}
+
+/* About Section */
+.about-section {
+  background-color: #f8fafc;
+  border-radius: 0.5rem;
+  padding: 2rem;
+}
+
+.about-section h2 {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.about-description {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  color: #334155;
+}
+
+.info-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.info-title {
+  display: flex;
+  align-items: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+}
+
+.info-icon {
+  margin-right: 0.5rem;
+  font-size: 1.25rem;
+}
+
+.info-list, .benefits-list, .notes-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0 0 2rem 0;
+}
+
+.info-list li {
+  position: relative;
+  padding-left: 2rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  color: #334155;
+}
+
+.step-number {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.5rem;
+  height: 1.5rem;
+  background-color: #3b82f6;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.benefits-list li, .notes-list li {
+  position: relative;
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  color: #334155;
+}
+
+.benefits-list li::before, .notes-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #10b981;
+  font-weight: 600;
+}
+
+.notes-list li::before {
+  content: '•';
+  color: #f59e0b;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .changes-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .info-columns {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .active-change-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .change-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 480px) {
+  .corporate-changes-page {
+    padding: 1rem;
+  }
+  
+  .change-card {
+    flex-direction: column;
+  }
+  
+  .change-icon {
+    margin-bottom: 1rem;
+  }
+} 
