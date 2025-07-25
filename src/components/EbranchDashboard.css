@@ -1,0 +1,701 @@
+.ebranch-dashboard-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #20223a 0%, #23244d 100%);
+    padding: 32px 0 32px 0;
+    position: relative;
+    overflow-x: hidden;
+  }
+  .ebranch-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin: 40px 48px 0 48px;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: 0 6px 32px 0 rgba(45,127,249,0.10);
+    padding: 0 0 24px 0;
+  }
+  .ebranch-header-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-end;
+  }
+  .ebranch-title {
+    font-size: 3.2rem;
+    font-weight: 900;
+    color: #fff;
+    margin: 0 0 12px 0;
+    letter-spacing: 0.5px;
+    line-height: 1.1;
+    background: none;
+    text-shadow: 0 2px 8px rgba(32,34,58,0.18);
+  }
+  .ebranch-title-accent {
+    color: #FF4D80;
+  }
+  .ebranch-title-underline {
+    width: 340px;
+    height: 8px;
+    background: linear-gradient(90deg, #FF4D80 60%, #FF8BA7 100%);
+    border-radius: 4px;
+    margin-bottom: 12px;
+  }
+  .ebranch-subtitle {
+    color: #b3b8e0;
+    font-size: 1.2rem;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  .ebranch-dashboard-container .dashboard-status-cards {
+    display: flex;
+    gap: 24px;
+  }
+  .ebranch-dashboard-container .status-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    color: #23244d;
+    border-radius: 12px;
+    padding: 18px 28px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 110px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255,77,128,0.15);
+    position: relative;
+    overflow: hidden;
+  }
+  .ebranch-dashboard-container .status-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,77,128,0.05) 0%, rgba(255,139,167,0.03) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .ebranch-dashboard-container .status-card:hover::before {
+    opacity: 1;
+  }
+  .ebranch-dashboard-container .status-card span { 
+    font-weight: 700; 
+    font-size: 1.3rem; 
+    color: #23244d;
+  }
+  .ebranch-dashboard-container .status-card.profile span { color: #FF4D80; }
+  .ebranch-dashboard-container .status-card.compliance span { color: #FFD600; }
+  .ebranch-dashboard-container .status-card.trial span { color: #FF8BA7; }
+  .ebranch-dashboard-container .status-card:hover {
+    box-shadow: 0 8px 32px rgba(255,77,128,0.25);
+    transform: translateY(-3px) scale(1.05);
+    border-color: rgba(255,77,128,0.3);
+  }
+  .ebranch-dashboard-container .dashboard-main {
+    display: flex;
+    gap: 40px;
+    margin: 48px 48px 0 48px;
+  }
+  .ebranch-dashboard-container .dashboard-left, .ebranch-dashboard-container .dashboard-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+  .ebranch-dashboard-container .dashboard-card {
+    background: linear-gradient(135deg, #26284a 0%, #2a2c4f 100%);
+    border-radius: 18px;
+    box-shadow: 0 4px 24px 0 rgba(255,77,128,0.08);
+    padding: 36px 40px 36px 40px;
+    margin-bottom: 0;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255,77,128,0.05);
+    position: relative;
+    overflow: hidden;
+  }
+  .ebranch-dashboard-container .dashboard-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,77,128,0.03) 0%, rgba(255,139,167,0.02) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .ebranch-dashboard-container .dashboard-card:hover::before {
+    opacity: 1;
+  }
+  .ebranch-dashboard-container .dashboard-card:hover {
+    box-shadow: 0 12px 40px 0 rgba(255,77,128,0.25);
+    transform: translateY(-3px) scale(1.02);
+    border-color: rgba(255,77,128,0.15);
+  }
+  .ebranch-dashboard-container .dashboard-card-header {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    gap: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    position: relative;
+    z-index: 1;
+    letter-spacing: 0.3px;
+    flex-wrap: nowrap;
+  }
+  .ebranch-dashboard-container .dashboard-card-header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #FF4D80 0%, #FF8BA7 100%);
+    transition: width 0.3s ease;
+  }
+  .ebranch-dashboard-container .dashboard-card:hover .dashboard-card-header::after {
+    width: 100%;
+  }
+  
+  /* Ensure header content stays on one line */
+  .ebranch-dashboard-container .dashboard-card-header > * {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Professional refresh button styling */
+  .ebranch-dashboard-container .dashboard-refresh {
+    background: rgba(255,255,255,0.05);
+    color: #b3b8e0;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 0.2px;
+  }
+  .ebranch-dashboard-container .dashboard-refresh:hover {
+    background: rgba(255,255,255,0.1);
+    color: #ffffff;
+    border-color: rgba(255,255,255,0.2);
+    transform: translateY(-1px);
+  }
+  .ebranch-dashboard-container .dashboard-refresh svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+  .ebranch-dashboard-container .dashboard-icon {
+    font-size: 1.4rem;
+    vertical-align: middle;
+    color: #FF4D80;
+    margin-right: 6px;
+    flex-shrink: 0;
+  }
+  .ebranch-dashboard-container .dashboard-card-tabs {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .ebranch-dashboard-container .dashboard-card-tabs button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 0.2px;
+    min-width: 70px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  }
+  .ebranch-dashboard-container .dashboard-card-tabs .active {
+    background: linear-gradient(135deg, #FF4D80 0%, #FF8BA7 100%);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(255,77,128,0.4);
+    transform: translateY(-2px);
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .ebranch-dashboard-container .dashboard-card-tabs button:hover:not(.active) {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(240, 147, 251, 0.4);
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .ebranch-dashboard-container .dashboard-task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 4px;
+  }
+  .ebranch-dashboard-container .no-tasks-message {
+    text-align: center;
+    padding: 40px 20px;
+    color: #b3b8e0;
+    font-size: 1.1rem;
+    background: rgba(255,77,128,0.05);
+    border-radius: 12px;
+    border: 1px dashed rgba(255,77,128,0.2);
+  }
+  .ebranch-dashboard-container .dashboard-task {
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    padding: 20px 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+    gap: 20px;
+    border: 1px solid rgba(255,255,255,0.05);
+    position: relative;
+    overflow: hidden;
+  }
+  .ebranch-dashboard-container .dashboard-task:hover {
+    background: rgba(255,255,255,0.05);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    transform: translateY(-1px);
+    border-color: rgba(255,255,255,0.1);
+  }
+  .ebranch-dashboard-container .task-icon {
+    font-size: 1.2rem;
+    color: #FF4D80;
+    background: rgba(255,255,255,0.05);
+    border-radius: 6px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    min-height: 40px;
+    flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.2s ease;
+    position: relative;
+    z-index: 1;
+  }
+  .ebranch-dashboard-container .dashboard-task:hover .task-icon {
+    background: rgba(255,77,128,0.1);
+    color: #FF4D80;
+    transform: scale(1.05);
+  }
+  .ebranch-dashboard-container .dashboard-task.high .task-icon { color: #FF4D80; background: #20223a; }
+  .ebranch-dashboard-container .dashboard-task.medium .task-icon { color: #FFD600; background: #20223a; }
+  .ebranch-dashboard-container .dashboard-task.low .task-icon { color: #10B981; background: #20223a; }
+  .ebranch-dashboard-container .task-info { 
+    flex: 1; 
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .ebranch-dashboard-container .task-title { 
+    font-size: 1rem; 
+    font-weight: 600; 
+    color: #ffffff; 
+    line-height: 1.2;
+    letter-spacing: 0.2px;
+  }
+  .ebranch-dashboard-container .task-meta { 
+    font-size: 0.85rem; 
+    background: none !important; 
+    color: #b3b8e0 !important; 
+    line-height: 1.3;
+    font-weight: 500;
+  }
+  .ebranch-dashboard-container .task-meta.high { color: #FF4D80; }
+  .ebranch-dashboard-container .task-meta.medium { color: #FFD600; }
+  .ebranch-dashboard-container .task-meta.low { color: #10B981; }
+  .ebranch-dashboard-container .task-status.overdue {
+    background: #FF4D80;
+    color: #fff;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    border: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    letter-spacing: 0.3px;
+  }
+  .ebranch-dashboard-container .task-action {
+    background: rgba(255,255,255,0.05);
+    color: #b3b8e0;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 4px;
+    padding: 8px 10px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    min-width: 36px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .ebranch-dashboard-container .task-action:hover {
+    background: rgba(255,255,255,0.1);
+    color: #ffffff;
+    transform: scale(1.05);
+    border-color: rgba(255,255,255,0.2);
+  }
+  .ebranch-dashboard-container .dashboard-view-all {
+    background: rgba(255,255,255,0.03);
+    color: #FF4D80;
+    border: 1px solid rgba(255,77,128,0.3);
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-top: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 0.3px;
+  }
+  .ebranch-dashboard-container .dashboard-view-all:hover {
+    background: rgba(255,77,128,0.1);
+    color: #FF4D80;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(255,77,128,0.2);
+    border-color: rgba(255,77,128,0.5);
+  }
+  .ebranch-dashboard-container .dashboard-app-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 20px;
+  }
+  .ebranch-dashboard-container .dashboard-app {
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,0.03);
+    border-radius: 10px;
+    padding: 16px 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+    gap: 16px;
+    border: 1px solid rgba(255,255,255,0.05);
+    min-height: 80px;
+  }
+  .ebranch-dashboard-container .dashboard-app:hover {
+    background: rgba(255,255,255,0.05);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    transform: translateY(-1px);
+    border-color: rgba(255,255,255,0.1);
+  }
+  .ebranch-dashboard-container .app-icon {
+    font-size: 1rem;
+    color: #FF4D80;
+    background: rgba(255,255,255,0.05);
+    border-radius: 6px;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    min-height: 36px;
+    flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .ebranch-dashboard-container .app-info { 
+    flex: 1; 
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+  }
+  .ebranch-dashboard-container .app-title { 
+    font-size: 0.95rem; 
+    font-weight: 600; 
+    color: #ffffff; 
+    line-height: 1.2;
+    letter-spacing: 0.2px;
+    margin: 0;
+  }
+  .ebranch-dashboard-container .app-meta { 
+    font-size: 0.8rem; 
+    margin: 0; 
+    color: #b3b8e0; 
+    background: none !important; 
+    line-height: 1.3;
+    font-weight: 500;
+  }
+  .ebranch-dashboard-container .app-tags {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-top: 2px;
+  }
+  .ebranch-dashboard-container .app-tags span {
+    background: rgba(255,77,128,0.1);
+    color: #FF4D80;
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border: 1px solid rgba(255,77,128,0.2);
+  }
+  .ebranch-dashboard-container .app-launch {
+    background: rgba(255,77,128,0.1);
+    color: #FF4D80;
+    border: 1px solid rgba(255,77,128,0.3);
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+  .ebranch-dashboard-container .app-launch:hover {
+    background: rgba(255,77,128,0.2);
+    color: #FF4D80;
+    transform: scale(1.05);
+    border-color: rgba(255,77,128,0.5);
+  }
+  .ebranch-dashboard-container .dashboard-new-app {
+    background: rgba(255,77,128,0.1);
+    color: #FF4D80;
+    border: 1px solid rgba(255,77,128,0.3);
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-top: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.3px;
+  }
+  .ebranch-dashboard-container .dashboard-new-app:hover {
+    background: rgba(255,77,128,0.2);
+    color: #FF4D80;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(255,77,128,0.2);
+    border-color: rgba(255,77,128,0.5);
+  }
+  .ebranch-dashboard-container .dashboard-card.profile .dashboard-card-header,
+  .ebranch-dashboard-container .dashboard-card.activity .dashboard-card-header,
+  .ebranch-dashboard-container .dashboard-card.quick-access .dashboard-card-header {
+    color: #FF4D80;
+  }
+  .ebranch-dashboard-container .profile-details {
+    margin-top: 18px;
+    margin-bottom: 18px;
+  }
+  .ebranch-dashboard-container .profile-row {
+    display: flex;
+    justify-content: space-between;
+    color: #fff;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+  }
+  .ebranch-dashboard-container .profile-status {
+    background: #23244d;
+    color: #FF4D80;
+    border-radius: 8px;
+    padding: 6px 16px;
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+  
+  .ebranch-dashboard-container .profile-loading {
+    text-align: center;
+    padding: 20px;
+    color: #b3b8e0;
+    font-size: 0.9rem;
+    font-style: italic;
+  }
+  
+  .ebranch-dashboard-container .profile-error {
+    text-align: center;
+    padding: 20px;
+    color: #FF4D80;
+    font-size: 0.9rem;
+    background: rgba(255,77,128,0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(255,77,128,0.2);
+  }
+  .ebranch-dashboard-container .dashboard-upgrade {
+    background: #FF4D80;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 28px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-top: 18px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+  .ebranch-dashboard-container .dashboard-upgrade:hover {
+    background: #fff;
+    color: #FF4D80;
+  }
+  .ebranch-dashboard-container .dashboard-card.activity .dashboard-card-header {
+    color: #FF4D80;
+  }
+  .ebranch-dashboard-container .activity-list {
+    margin-top: 18px;
+    margin-bottom: 18px;
+  }
+  .ebranch-dashboard-container .activity-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #fff;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+  }
+  .ebranch-dashboard-container .activity-icon {
+    font-size: 1.2rem;
+    color: #FF4D80;
+  }
+  .ebranch-dashboard-container .activity-time {
+    color: #b3b8e0;
+    font-size: 1rem;
+    margin-left: 10px;
+  }
+  .ebranch-dashboard-container .dashboard-card.quick-access .dashboard-card-header {
+    color: #FF4D80;
+  }
+  .ebranch-dashboard-container .quick-access-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 18px;
+  }
+  .ebranch-dashboard-container .quick-access-btn {
+    background: linear-gradient(135deg, #20223a 0%, #22243c 100%);
+    color: #fff;
+    border: 1px solid rgba(255,77,128,0.1);
+    border-radius: 12px;
+    padding: 20px 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+    min-height: 100px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+  }
+  .ebranch-dashboard-container .quick-access-btn:hover {
+    background: rgba(255,77,128,0.1);
+    color: #ffffff;
+    box-shadow: 0 4px 16px rgba(255,77,128,0.2);
+    transform: translateY(-2px);
+    border-color: rgba(255,77,128,0.3);
+  }
+  
+  .ebranch-dashboard-container .quick-access-btn svg {
+    font-size: 1.5rem;
+    transition: all 0.3s ease;
+    z-index: 2;
+    position: relative;
+  }
+  
+  .ebranch-dashboard-container .quick-access-btn:hover svg {
+    transform: scale(1.1);
+    color: #FF4D80;
+  }
+  @media (max-width: 1200px) {
+    .ebranch-dashboard-container .dashboard-main {
+      flex-direction: column;
+      gap: 28px;
+    }
+    .ebranch-dashboard-container .dashboard-left, .ebranch-dashboard-container .dashboard-right {
+      gap: 28px;
+    }
+  }
+  @media (max-width: 768px) {
+    .ebranch-dashboard-container .ebranch-header, .ebranch-dashboard-container .dashboard-main {
+      margin: 12px;
+      padding: 0;
+    }
+    .ebranch-dashboard-container .ebranch-header {
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .ebranch-dashboard-container .dashboard-status-cards {
+      gap: 10px;
+    }
+    .ebranch-dashboard-container .dashboard-card {
+      padding: 14px 8px;
+    }
+    
+    /* Mobile adjustments for calendar header */
+    .ebranch-dashboard-container .dashboard-card-header {
+      flex-direction: column;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .ebranch-dashboard-container .dashboard-card-tabs {
+      width: 100%;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+    .ebranch-dashboard-container .dashboard-card-tabs button {
+      min-width: 60px;
+      padding: 6px 10px;
+      font-size: 0.8rem;
+    }
+    
+    /* Mobile adjustments for recommended applications */
+    .ebranch-dashboard-container .dashboard-app-list {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .ebranch-dashboard-container .dashboard-app {
+      min-height: 70px;
+      padding: 12px 16px;
+    }
+    .ebranch-dashboard-container .app-icon {
+      min-width: 32px;
+      min-height: 32px;
+      padding: 6px;
+      font-size: 0.9rem;
+    }
+    .ebranch-dashboard-container .app-title {
+      font-size: 0.9rem;
+    }
+    .ebranch-dashboard-container .app-meta {
+      font-size: 0.75rem;
+    }
+    .ebranch-dashboard-container .app-tags span {
+      font-size: 0.65rem;
+      padding: 1px 4px;
+    }
+  }
+  

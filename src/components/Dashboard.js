@@ -299,31 +299,31 @@ export default function Dashboard() {
       <div className="navigation-hubs-section">
         <h2 className="navigation-hubs-title">Navigation Hubs</h2>
         <div className="navigation-hubs-container">
-          <button className="navigation-hub-btn application">
+          <button className="navigation-hub-btn application" onClick={() => navigate('/ebranch')}>
             <div className="hub-icon">
               <FaPlay />
             </div>
-            <span className="hub-label">Application</span>
+            <span className="hub-label">eBranch</span>
           </button>
-          <button className="navigation-hub-btn corporate">
+          <button className="navigation-hub-btn corporate" onClick={() => navigate('/corporate-hub')}>
             <div className="hub-icon">
               <FaBuilding />
             </div>
             <span className="hub-label">Corporate</span>
           </button>
-          <button className="navigation-hub-btn financial">
+          <button className="navigation-hub-btn financial" onClick={() => navigate('/financial-hub')}>
             <div className="hub-icon">
               <FaChartLine />
             </div>
             <span className="hub-label">Financial</span>
           </button>
-          <button className="navigation-hub-btn tax">
+          <button className="navigation-hub-btn tax" onClick={() => navigate('/comprehensive-tax-dashboard')}>
             <div className="hub-icon">
               <FaPercent />
             </div>
             <span className="hub-label">Tax</span>
           </button>
-          <button className="navigation-hub-btn data">
+          <button className="navigation-hub-btn data" onClick={() => navigate('/dataroom')}>
             <div className="hub-icon">
               <FaDatabase />
             </div>

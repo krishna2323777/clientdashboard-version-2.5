@@ -42,9 +42,9 @@ const CorporateHub = () => {
       badge: 'Premium',
       badgeColor: '#3b82f6',
       grade: 'Professional Grade',
-      onClick: () => navigate('/kvk-registration'),
-      available: true,
-      comingSoon: false
+      onClick: () => alert('Coming Soon! This feature is under development.'),
+      available: false,
+      comingSoon: true
     },
     {
       id: 'employer-registration',
@@ -55,7 +55,7 @@ const CorporateHub = () => {
       badge: 'Premium',
       badgeColor: '#3b82f6',
       grade: 'Professional Grade',
-      onClick: () => navigate('/employer-registration'),
+      onClick: () => alert('Coming Soon! This feature is under development.'),
       available: false,
       comingSoon: true
     },
@@ -81,9 +81,9 @@ const CorporateHub = () => {
       badge: 'Premium',
       badgeColor: '#3b82f6',
       grade: 'Professional Grade',
-      onClick: () => navigate('/agreements'),
-      available: true,
-      comingSoon: false
+      onClick: () => alert('Coming Soon! This feature is under development.'),
+      available: false,
+      comingSoon: true
     }
   ];
 

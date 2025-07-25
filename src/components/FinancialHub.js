@@ -24,10 +24,16 @@ import {
   FaChartBar
 } from 'react-icons/fa';
 import './FinancialHub.css';
+import './Settings.css'; // Import invoice styles
 
 const FinancialHub = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('All Services');
+  // Add state for Invoice Management sub-tabs
+  const [invoiceTab, setInvoiceTab] = useState('Incoming');
+  const [invoices, setInvoices] = useState([]);
+  const [loadingInvoices, setLoadingInvoices] = useState(false);
+  const [invoiceError, setInvoiceError] = useState(null);
   const [reportDocuments, setReportDocuments] = useState([]);
   const [loadingDocuments, setLoadingDocuments] = useState(false);
   const [userId, setUserId] = useState(null);
@@ -146,6 +152,14 @@ const FinancialHub = () => {
     }
   }, [userId, activeTab, selectedYear]); // Re-fetch when year filter changes
 
+  // Fetch invoices for Invoice Management (Incoming)
+  useEffect(() => {
+    if (activeTab === 'Invoice Management' && invoiceTab === 'Incoming' && userId) {
+      fetchInvoices();
+    }
+    // eslint-disable-next-line
+  }, [activeTab, invoiceTab, userId]);
+
   // Function to fetch financial documents from Supabase
   const fetchFinancialDocuments = async () => {
     setLoadingDocuments(true);
@@ -262,6 +276,62 @@ const FinancialHub = () => {
     }
   };
 
+  const fetchInvoices = async () => {
+    try {
+      setLoadingInvoices(true);
+      setInvoiceError(null);
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) throw new Error('No user session found');
+      const userId = sessionData.session.user.id;
+      const { data, error } = await supabase
+        .from('invoices')
+        .select('*')
+        .eq('auth_user_id', userId)
+        .eq('approved', true)
+        .eq('visible_to_client', true)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      // Get signed URLs for invoice PDFs and payment links
+      const invoicesWithUrls = await Promise.all(
+        data.map(async (invoice) => {
+          let updatedInvoice = { ...invoice };
+          if (invoice.pdf_url) {
+            const { data: urlData } = await supabase
+              .storage
+              .from('private-invoices')
+              .createSignedUrl(invoice.pdf_url, 3600);
+            updatedInvoice.signed_pdf_url = urlData?.signedUrl;
+          }
+          if (invoice.stripe_payment_link) {
+            updatedInvoice.payment_link = invoice.stripe_payment_link;
+          }
+          return updatedInvoice;
+        })
+      );
+      setInvoices(invoicesWithUrls);
+    } catch (err) {
+      setInvoiceError(err.message);
+    } finally {
+      setLoadingInvoices(false);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'eur'
+    }).format(amount);
+  };
+
   // Function to analyze document
   const analyzeDocument = async (documentData) => {
     try {
@@ -360,6 +430,9 @@ const FinancialHub = () => {
   const filteredServices = activeTab === 'All Services' 
     ? financialServices 
     : financialServices.filter(service => service.category === (activeTab === 'Report' ? 'Reporting' : activeTab));
+
+  // Add 'Invoice Management' to the main tabs
+  const mainTabs = ['All Services', 'Report', 'Accounting', 'Banking', 'Invoice Management'];
 
   return (
     <div style={{
@@ -490,7 +563,7 @@ const FinancialHub = () => {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                 <h2 style={{ color: '#fff', fontSize: '18px', fontWeight: '600', margin: 0 }}>
-                  Financial Services
+                  {activeTab === 'Invoice Management' ? 'Invoice Management' : 'Financial Services'}
                 </h2>
                 <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                   {activeTab === 'Report' && (
@@ -570,7 +643,7 @@ const FinancialHub = () => {
 
               {/* Service Tabs */}
               <div style={{ display: 'flex', gap: '6px', marginBottom: '12px' }}>
-                {['All Services', 'Report', 'Accounting', 'Banking'].map((tab) => (
+                {mainTabs.map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
@@ -591,163 +664,123 @@ const FinancialHub = () => {
                 ))}
               </div>
 
-              {/* Services Content */}
-              {activeTab === 'Report' ? (
-                // All Financial Documents List
-                <div style={{ width: '100%' }}>
-                  {loadingDocuments ? (
-                    // Loading state
-                    <div style={{
-                      textAlign: 'center',
-                      padding: '40px',
-                      color: '#9CA3AF'
-                    }}>
-                      <div>Loading financial documents...</div>
-                    </div>
-                  ) : reportDocuments.length === 0 ? (
-                    // No documents state
-                    <div style={{
-                      textAlign: 'center',
-                      padding: '40px',
-                      color: '#9CA3AF'
-                    }}>
-                      <div>No financial documents found. Upload documents to view them here.</div>
+              {/* Invoice Management Section */}
+              {activeTab === 'Invoice Management' ? (
+                <div>
+                  {/* Invoice Sub-tabs */}
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                    {['Incoming', 'Outgoing'].map((tab) => (
+                      <button
+                        key={tab}
+                        onClick={() => setInvoiceTab(tab)}
+                        style={{
+                          background: invoiceTab === tab ? '#3B82F6' : 'transparent',
+                          color: invoiceTab === tab ? '#fff' : '#9CA3AF',
+                          border: '1px solid rgba(59, 130, 246, 0.3)',
+                          borderRadius: '20px',
+                          padding: '8px 16px',
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        {tab}
+                      </button>
+                    ))}
+                  </div>
+                  {/* Invoice Content */}
+                  {invoiceTab === 'Incoming' ? (
+                    <div className="billing-container">
+                      <h2 style={{ color: '#fff' }}>Your Invoices</h2>
+                      {loadingInvoices ? (
+                        <div className="loading-container">
+                          <div className="loading-spinner"></div>
+                          <p>Loading invoices...</p>
+                        </div>
+                      ) : invoiceError ? (
+                        <div className="error-container">
+                          <p className="error-message">{invoiceError}</p>
+                        </div>
+                      ) : invoices.length === 0 ? (
+                        <div className="no-invoices">
+                          <p>No invoices available at the moment.</p>
+                        </div>
+                      ) : (
+                        <table className="invoices-table">
+                          <thead>
+                            <tr>
+                              <th>Invoice Number</th>
+                              <th>Date</th>
+                              <th>Due Date</th>
+                              <th>Services</th>
+                              <th>Total</th>
+                              <th>Payment Status</th>
+                              <th>Payment Link</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {invoices.map((invoice) => {
+                              const isUnpaid = invoice.payment_status !== true;
+                              return (
+                                <tr key={invoice.id}>
+                                  <td className="invoice-number">{invoice.invoice_number}</td>
+                                  <td className="date-cell">{formatDate(invoice.date)}</td>
+                                  <td className="date-cell">{formatDate(invoice.due_date)}</td>
+                                  <td className="services-cell">
+                                    {invoice.products && invoice.products.map((product, idx) => (
+                                      <div key={idx} className="service-item">
+                                        {product.description || product.name}
+                                      </div>
+                                    ))}
+                                  </td>
+                                  <td className="total-cell">{formatCurrency(invoice.total)}</td>
+                                  <td className="payment-status-cell">
+                                    <span className={`payment-status ${isUnpaid ? 'unpaid' : 'paid'}`}>{isUnpaid ? 'Unpaid' : 'Paid'}</span>
+                                  </td>
+                                  <td className="payment-link-cell">
+                                    {isUnpaid ? (
+                                      invoice.payment_link ? (
+                                        <a
+                                          href={invoice.payment_link}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="pay-button"
+                                        >
+                                          <span className="pay-icon">💳</span>
+                                          Pay Now
+                                        </a>
+                                      ) : (
+                                        <span style={{ color: '#9CA3AF' }}>No Link</span>
+                                      )
+                                    ) : (
+                                      <span className="payment-complete">✓ Payment Complete</span>
+                                    )}
+                                  </td>
+                                  <td className="actions-cell">
+                                    {invoice.signed_pdf_url && (
+                                      <a
+                                        href={invoice.signed_pdf_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="download-button"
+                                      >
+                                        <span className="download-icon">📄</span>
+                                        Download
+                                      </a>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      )}
                     </div>
                   ) : (
-                    // All Documents List
-                    <div style={{ display: 'grid', gap: '12px' }}>
-                      {reportDocuments.map((docType, typeIndex) => (
-                        docType.allDocuments && docType.allDocuments.length > 0 && (
-                          <div key={typeIndex}>
-                            {/* Document Type Header */}
-                            <div style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '8px',
-                              marginBottom: '12px',
-                              paddingLeft: '4px'
-                            }}>
-                              <span style={{ fontSize: '20px' }}>{docType.icon}</span>
-                              <h3 style={{ 
-                                color: '#fff', 
-                                fontSize: '18px', 
-                                fontWeight: '600', 
-                                margin: 0 
-                              }}>
-                                {docType.name}
-                              </h3>
-                              <span style={{
-                                background: '#3B82F6',
-                                color: '#fff',
-                                padding: '2px 8px',
-                                borderRadius: '12px',
-                                fontSize: '12px',
-                                fontWeight: '600'
-                              }}>
-                                {docType.count} file{docType.count > 1 ? 's' : ''}
-                              </span>
-                            </div>
-
-                            {/* Documents in this category */}
-                            <div style={{ display: 'grid', gap: '8px', marginBottom: '24px' }}>
-                              {docType.allDocuments.map((doc, docIndex) => (
-                                <div key={docIndex} style={{
-                                  background: 'rgba(45, 53, 97, 0.6)',
-                                  borderRadius: '8px',
-                                  padding: '16px',
-                                  border: '1px solid rgba(59, 130, 246, 0.2)',
-                                  display: 'flex',
-                                  justifyContent: 'space-between',
-                                  alignItems: 'center'
-                                }}>
-                                  <div style={{ flex: 1 }}>
-                                    <h5 style={{ 
-                                      color: '#fff', 
-                                      fontSize: '16px', 
-                                      fontWeight: '600', 
-                                      margin: '0 0 8px 0' 
-                                    }}>
-                                      {doc.file_name}
-                                    </h5>
-                                    <div style={{ 
-                                      display: 'flex', 
-                                      gap: '16px', 
-                                      fontSize: '14px', 
-                                      color: '#9CA3AF' 
-                                    }}>
-                                      <span>📅 Year: {doc.year}</span>
-                                      <span>📁 Size: {(doc.file_size / 1024 / 1024).toFixed(2)} MB</span>
-                                      <span>⏰ Uploaded: {new Date(doc.created_at).toLocaleDateString()}</span>
-                                      <span>📋 Type: {doc.doc_type}</span>
-                                    </div>
-                                  </div>
-                                  
-                                  <div style={{ 
-                                    display: 'flex', 
-                                    gap: '8px', 
-                                    marginLeft: '16px' 
-                                  }}>
-                                    <button
-                                      onClick={() => viewDocumentFile(doc)}
-                                      style={{
-                                        background: '#10B981',
-                                        color: '#fff',
-                                        border: 'none',
-                                        borderRadius: '6px',
-                                        padding: '8px 12px',
-                                        fontSize: '14px',
-                                        fontWeight: '600',
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '6px'
-                                      }}
-                                    >
-                                      <FaEye /> View
-                                    </button>
-                                    <button
-                                      onClick={() => downloadDocumentFile(doc)}
-                                      style={{
-                                        background: '#3B82F6',
-                                        color: '#fff',
-                                        border: 'none',
-                                        borderRadius: '6px',
-                                        padding: '8px 12px',
-                                        fontSize: '14px',
-                                        fontWeight: '600',
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '6px'
-                                      }}
-                                    >
-                                      <FaDownload /> Download
-                                    </button>
-                                    <button
-                                      onClick={() => analyzeDocument(doc)}
-                                      style={{
-                                        background: '#F59E0B',
-                                        color: '#fff',
-                                        border: 'none',
-                                        borderRadius: '6px',
-                                        padding: '8px 12px',
-                                        fontSize: '14px',
-                                        fontWeight: '600',
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '6px'
-                                      }}
-                                    >
-                                      <FaChartBar /> Analyze
-                                    </button>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )
-                      ))}
+                    <div className="no-invoices">
+                      <p>Outgoing invoices feature is <b>Coming Soon</b>!</p>
                     </div>
                   )}
                 </div>

@@ -96,6 +96,8 @@ const Dataroom = () => {
   const [documentTypeFilter, setDocumentTypeFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [tooltip, setTooltip] = useState({ show: false, content: [], position: { x: 0, y: 0 } });
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [selectedDocumentData, setSelectedDocumentData] = useState(null);
 
   // Fetch documents from Supabase
   const fetchDocuments = async () => {
@@ -414,6 +416,170 @@ const Dataroom = () => {
     setTooltip({ show: false, content: [], position: { x: 0, y: 0 } });
   };
 
+  const handleViewDetails = (doc) => {
+    setSelectedDocumentData(doc);
+    setDetailsModalOpen(true);
+  };
+
+  // Function to render extracted data in a structured format
+  const renderExtractedData = (extractedData, documentType) => {
+    if (!extractedData) return null;
+
+    const renderField = (label, value, isStatus = false) => {
+      if (!value) return null;
+      
+      let statusColor = '#fff';
+      if (isStatus) {
+        if (value.toLowerCase().includes('approved') || value.toLowerCase().includes('verified')) {
+          statusColor = '#10B981';
+        } else if (value.toLowerCase().includes('rejected')) {
+          statusColor = '#EF4444';
+        } else if (value.toLowerCase().includes('pending')) {
+          statusColor = '#F59E0B';
+        }
+      }
+
+      return (
+        <div style={{ marginBottom: '12px' }}>
+          <label style={{ 
+            color: '#9CA3AF', 
+            fontSize: '12px', 
+            fontWeight: '500',
+            display: 'block',
+            marginBottom: '4px'
+          }}>
+            {label}
+          </label>
+          <div style={{ 
+            color: statusColor, 
+            fontSize: '14px',
+            background: isStatus ? `${statusColor}15` : 'transparent',
+            padding: isStatus ? '4px 8px' : '0',
+            borderRadius: isStatus ? '4px' : '0',
+            display: 'inline-block'
+          }}>
+            {value}
+          </div>
+        </div>
+      );
+    };
+
+    // Render based on document type
+    switch (documentType) {
+      case 'passport':
+        return (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            {renderField('Full Name', `${extractedData.surname || ''} ${extractedData.given_names || ''}`.trim())}
+            {renderField('Date of Birth', extractedData.date_of_birth)}
+            {renderField('Nationality', extractedData.nationality)}
+            {renderField('Passport Number', extractedData.passport_number)}
+            {renderField('Date of Issue', extractedData.date_of_issue)}
+            {renderField('Date of Expiry', extractedData.date_of_expiry)}
+            {renderField('Issuing Authority', extractedData.issuing_authority)}
+            {renderField('Verification Status', extractedData.verification_status || extractedData.validation_status, true)}
+            {renderField('Validation Message', extractedData.validation_message)}
+            {extractedData.verification_details && (
+              <div style={{ gridColumn: '1 / -1', marginTop: '16px', padding: '12px', background: '#1a1b36', borderRadius: '6px' }}>
+                <h4 style={{ color: '#D1D5DB', marginBottom: '8px', fontSize: '14px' }}>Verification Details</h4>
+                {renderField('Status', extractedData.verification_details.status, true)}
+                {renderField('Message', extractedData.verification_details.message)}
+                {renderField('Verification Date', new Date(extractedData.verification_details.verification_date).toLocaleDateString())}
+              </div>
+            )}
+          </div>
+        );
+
+      case 'addressProof':
+        return (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            {renderField('Full Address', extractedData.address)}
+            {renderField('Document Date', extractedData.document_date)}
+            {renderField('Issuing Authority', extractedData.issuing_authority)}
+            {renderField('Resident Name', extractedData.resident_name || extractedData.name)}
+            {renderField('Validation Status', extractedData.validation_status, true)}
+            {renderField('Validation Message', extractedData.validation_message)}
+            {renderField('Months Since Issue', extractedData.months_since_issue ? `${extractedData.months_since_issue} months` : null)}
+            {extractedData.verification_details && (
+              <div style={{ gridColumn: '1 / -1', marginTop: '16px', padding: '12px', background: '#1a1b36', borderRadius: '6px' }}>
+                <h4 style={{ color: '#D1D5DB', marginBottom: '8px', fontSize: '14px' }}>Verification Details</h4>
+                {renderField('Status', extractedData.verification_details.status, true)}
+                {renderField('Message', extractedData.verification_details.message)}
+                {renderField('Verification Date', new Date(extractedData.verification_details.verification_date).toLocaleDateString())}
+              </div>
+            )}
+          </div>
+        );
+
+      case 'utilityBill':
+        return (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            {renderField('Service Provider', extractedData.service_provider)}
+            {renderField('Bill Date', extractedData.bill_date)}
+            {renderField('Total Amount Due', extractedData.total_amount_due)}
+            {renderField('Service Address', extractedData.address)}
+            {renderField('Account Number', extractedData.account_number)}
+            {renderField('Verification Status', extractedData.verification_status, true)}
+            {renderField('Validation Message', extractedData.validation_message)}
+            {renderField('Months Since Issue', extractedData.months_since_issue ? `${extractedData.months_since_issue} months` : null)}
+            {extractedData.verification_details && (
+              <div style={{ gridColumn: '1 / -1', marginTop: '16px', padding: '12px', background: '#1a1b36', borderRadius: '6px' }}>
+                <h4 style={{ color: '#D1D5DB', marginBottom: '8px', fontSize: '14px' }}>Verification Details</h4>
+                {renderField('Status', extractedData.verification_details.status, true)}
+                {renderField('Message', extractedData.verification_details.message)}
+                {renderField('Verification Date', new Date(extractedData.verification_details.verification_date).toLocaleDateString())}
+              </div>
+            )}
+          </div>
+        );
+
+      case 'drivingLicense':
+        return (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            {renderField('Full Name', extractedData.name)}
+            {renderField('License Number', extractedData.license_number)}
+            {renderField('Date of Birth', extractedData.date_of_birth)}
+            {renderField('Issue Date', extractedData.date_of_issue)}
+            {renderField('Expiry Date', extractedData.date_of_expiry)}
+            {renderField('Address', extractedData.address)}
+            {renderField('Verification Status', extractedData.verification_status, true)}
+            {renderField('Validation Message', extractedData.validation_message)}
+            {extractedData.verification_details && (
+              <div style={{ gridColumn: '1 / -1', marginTop: '16px', padding: '12px', background: '#1a1b36', borderRadius: '6px' }}>
+                <h4 style={{ color: '#D1D5DB', marginBottom: '8px', fontSize: '14px' }}>Verification Details</h4>
+                {renderField('Status', extractedData.verification_details.status, true)}
+                {renderField('Message', extractedData.verification_details.message)}
+                {renderField('Verification Date', new Date(extractedData.verification_details.verification_date).toLocaleDateString())}
+              </div>
+            )}
+          </div>
+        );
+
+      default:
+        // For other document types, show a structured view of the data
+        return (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            {Object.entries(extractedData).map(([key, value]) => {
+              if (key === 'verification_details' || key === 'processing_metadata') return null;
+              if (typeof value === 'object' && value !== null) return null;
+              return renderField(
+                key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                String(value),
+                key.includes('status') || key.includes('verification')
+              );
+            })}
+            {extractedData.verification_details && (
+              <div style={{ gridColumn: '1 / -1', marginTop: '16px', padding: '12px', background: '#1a1b36', borderRadius: '6px' }}>
+                <h4 style={{ color: '#D1D5DB', marginBottom: '8px', fontSize: '14px' }}>Verification Details</h4>
+                {renderField('Status', extractedData.verification_details.status, true)}
+                {renderField('Message', extractedData.verification_details.message)}
+                {renderField('Verification Date', new Date(extractedData.verification_details.verification_date).toLocaleDateString())}
+              </div>
+            )}
+          </div>
+        );
+    }
+  };
+
   return (
     <div className="dru-main-container">
       <div className="dru-upload-card">
@@ -724,7 +890,32 @@ const Dataroom = () => {
                   </div>
                 </div>
                 <div className="dru-document-actions">
-                  {getStatusBadge(doc.status)}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                    {getStatusBadge(doc.status)}
+                    {doc.extractedData && (
+                      <button 
+                        onClick={() => handleViewDetails(doc)}
+                        style={{
+                          background: '#3B82F6',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          padding: '4px 8px',
+                          fontSize: '11px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                      >
+                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" strokeWidth="2"/>
+                          <polyline points="14,2 14,8 20,8" stroke="currentColor" strokeWidth="2"/>
+                        </svg>
+                        View Details
+                      </button>
+                    )}
+                  </div>
                   <div className="dru-action-buttons">
                     <button 
                       className="dru-action-btn" 
@@ -804,6 +995,139 @@ const Dataroom = () => {
         financialCategories={financialCategories}
         onDocumentUploaded={fetchDocuments}
       />
+
+      {/* Details Modal */}
+      {detailsModalOpen && selectedDocumentData && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: '#1a1b36',
+            border: '1px solid #2e2f50',
+            borderRadius: '12px',
+            padding: '24px',
+            maxWidth: '800px',
+            maxHeight: '80vh',
+            overflow: 'auto',
+            width: '90%'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '20px',
+              borderBottom: '1px solid #2e2f50',
+              paddingBottom: '16px'
+            }}>
+              <h2 style={{ color: '#fff', margin: 0, fontSize: '20px' }}>
+                Document Details - {selectedDocumentData.name}
+              </h2>
+              <button 
+                onClick={() => setDetailsModalOpen(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#9CA3AF',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  padding: '4px'
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <h3 style={{ color: '#D1D5DB', marginBottom: '12px', fontSize: '16px' }}>Document Information</h3>
+              <div style={{
+                background: '#232448',
+                border: '1px solid #2e2f50',
+                borderRadius: '8px',
+                padding: '16px',
+                marginBottom: '16px'
+              }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={{ color: '#9CA3AF', fontSize: '12px' }}>File Name</label>
+                    <div style={{ color: '#fff', fontSize: '14px' }}>{selectedDocumentData.name}</div>
+                  </div>
+                  <div>
+                    <label style={{ color: '#9CA3AF', fontSize: '12px' }}>Document Type</label>
+                    <div style={{ color: '#fff', fontSize: '14px' }}>{selectedDocumentData.category}</div>
+                  </div>
+                  <div>
+                    <label style={{ color: '#9CA3AF', fontSize: '12px' }}>Upload Date</label>
+                    <div style={{ color: '#fff', fontSize: '14px' }}>
+                      {new Date(selectedDocumentData.uploadDate).toLocaleDateString()}
+                    </div>
+                  </div>
+                  <div>
+                    <label style={{ color: '#9CA3AF', fontSize: '12px' }}>File Size</label>
+                    <div style={{ color: '#fff', fontSize: '14px' }}>{formatFileSize(selectedDocumentData.fileSize)}</div>
+                  </div>
+                  <div>
+                    <label style={{ color: '#9CA3AF', fontSize: '12px' }}>Status</label>
+                    <div style={{ color: '#fff', fontSize: '14px' }}>{selectedDocumentData.status}</div>
+                  </div>
+                  {selectedDocumentData.representativeId && (
+                    <div>
+                      <label style={{ color: '#9CA3AF', fontSize: '12px' }}>Representative</label>
+                      <div style={{ color: '#fff', fontSize: '14px' }}>{selectedDocumentData.representativeId}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {selectedDocumentData.extractedData && (
+              <div>
+                <h3 style={{ color: '#D1D5DB', marginBottom: '12px', fontSize: '16px' }}>Extracted Data</h3>
+                <div style={{
+                  background: '#232448',
+                  border: '1px solid #2e2f50',
+                  borderRadius: '8px',
+                  padding: '16px'
+                }}>
+                  {renderExtractedData(selectedDocumentData.extractedData, selectedDocumentData.category)}
+                </div>
+              </div>
+            )}
+
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '12px',
+              marginTop: '24px',
+              borderTop: '1px solid #2e2f50',
+              paddingTop: '16px'
+            }}>
+              <button 
+                onClick={() => setDetailsModalOpen(false)}
+                style={{
+                  background: '#6B7280',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '8px 16px',
+                  fontSize: '14px',
+                  cursor: 'pointer'
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

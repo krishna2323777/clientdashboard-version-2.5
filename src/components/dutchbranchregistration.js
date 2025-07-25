@@ -1055,33 +1055,29 @@ const DutchBranchRegistration = () => {
           </p>
         </div>
 
-        <div className="steps-nav">
+        <div className="stepper-nav">
           <div 
-            className={`step ${activeStep === 'documents' ? 'active' : ''}`}
+            className={`stepper-step ${activeStep === 'documents' ? 'active' : ''}`}
             onClick={() => setActiveStep('documents')}
           >
-            <span className="step-icon">📄</span>
             Document Upload
           </div>
           <div 
-            className={`step ${activeStep === 'shipping' ? 'active' : ''}`}
+            className={`stepper-step ${activeStep === 'shipping' ? 'active' : ''}`}
             onClick={() => setActiveStep('shipping')}
           >
-            <span className="step-icon">✓</span>
             Shipping Checklist
           </div>
           <div 
-            className={`step ${activeStep === 'post-registration' ? 'active' : ''}`}
+            className={`stepper-step ${activeStep === 'post-registration' ? 'active' : ''}`}
             onClick={() => setActiveStep('post-registration')}
           >
-            <span className="step-icon">🎯</span>
             Post-Registration Steps
           </div>
           <div 
-            className={`step ${activeStep === 'view-documents' ? 'active' : ''}`}
+            className={`stepper-step ${activeStep === 'view-documents' ? 'active' : ''}`}
             onClick={() => setActiveStep('view-documents')}
           >
-            <span className="step-icon">📂</span>
             View Documents
           </div>
         </div>

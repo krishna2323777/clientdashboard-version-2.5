@@ -209,6 +209,9 @@ export default function DocumentUploadModal({ open, onClose, selectedType, onDoc
   const [selectedKycFile, setSelectedKycFile] = useState(null);
   const [selectedKycRepresentative, setSelectedKycRepresentative] = useState('');
 
+  // Add state for user flow
+  const [userFlowType, setUserFlowType] = useState(null);
+
   useEffect(() => {
     setSelectedFinancialCategory(null); // Reset category on open/type change
   }, [open, selectedType]);
@@ -932,7 +935,104 @@ export default function DocumentUploadModal({ open, onClose, selectedType, onDoc
     }
   };
 
+  // CurvedTimeline component for reference-style snake/curved user flow
+  function CurvedTimeline({ steps, colors }) {
+    // Layout constants
+    const stepGap = 75; // more vertical space between steps
+    const markerRadius = 9;
+    const pathWidth = 320;
+    const markerOffset = 60;
+    const textBoxWidth = 105; // more compact text boxes
+    const svgHeight = (steps.length - 1) * stepGap + 2 * markerRadius;
+    const svgWidth = pathWidth;
+    // Calculate marker positions and path
+    const markerPositions = steps.map((_, idx) => {
+      const isRight = idx % 2 === 1;
+      return {
+        cx: isRight ? svgWidth - markerOffset : markerOffset,
+        cy: markerRadius + idx * stepGap,
+        isRight,
+      };
+    });
+    // Build the snake path
+    let path = '';
+    for (let i = 0; i < markerPositions.length - 1; i++) {
+      const start = markerPositions[i];
+      const end = markerPositions[i + 1];
+      const curveY = start.cy + stepGap * 1.2;
+      path += `M${start.cx},${start.cy} `;
+      path += `C${start.cx},${curveY} ${end.cx},${curveY} ${end.cx},${end.cy} `;
+    }
+    const pathGradientId = 'timeline-gradient';
+    return (
+      <div style={{ position: 'relative', width: svgWidth, minHeight: svgHeight, margin: '32px auto 0 auto' }}>
+        <svg width={svgWidth} height={svgHeight} style={{ position: 'absolute', top: 0, left: 0, zIndex: 0, pointerEvents: 'none' }}>
+          <defs>
+            <linearGradient id={pathGradientId} x1="0" y1="0" x2={svgWidth} y2={svgHeight} gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#00BFFF" />
+              <stop offset="40%" stopColor="#8B5CF6" />
+              <stop offset="70%" stopColor="#22C55E" />
+              <stop offset="100%" stopColor="#EF4444" />
+            </linearGradient>
+          </defs>
+          <path d={path} fill="none" stroke={`url(#${pathGradientId})`} strokeWidth="4" strokeDasharray="6 6" />
+        </svg>
+        {markerPositions.map((pos, idx) => (
+          <svg key={idx} style={{ position: 'absolute', left: pos.cx - markerRadius, top: pos.cy - markerRadius, zIndex: 2, transition: 'transform 0.2s, filter 0.2s', cursor: 'pointer' }} width={markerRadius * 2} height={markerRadius * 2}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.18)'; e.currentTarget.style.filter = 'drop-shadow(0 0 8px ' + colors[idx % colors.length] + '55)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.filter = 'none'; }}
+          >
+            <g>
+              <path d={`M${markerRadius},${markerRadius * 0.3} C${markerRadius * 1.6},${markerRadius * 0.3} ${markerRadius * 1.6},${markerRadius * 1.5} ${markerRadius},${markerRadius * 1.9} C${markerRadius * 0.4},${markerRadius * 1.5} ${markerRadius * 0.4},${markerRadius * 0.3} ${markerRadius},${markerRadius * 0.3} Z`} fill={colors[idx % colors.length]} stroke="#fff" strokeWidth="1.5" filter="url(#marker-shadow)" />
+              <circle cx={markerRadius} cy={markerRadius * 0.95} r={markerRadius * 0.38} fill="#fff" />
+            </g>
+          </svg>
+        ))}
+        {steps.map((step, idx) => {
+          const pos = markerPositions[idx];
+          return (
+            <div key={idx + '-text'} style={{
+              position: 'absolute',
+              top: pos.cy - markerRadius - (pos.isRight ? 0 : 18),
+              left: pos.isRight ? pos.cx + markerRadius + 14 : pos.cx - markerRadius - textBoxWidth - 14,
+              width: textBoxWidth,
+              textAlign: pos.isRight ? 'left' : 'right',
+              color: '#D1D5DB',
+              fontSize: '0.85rem',
+              lineHeight: 1.4,
+              zIndex: 3,
+              fontWeight: 400,
+              wordBreak: 'break-word',
+              overflowWrap: 'break-word',
+            }}>
+              <div style={{ fontWeight: 900, color: '#fff', fontSize: '1rem', marginBottom: 2, textShadow: '0 2px 8px #0008, 0 0 8px ' + colors[idx % colors.length] + '55' }}>Step {idx + 1}</div>
+              <div>{step}</div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
   if (!open) return null;
+
+  // Standard user flows
+  const kycUserFlowSteps = [
+    'Select and upload required KYC documents (Passport/ID, Proof of Address, UBO Declaration)',
+    'Assign document to the correct representative (if needed)',
+    'System validates and extracts data from documents',
+    'Review extracted data and document status',
+    'Submit for verification',
+    'Await approval or feedback',
+  ];
+  const financialUserFlowSteps = [
+    'Select year and upload financial documents (Invoices, Statements, etc.)',
+    'Assign document type for each file',
+    'System processes and stores documents securely',
+    'Review uploaded documents and their status',
+    'Use documents for reporting and analysis',
+  ];
+  const timelineColors = ["#00BFFF", "#8B5CF6", "#EF4444", "#22C55E"];
 
   // Always show header, stepper, and card selection
   return (
@@ -943,28 +1043,49 @@ export default function DocumentUploadModal({ open, onClose, selectedType, onDoc
           <button className="doc-modal-close" onClick={onClose}>×</button>
         </div>
         <div className="doc-modal-content">
-          <div className="doc-modal-question">
-            What are you uploading documents for?
-          </div>
-          <div className="doc-modal-cards-row">
-            <div
-              className={`doc-modal-card ${localSelectedType === 'kyc' ? 'selected' : ''}`}
-              onClick={() => { setLocalSelectedType('kyc'); setStep(1); }}
-            >
-              <div className="doc-modal-card-title">KYC Verification</div>
-              <div className="doc-modal-card-desc">Documents for Know Your Customer verification</div>
-              <div className="doc-modal-card-count">3 required documents</div>
+          {/* Flex row for card selection and user flow, visually balanced */}
+          <div className="doc-modal-flex-row" style={{ marginBottom: '2rem' }}>
+            {/* Card selection box (left half) */}
+            <div className="doc-modal-option-box">
+              <div className="doc-modal-question">
+                What are you uploading documents for?
+              </div>
+              <div className="doc-modal-cards-row">
+                <div
+                  className={`doc-modal-card ${localSelectedType === 'kyc' ? 'selected' : ''}`}
+                  onClick={() => { setLocalSelectedType('kyc'); setStep(1); setUserFlowType('kyc'); }}
+                >
+                  <div className="doc-modal-card-title">KYC Verification</div>
+                  <div className="doc-modal-card-desc">Documents for Know Your Customer verification</div>
+                </div>
+                <div
+                  className={`doc-modal-card ${localSelectedType === 'financial' ? 'selected' : ''}`}
+                  onClick={() => { setLocalSelectedType('financial'); setStep(1); setUserFlowType('financial'); }}
+                >
+                  <div className="doc-modal-card-title">Financial Documents</div>
+                  <div className="doc-modal-card-desc">Documents for financial reporting and analysis</div>
+                </div>
+              </div>
             </div>
-            <div
-              className={`doc-modal-card ${localSelectedType === 'financial' ? 'selected' : ''}`}
-              onClick={() => { setLocalSelectedType('financial'); setStep(1); }}
-            >
-              <div className="doc-modal-card-title">Financial Documents</div>
-              <div className="doc-modal-card-desc">Documents for financial reporting and analysis</div>
-              <div className="doc-modal-card-count">3 required documents</div>
+            {/* Divider */}
+            <div className="doc-modal-divider" />
+            {/* User Flow Box (right half) */}
+            <div className="doc-modal-userflow-box" style={{ display: userFlowType ? 'block' : 'none' }}>
+              {userFlowType === 'kyc' && (
+                <>
+                  <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#FF4D80', marginBottom: 10 }}>KYC Verification User Flow</div>
+                  <CurvedTimeline steps={kycUserFlowSteps} colors={timelineColors} />
+                </>
+              )}
+              {userFlowType === 'financial' && (
+                <>
+                  <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#FF4D80', marginBottom: 10 }}>Financial Documents User Flow</div>
+                  <CurvedTimeline steps={financialUserFlowSteps} colors={timelineColors} />
+                </>
+              )}
             </div>
           </div>
-          {/* Content below cards */}
+          {/* Content below cards (upload forms, etc.) remains unchanged */}
 
           {localSelectedType === 'kyc' && step === 1 && (
             <div className="doc-modal-req-list">
@@ -987,31 +1108,33 @@ export default function DocumentUploadModal({ open, onClose, selectedType, onDoc
                   <div style={{ fontWeight: 500, marginBottom: 8, color: '#D1D5DB' }}>
                     1. Select File:
                   </div>
-                          <input 
-                            type="file" 
-                    accept=".pdf,.jpg,.jpeg,.png,.doc" 
-                    onChange={handleKycFileUpload}
-                            style={{ marginBottom: 8 }}
-                          />
+                  <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                    <input 
+                      type="file" 
+                      accept=".pdf,.jpg,.jpeg,.png,.doc" 
+                      onChange={handleKycFileUpload}
+                      style={{ marginBottom: 8 }}
+                    />
+                  </div>
                   {selectedKycFile && (
-                            <div style={{ 
+                    <div style={{ 
                       background: '#232448', 
-                                padding: '8px 12px',
-                                borderRadius: '6px',
-                                fontSize: '12px',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      fontSize: '12px',
                       color: '#D1D5DB'
                     }}>
                       Selected: {selectedKycFile.name} ({formatFileSize(selectedKycFile.size)})
-                            </div>
-                      )}
                     </div>
+                  )}
+                </div>
 
                 {/* Step 2: Document Type Selection */}
                 {selectedKycFile && (
                   <div style={{ marginBottom: 16 }}>
                     <div style={{ fontWeight: 500, marginBottom: 8, color: '#D1D5DB' }}>
                       2. Select Document Type:
-                      </div>
+                    </div>
                     <select
                       value={selectedKycDocumentType}
                       onChange={(e) => {
@@ -1022,7 +1145,7 @@ export default function DocumentUploadModal({ open, onClose, selectedType, onDoc
                         background: '#232448',
                         color: '#fff',
                         border: '1px solid #2e2f50',
-                          borderRadius: '6px',
+                        borderRadius: '6px',
                         padding: '8px 12px',
                         fontSize: '14px',
                         width: '100%'
@@ -1036,15 +1159,15 @@ export default function DocumentUploadModal({ open, onClose, selectedType, onDoc
                       <option value="ubo">UBO Declaration</option>
                       <option value="structure_chart">Company Structure Chart</option>
                     </select>
-                      </div>
-                    )}
+                  </div>
+                )}
 
                 {/* Step 3: Representative Selection (for passport and address proof) */}
                 {selectedKycFile && (selectedKycDocumentType === 'passport' || selectedKycDocumentType === 'addressProof') && (
                   <div style={{ marginBottom: 16 }}>
                     <div style={{ fontWeight: 500, marginBottom: 8, color: '#D1D5DB' }}>
                       3. Select Representative:
-                      </div>
+                    </div>
                     {loadingDirectors ? (
                       <div style={{ color: '#F59E0B' }}>Loading directors...</div>
                     ) : directors.length === 0 ? (
@@ -1071,8 +1194,8 @@ export default function DocumentUploadModal({ open, onClose, selectedType, onDoc
                         ))}
                       </select>
                     )}
-                      </div>
-                    )}
+                  </div>
+                )}
 
                 {/* Step 4: Process and Upload */}
                 {selectedKycFile && selectedKycDocumentType && 
@@ -1080,7 +1203,7 @@ export default function DocumentUploadModal({ open, onClose, selectedType, onDoc
                   <div style={{ marginBottom: 16 }}>
                     <div style={{ fontWeight: 500, marginBottom: 8, color: '#D1D5DB' }}>
                       4. Process and Upload:
-              </div>
+                    </div>
                     {(() => {
                       const director = (selectedKycDocumentType === 'passport' || selectedKycDocumentType === 'addressProof') && selectedKycRepresentative 
                         ? directors.find(d => (d.email || d.name) === selectedKycRepresentative)
@@ -1093,68 +1216,68 @@ export default function DocumentUploadModal({ open, onClose, selectedType, onDoc
                       return (
                         <>
                           <div style={{ display: 'flex', gap: '8px' }}>
-                        <button 
-                          className="doc-modal-continue"
+                            <button 
+                              className="doc-modal-continue"
                               onClick={processKycDocument}
                               disabled={isProcessing}
                               style={{ flex: 1 }}
                             >
                               {isProcessing ? 'Processing...' : 'Process Document'}
-                        </button>
+                            </button>
                             {uploadData && !isProcessing && (
-                        <button 
-                          className="doc-modal-continue"
+                              <button 
+                                className="doc-modal-continue"
                                 onClick={handleKycUploadWithFlow}
-                          disabled={uploading}
+                                disabled={uploading}
                                 style={{ flex: 1 }}
-                        >
+                              >
                                 {uploading ? 'Uploading...' : 'Upload Document'}
-                        </button>
-                )}
-              </div>
+                              </button>
+                            )}
+                          </div>
 
                           {/* Show processing status */}
                           {isProcessing && (
-                      <div style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: '8px',
-                        color: '#F59E0B',
-                        fontSize: '14px',
+                            <div style={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: '8px',
+                              color: '#F59E0B',
+                              fontSize: '14px',
                               marginTop: '8px'
-                      }}>
-                        <div className="animate-spin" style={{
-                          width: '16px',
-                          height: '16px',
-                          border: '2px solid #F59E0B',
-                          borderTop: '2px solid transparent',
-                          borderRadius: '50%',
-                          animation: 'spin 1s linear infinite'
-                        }}></div>
-                        Processing document...
-                      </div>
-                    )}
+                            }}>
+                              <div className="animate-spin" style={{
+                                width: '16px',
+                                height: '16px',
+                                border: '2px solid #F59E0B',
+                                borderTop: '2px solid transparent',
+                                borderRadius: '50%',
+                                animation: 'spin 1s linear infinite'
+                              }}></div>
+                              Processing document...
+                            </div>
+                          )}
                           
                           {/* Show upload status */}
                           {uploadData && !isProcessing && (
-                        <div style={{ 
+                            <div style={{ 
                               background: uploadData.status === 'approved' ? '#10B981' : 
                                          uploadData.status === 'rejected' ? '#EF4444' : '#3B82F6',
-                          color: 'white',
-                          padding: '8px 12px',
-                          borderRadius: '6px',
-                          fontSize: '12px',
+                              color: 'white',
+                              padding: '8px 12px',
+                              borderRadius: '6px',
+                              fontSize: '12px',
                               marginTop: '8px'
-                        }}>
+                            }}>
                               Status: {uploadData.status}
                               {uploadData.message && (
                                 <div style={{ fontSize: '11px', marginTop: '4px' }}>
                                   {uploadData.message}
-                        </div>
+                                </div>
                               )}
-                      </div>
-                    )}
-                  </>
+                            </div>
+                          )}
+                        </>
                       );
                     })()}
                   </div>
@@ -1198,21 +1321,23 @@ export default function DocumentUploadModal({ open, onClose, selectedType, onDoc
                   <div style={{ fontWeight: 600, marginBottom: 8, color: '#fff' }}>
                     Select Files and Document Types:
                   </div>
-                  <input
-                    type="file"
-                    multiple
-                    onChange={e => {
-                      const newFiles = Array.from(e.target.files);
-                      setFilesToUpload(newFiles);
-                      // Initialize document types for new files
-                      const newFileTypes = {};
-                      newFiles.forEach((file, index) => {
-                        newFileTypes[index] = '';
-                      });
-                      setFinancialFileTypes(prev => ({ ...prev, ...newFileTypes }));
-                    }}
-                    style={{ marginBottom: 16 }}
-                  />
+                  <div className="doc-file-upload-row">
+                    <input
+                      type="file"
+                      multiple
+                      onChange={e => {
+                        const newFiles = Array.from(e.target.files);
+                        setFilesToUpload(newFiles);
+                        // Initialize document types for new files
+                        const newFileTypes = {};
+                        newFiles.forEach((file, index) => {
+                          newFileTypes[index] = '';
+                        });
+                        setFinancialFileTypes(prev => ({ ...prev, ...newFileTypes }));
+                      }}
+                      style={{ marginBottom: 16 }}
+                    />
+                  </div>
                   {filesToUpload.length > 0 && (
                     <div style={{ 
                       background: '#1a1b36', 

@@ -35,6 +35,7 @@ import Registration from './components/registration';
 import VAT from './components/VAT';
 import DutchBranchRegistration from './components/dutchbranchregistration';  // Update import name
 import Signup from './components/Signup';
+import EbranchDashboard from './components/EbranchDashboard';
 import ResetPassword from './components/Resetpassword';
 import ProtectedRoute from './components/ProtectedRoute';
 import SubscriptionRequired from './components/SubscriptionRequired';
@@ -46,6 +47,7 @@ import CorporateHub from './components/CorporateHub';
 import TargetCompanyDetails from './components/TargetCompanyDetails';
 import ComprehensiveTaxDashboard from './components/ComprehensiveTaxDashboard';
 import CorporateIncomeTax from './components/CorporateIncomeTax';
+import Invoices from './components/Invoices';
 
 
 // Track page views
@@ -92,6 +94,22 @@ const TrackPageViews = () => {
   }, [location]);
 
   return null;
+};
+
+// Conditional iframe component
+const ConditionalIframe = () => {
+  const location = useLocation();
+  
+  // Don't show iframe on login, signup, or reset-password pages
+  const shouldHideIframe = ['/login', '/signup', '/reset-password'].includes(location.pathname);
+  
+  if (shouldHideIframe) {
+    return null;
+  }
+  
+  return (
+          <ConditionalIframe />
+  );
 };
 
 function App() { 
@@ -166,7 +184,7 @@ function App() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/financial-hub" element={<FinancialHub />} />
                 <Route path="/corporate-hub" element={<CorporateHub />} />
-              
+                <Route path="/ebranch" element={<EbranchDashboard />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/services" element={<Services />} />
                 <Route path="/generate-forms" element={<GenerateForms />} />
@@ -208,6 +226,7 @@ function App() {
                 <Route path="/profile/edit" element={<UserProfileForm />} />
                 <Route path="/corporate-tax-analysis" element={<CorporateTaxAnalysis />} />
                 <Route path="/target-company/:id" element={<TargetCompanyDetails />} />
+                <Route path="/invoices" element={<Invoices />} />
               </Route>
             </Route>
 
@@ -215,6 +234,7 @@ function App() {
           </Routes>
         </div>
       </div>
+     
     </Router>
   );
 }

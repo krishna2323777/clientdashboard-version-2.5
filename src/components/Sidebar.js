@@ -80,6 +80,11 @@ const Sidebar = ({ onToggle }) => {
     }
   };
 
+  const handleComingSoonClick = (e) => {
+    e.preventDefault();
+    alert('Coming Soon! This feature is under development.');
+  };
+
   // Helper for badge
   const Badge = ({ count }) => (
     <span className="sidebar-badge">{count}</span>
@@ -152,16 +157,12 @@ const Sidebar = ({ onToggle }) => {
                   {!collapsed && <span className="label">eBranch</span>}
                 </NavLink>
               </li>
+             
+    
               <li>
-                <NavLink to="/command-center" className={({isActive}) => isActive ? 'active' : ''} onClick={handleNavClick}>
-                  <span className="icon"><Layers size={18} /></span>
-                  {!collapsed && <span className="label">Command Center</span>}
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/discover" className={({isActive}) => isActive ? 'active' : ''} onClick={handleNavClick}>
-                  <span className="icon"><FaHeadset /></span>
-                  {!collapsed && <span className="label">Discover</span>}
+                <NavLink to="/dataroom" className={({isActive}) => isActive ? 'active' : ''} onClick={handleNavClick}>
+                  <span className="icon"><Database size={18} /></span>
+                  {!collapsed && <span className="label">Data Center</span>}
                 </NavLink>
               </li>
             </ul>
@@ -175,12 +176,7 @@ const Sidebar = ({ onToggle }) => {
           )}
           {entityOpen && (
             <ul>
-               <li>
-                <NavLink to="/dataroom" className={({isActive}) => isActive ? 'active' : ''} onClick={handleNavClick}>
-                  <span className="icon"><Database size={18} /></span>
-                  {!collapsed && <span className="label">Data Center</span>}
-                </NavLink>
-              </li>
+            
               <li>
                 <NavLink to="/corporate-hub" className={({isActive}) => isActive ? 'active' : ''} onClick={handleNavClick}>
                   <span className="icon"><FaBuildingUser size={18} /></span>
@@ -218,13 +214,13 @@ const Sidebar = ({ onToggle }) => {
                 </NavLink>
               </li>
               <li>
-                <NavLink to="/library" className={({isActive}) => isActive ? 'active' : ''} onClick={handleNavClick}>
+                <NavLink to="/library" className={({isActive}) => isActive ? 'active' : ''} onClick={handleComingSoonClick}>
                   <span className="icon"><FolderOpen size={18} /></span>
                   {!collapsed && <span className="label">Library</span>}
                 </NavLink>
               </li>
               <li>
-                <NavLink to="/ai-assistant" className={({isActive}) => isActive ? 'active' : ''} onClick={handleNavClick}>
+                <NavLink to="/ai-assistant" className={({isActive}) => isActive ? 'active' : ''} onClick={handleComingSoonClick}>
                   <span className="icon"><Bot size={18} /></span>
                   {!collapsed && <span className="label">AI Assistant</span>}
                 </NavLink>

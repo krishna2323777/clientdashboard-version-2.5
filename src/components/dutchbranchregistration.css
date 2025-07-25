@@ -25,25 +25,32 @@
     line-height: 1.6;
   }
   
-  .steps-nav {
-    display: flex;
-    gap: 2rem;
-    margin-bottom: 2rem;
-    padding: 1rem 0;
-    border-bottom: 1px solid #e2e8f0;
-  }
-  
-  .step {
+  .stepper-nav {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    color: #718096;
-    font-weight: 500;
-    cursor: pointer;
+    justify-content: flex-start;
+    gap: 64px;
+    margin-bottom: 2rem;
+    padding: 1.5rem 0 2rem 0;
+    border-bottom: 1px solid #e2e8f0;
+    position: relative;
   }
   
-  .step.active {
-    color: #6c5dd3;
+  .stepper-step {
+    background: none;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 500;
+    color: #6b7280;
+    transition: color 0.2s;
+  }
+  
+  .stepper-step.active {
+    color: #2196f3;
   }
   
   .main-contentdutch {
@@ -230,7 +237,7 @@
   .document-type-tabs {
     display: flex;
     gap: 10px;
-    margin-bottom: 20px.
+    margin-bottom: 20px;
   }
   
   .tab-button1 {
@@ -262,7 +269,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px.
+    margin-bottom: 20px;
   }
   
   .documents-header h2 {
@@ -271,7 +278,7 @@
   
   .document-type-tabs {
     display: flex;
-    gap: 10px.
+    gap: 10px;
   }
   
   .supporting-docs .form-itemdu {
@@ -281,7 +288,7 @@
     margin-bottom: 10px;
     border-radius: 8px;
     cursor: pointer;
-    transition: all 0.3s ease.
+    transition: all 0.3s ease;
   }
   
 
@@ -289,23 +296,23 @@
   .supporting-docs .form-itemdu-header {
     display: flex;
     justify-content: space-between;
-    align-items: center.
+    align-items: center;
   }
   
   .supporting-docs .form-itemdu-header h3 {
   
     margin: 0;
     font-size: 16px;
-    font-weight: normal.
+    font-weight: normal;
   }
   
   .supporting-docs .expand-icon {
-    font-size: 20px.
+    font-size: 20px;
   }
   
   .section-desc {
     color: #b8b8b8;
-    margin-bottom: 20px.
+    margin-bottom: 20px;
   }
 
   .form-title {
@@ -337,16 +344,16 @@
     margin: 0;
     color: white;
     font-size: 16px;
-    font-weight: normal.
+    font-weight: normal;
   }
 
   .form-title-main {
     margin-bottom: 16px;
-    color: #ffffff.
+    color: #ffffff;
   }
 
   .document-description {
-    margin-bottom: 20px.
+    margin-bottom: 20px;
   }
 
   .requirements-section h4,
@@ -354,13 +361,13 @@
     color: #e91e63;
     margin: 15px 0 10px;
     font-size: 14px;
-    font-weight: 500.
+    font-weight: 500;
   }
 
   .requirements-section ul {
     list-style: none;
     padding: 0;
-    margin: 0 0 20px.
+    margin: 0 0 20px;
   }
 
   .requirements-section li {
@@ -385,7 +392,7 @@
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 6px.
+    gap: 6px;
   }
 
   .select-file {
@@ -394,7 +401,7 @@
     color: white;
     padding: 8px 16px;
     border-radius: 6px;
-    cursor: pointer.
+    cursor: pointer;
   }
   .form-itemdu345{
     background-color: rgb(10 8 38 / var(--tw-bg-opacity, 1));
@@ -403,7 +410,7 @@
     border-radius: 8px;
     box-shadow: 0 2px 12px rgba(60,60,60,0.07);
     transition: box-shadow 0.2s;
-    cursor: pointer.
+    cursor: pointer;
   }
   .form-itemdu{
     background-color: rgb(30 27 63 / 1);
@@ -412,7 +419,7 @@
     border-radius: 8px;
     box-shadow: 0 2px 12px rgba(60,60,60,0.07);
     transition: box-shadow 0.2s;
-    cursor: pointer.
+    cursor: pointer;
   }
   
   .form-itemdu-header {
@@ -459,7 +466,7 @@
     font-weight: 500;
     cursor: pointer;
     transition: background 0.2s, box-shadow 0.2s;
-    box-shadow: 0 1px 4px rgba(60,60,60,0.07).
+    box-shadow: 0 1px 4px rgba(60,60,60,0.07);
   }
   .upload-btn:hover, .download-btn:hover, .generate-btn:hover, .view-sample:hover {
     background: #4b3bbd;
@@ -471,7 +478,7 @@
   @media (max-width: 600px) {
     .form-itemdu-content, .form-itemdu-header {
       padding: 12px;
-      font-size: 1rem.
+      font-size: 1rem;
     }
   }
   .spinner {
@@ -482,7 +489,7 @@
     height: 16px;
     animation: spin 0.7s linear infinite;
     display: inline-block;
-    vertical-align: middle.
+    vertical-align: middle;
   }
   @keyframes spin {
     0% { transform: rotate(0deg);}
@@ -962,4 +969,48 @@
   .primary-button:hover {
     background: #5a4dbd;
     transform: translateY(-1px);
+  }
+
+  /* Remove any .step, .steps-nav, .step1, .step-icon rules if present */
+  .steps-nav, .step, .step1, .step-icon {
+    all: unset;
+  }
+
+  .stepper-nav {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 64px;
+    margin-bottom: 2rem;
+    padding: 1.5rem 0 2rem 0;
+    border-bottom: 1px solid #e2e8f0;
+    position: relative;
+  }
+
+  .stepper-step {
+    background: none;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 500;
+    color: #6b7280;
+    transition: color 0.2s;
+  }
+
+  .stepper-step.active {
+    color: #2196f3;
+  }
+
+  @media (max-width: 700px) {
+    .stepper-nav {
+      gap: 24px;
+      flex-wrap: wrap;
+      padding: 1rem 0 1.5rem 0;
+    }
+    .stepper-step {
+      font-size: 1.1rem;
+    }
   }

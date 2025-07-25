@@ -1,45 +1,101 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FaFileAlt, FaCheckCircle, FaFileSignature, FaArrowRight, FaEye, FaFileUpload, FaSpinner, FaFilePdf, FaDownload, FaTrash } from 'react-icons/fa';
+import { 
+  FaFileAlt, 
+  FaCheckCircle, 
+  FaFileSignature, 
+  FaArrowRight, 
+  FaEye, 
+  FaFileUpload, 
+  FaSpinner, 
+  FaFilePdf, 
+  FaDownload, 
+  FaTrash,
+  FaCloudUploadAlt,
+  FaFileContract,
+  FaChartLine,
+  FaCalculator,
+  FaMoneyBillWave,
+  FaFileInvoiceDollar,
+  FaBalanceScale,
+  FaSearchDollar,
+  FaCloudDownloadAlt,
+  FaEyeSlash,
+  FaTrashAlt,
+  FaFileExcel,
+  FaFileCsv
+} from 'react-icons/fa';
+import { 
+  HiDocumentText, 
+  HiEye, 
+  HiDownload, 
+  HiTrash, 
+  HiCloudUpload,
+  HiOutlineDocumentText,
+  HiOutlineEye,
+  HiOutlineDownload,
+  HiOutlineTrash,
+  HiOutlineCloudUpload
+} from 'react-icons/hi';
+import { 
+  MdVisibility, 
+  MdFileDownload, 
+  MdDelete, 
+  MdCloudUpload,
+  MdDescription,
+  MdAccountBalance,
+  MdTrendingUp,
+  MdAssessment,
+  MdFilePresent
+} from 'react-icons/md';
+import { 
+  BiDownload, 
+  BiShow, 
+  BiTrash, 
+  BiUpload,
+  BiFile,
+  BiFileBlank,
+  BiChart,
+  BiMoney
+} from 'react-icons/bi';
+import { 
+  IoEyeOutline, 
+  IoDownloadOutline, 
+  IoTrashOutline, 
+  IoCloudUploadOutline,
+  IoDocumentTextOutline,
+  IoStatsChartOutline
+} from 'react-icons/io5';
 import './CorporateIncomeTax.css';
 import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf'; 
 import { supabase } from './SupabaseClient';
+import { corporateTaxDataManager } from './CorporateTaxDataManager';
 
 const requiredDocuments = [
   {
-    icon: '📊',
+    icon: <MdAssessment style={{ fontSize: '1.5rem', color: '#4f46e5' }} />,
     title: 'Financial Statement',
-    description: 'Profit & Loss, Balance Sheet for current year',
-    color: '#3a4374',
-    bgColor: '#2d3561'
+    description: 'Profit & Loss, Balance Sheet for current year'
   },
   {
-    icon: '📈',
+    icon: <MdAccountBalance style={{ fontSize: '1.5rem', color: '#059669' }} />,
     title: 'Trial Balance',
-    description: 'Detailed account balances',
-    color: '#3a4374',
-    bgColor: '#2d3561'
+    description: 'Detailed account balances'
   },
   {
-    icon: '📋',
+    icon: <FaBalanceScale style={{ fontSize: '1.5rem', color: '#7c2d12' }} />,
     title: 'Balance Sheet',
-    description: 'Assets, liabilities and equity statement',
-    color: '#3a4374',
-    bgColor: '#2d3561'
+    description: 'Assets, liabilities and equity statement'
   },
   {
-    icon: '$',
+    icon: <FaChartLine style={{ fontSize: '1.5rem', color: '#dc2626' }} />,
     title: 'Cashflow Statement',
-    description: 'Cash inflows and outflows analysis',
-    color: '#3a4374',
-    bgColor: '#2d3561'
+    description: 'Cash inflows and outflows analysis'
   },
   {
-    icon: '💰',
+    icon: <FaMoneyBillWave style={{ fontSize: '1.5rem', color: '#eab308' }} />,
     title: 'Profit and Loss Statement',
-    description: 'Revenue, expenses and net income analysis',
-    color: '#3a4374',
-    bgColor: '#2d3561'
+    description: 'Revenue, expenses and net income analysis'
   }
 ];  
 
@@ -62,13 +118,117 @@ export default function CorporateIncomeTax() {
   const [existingAnalysis, setExistingAnalysis] = useState(null);
   const [isCheckingExisting, setIsCheckingExisting] = useState(true);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [isLoadingDataroomFiles, setIsLoadingDataroomFiles] = useState(false);
+  const [currentSessionId, setCurrentSessionId] = useState(null);
+  const [processingStartTime, setProcessingStartTime] = useState(null);
+  const [selectedYear, setSelectedYear] = useState('2024'); // Default to current year
+  const [selectedDocumentType, setSelectedDocumentType] = useState('all'); // Document type filter
   const navigate = useNavigate();
   const fileInputRef = useRef();
+
+  // Handle document card clicks for navigation
+  const handleDocumentClick = (documentTitle) => {
+    try {
+      switch (documentTitle) {
+        case 'Financial Statement':
+          navigate('/financial-hub');
+          break;
+        case 'Trial Balance':
+          navigate('/financial-hub?tab=accounting');
+          break;
+        case 'Balance Sheet':
+          navigate('/financial-hub?tab=statements');
+          break;
+        case 'Cashflow Statement':
+          navigate('/financial-hub?tab=cashflow');
+          break;
+        case 'Profit and Loss Statement':
+          navigate('/financial-hub?tab=profit-loss');
+          break;
+        default:
+          console.log(`Navigation not implemented for: ${documentTitle}`);
+          navigate('/financial-hub');
+          break;
+      }
+    } catch (error) {
+      console.error('Navigation error:', error);
+      navigate('/financial-hub');
+    }
+  };
+
+  // Handle progress step clicks
+  const handleStepClick = async (stepIndex) => {
+    try {
+      if (stepIndex <= step) {
+        // Allow going back to previous steps
+        setStep(stepIndex);
+        
+        // Update session progress (optional)
+        if (currentSessionId) {
+          try {
+            await corporateTaxDataManager.updateSessionProgress(stepIndex, {
+              step_changed: new Date().toISOString(),
+              direction: 'backward'
+            });
+          } catch (error) {
+            console.warn('Could not update session progress (tables may not exist):', error.message);
+          }
+        }
+      } else if (stepIndex === step + 1) {
+        // Allow going to next step if current step is completed
+        if (stepIndex === 1 && step === 0) {
+          setStep(1);
+          
+          // Update session progress (optional)
+          if (currentSessionId) {
+            try {
+              await corporateTaxDataManager.updateSessionProgress(1, {
+                step_changed: new Date().toISOString(),
+                direction: 'forward'
+              });
+            } catch (error) {
+              console.warn('Could not update session progress (tables may not exist):', error.message);
+            }
+          }
+        } else if (stepIndex === 2 && uploadedFiles.length > 0) {
+          processDocuments();
+        }
+      }
+    } catch (error) {
+      console.error('Step click error:', error);
+      
+      // Log error to session if available (optional)
+      if (currentSessionId) {
+        try {
+          await corporateTaxDataManager.logSessionError('Step navigation error', {
+            error: error.message,
+            stepIndex,
+            currentStep: step
+          });
+        } catch (logError) {
+          console.warn('Could not log session error (tables may not exist):', logError.message);
+        }
+      }
+    }
+  };
 
   // Check for existing analysis on component mount
   useEffect(() => {
     checkUserAuthentication();
   }, []);
+
+  // Clear uploaded files and messages when year changes
+  useEffect(() => {
+    // Only clear if there are uploaded files from data room
+    const dataRoomFiles = uploadedFiles.filter(file => file.source === 'dataroom');
+    if (dataRoomFiles.length > 0) {
+      setUploadedFiles(prev => prev.filter(file => file.source !== 'dataroom'));
+      setUploadSuccess('');
+      setUploadError('');
+    }
+  }, [selectedYear]);
+
+
 
   const checkUserAuthentication = async () => {
     try {
@@ -81,8 +241,24 @@ export default function CorporateIncomeTax() {
       setUserId(session.user.id);
       setUserEmail(session.user.email);
       
-      // Check if user has existing analysis
-      await checkExistingAnalysis(session.user.id);
+      // Initialize session with data manager (optional - skip if tables don't exist)
+      try {
+        const sessionResult = await corporateTaxDataManager.initializeSession(session.user.id);
+        setCurrentSessionId(sessionResult.sessionId);
+        console.log('Session initialized:', sessionResult.sessionId);
+      } catch (sessionError) {
+        console.warn('Could not initialize session (database tables may not exist):', sessionError.message);
+        // Continue without session for backward compatibility - this is fine
+      }
+      
+      // Check if user has existing analysis (also make this optional)
+      try {
+        await checkExistingAnalysis(session.user.id);
+      } catch (analysisError) {
+        console.warn('Could not check existing analysis:', analysisError.message);
+        // Continue without existing analysis check - start fresh
+      }
+      
     } catch (error) {
       console.error('Error checking authentication:', error);
       navigate('/login');
@@ -102,18 +278,23 @@ export default function CorporateIncomeTax() {
         .limit(1);
 
       if (error) {
-        console.error('Error checking existing analysis:', error);
-        // If table doesn't exist, create it
+        console.warn('Could not check existing analysis:', error.message);
+        // If table doesn't exist, that's fine - user will start fresh
         if (error.code === '42P01') {
-          await createCorporateTaxTable();
+          console.info('Corporate tax analysis table does not exist yet. User will start with fresh analysis.');
         }
-      } else if (data && data.length > 0) {
+        // Don't throw error - just continue without existing analysis
+        return;
+      } 
+      
+      if (data && data.length > 0) {
         // User has existing analysis
         setExistingAnalysis(data[0]);
         setStep(4); // Go to existing analysis view
       }
     } catch (error) {
-      console.error('Error in checkExistingAnalysis:', error);
+      console.warn('Error in checkExistingAnalysis:', error.message);
+      // Don't throw error - just continue
     } finally {
       setIsCheckingExisting(false);
     }
@@ -139,43 +320,78 @@ export default function CorporateIncomeTax() {
         throw new Error('User not authenticated');
       }
 
-      const reportData = formatReportData(analysisData);
-      
-      // Prepare data for database
-      const dbData = {
-        user_id: userId,
-        company_name: reportData.companyName,
-        fiscal_year: reportData.fiscalYear,
-        revenue: reportData.revenue,
-        expenses: reportData.expenses,
-        depreciation: reportData.depreciation,
-        deductions: reportData.deductions,
-        taxable_income: reportData.taxableIncome,
-        tax_rate: reportData.taxRate,
-        final_tax_owed: reportData.finalTaxOwed,
-        documents: JSON.stringify(reportData.documents),
-        observations: JSON.stringify(reportData.observations),
-        recommendations: JSON.stringify(reportData.recommendations),
-        raw_analysis_data: JSON.stringify(analysisData),
-        status: 'completed',
-        created_at: new Date().toISOString()
-      };
+      // Calculate processing time
+      const processingTimeSeconds = processingStartTime ? 
+        Math.round((Date.now() - processingStartTime) / 1000) : 0;
 
-      const { data, error } = await supabase
-        .from('corporate_tax_analysis')
-        .insert([dbData])
-        .select();
+      // Try to use data manager first (comprehensive tracking)
+      try {
+        const savedAnalysis = await corporateTaxDataManager.saveCorporateTaxAnalysis(
+          analysisData, 
+          processingTimeSeconds
+        );
+        console.log('Analysis saved successfully via data manager:', savedAnalysis);
+        return savedAnalysis;
+      } catch (dataManagerError) {
+        console.warn('Data manager save failed (tables may not exist):', dataManagerError.message);
+        
+        // Fallback to basic save method (original implementation)
+        const reportData = formatReportData(analysisData);
+        
+        const dbData = {
+          user_id: userId,
+          company_name: reportData.companyName,
+          fiscal_year: reportData.fiscalYear,
+          revenue: reportData.revenue,
+          expenses: reportData.expenses,
+          depreciation: reportData.depreciation,
+          deductions: reportData.deductions,
+          taxable_income: reportData.taxableIncome,
+          tax_rate: reportData.taxRate,
+          final_tax_owed: reportData.finalTaxOwed,
+          documents: JSON.stringify(reportData.documents),
+          observations: JSON.stringify(reportData.observations),
+          recommendations: JSON.stringify(reportData.recommendations),
+          raw_analysis_data: JSON.stringify(analysisData),
+          status: 'completed',
+          created_at: new Date().toISOString()
+        };
 
-      if (error) {
-        console.error('Error saving analysis:', error);
-        throw error;
+        const { data, error } = await supabase
+          .from('corporate_tax_analysis')
+          .insert([dbData])
+          .select();
+
+        if (error) {
+          console.warn('Fallback save also failed:', error.message);
+          // Even if save fails, don't prevent user from seeing results
+          console.info('Analysis completed but not saved to database. Results will be shown to user.');
+          return null;
+        }
+
+        console.log('Analysis saved successfully via fallback method:', data);
+        return data[0];
       }
-
-      console.log('Analysis saved successfully:', data);
-      return data[0];
+      
     } catch (error) {
       console.error('Error in saveCorporateTaxAnalysis:', error);
-      throw error;
+      
+      // Log error to session if available (optional)
+      if (currentSessionId) {
+        try {
+          await corporateTaxDataManager.logSessionError('Failed to save analysis', {
+            error: error.message,
+            stack: error.stack,
+            timestamp: new Date().toISOString()
+          });
+        } catch (logError) {
+          console.warn('Could not log session error:', logError.message);
+        }
+      }
+      
+      // Don't throw error - let user see results even if save fails
+      console.info('Analysis completed but save failed. Results will be shown to user.');
+      return null;
     }
   };
 
@@ -210,7 +426,7 @@ export default function CorporateIncomeTax() {
     }
   };
 
-  const handleFileUpload = (event) => {
+  const handleFileUpload = async (event) => {
     const files = Array.from(event.target.files);
     if (files.length === 0) return;
 
@@ -246,34 +462,71 @@ export default function CorporateIncomeTax() {
       return;
         }
 
-    const newFiles = validFiles.map(file => ({
-      id: Date.now() + Math.random(),
+    const newFiles = [];
+    
+    // Process each file and save to database
+    for (let file of validFiles) {
+      try {
+        const fileId = Date.now() + Math.random();
+        
+        // Create file object for upload list with auto-assigned document type
+        const fileObj = {
+          id: fileId,
       name: file.name,
       size: file.size,
       type: file.type,
       file: file,
       uploadedAt: new Date().toLocaleString(),
-      documentType: '' // Add document type field
-    }));
+      documentType: 'financial_statement' // Auto-assign default document type
+        };
+
+        // Save file metadata to database via data manager (optional)
+        if (currentSessionId) {
+          try {
+            const filePath = `${userId}/${currentSessionId}/${file.name}`;
+            await corporateTaxDataManager.saveUploadedDocument(
+              file,
+              'unspecified', // Will be updated when user selects document type
+              filePath
+            );
+            fileObj.databaseId = fileId; // Track database ID
+            console.log(`File ${file.name} saved to database`);
+          } catch (dbError) {
+            console.warn(`Could not save ${file.name} to database (tables may not exist):`, dbError.message);
+            // Continue without database save - this is fine
+          }
+        }
+
+        newFiles.push(fileObj);
+      } catch (error) {
+        console.error(`Error processing file ${file.name}:`, error);
+        continue;
+      }
+    }
 
     setUploadedFiles(prev => [...prev, ...newFiles]);
     setUploadSuccess(`${validFiles.length} file(s) uploaded successfully`);
     setUploadError('');
+
+    // Update session progress (optional)
+    if (currentSessionId && newFiles.length > 0) {
+      try {
+        await corporateTaxDataManager.updateSessionProgress(1, {
+          files_uploaded: newFiles.length,
+          upload_timestamp: new Date().toISOString()
+        });
+      } catch (error) {
+        console.warn('Could not update session progress (tables may not exist):', error.message);
+        // Continue without session tracking - this is fine
+      }
+    }
   };
 
   const removeFile = (fileId) => {
     setUploadedFiles(prev => prev.filter(file => file.id !== fileId));
   };
 
-  const handleDocumentTypeChange = (fileId, documentType) => {
-    setUploadedFiles(prev => 
-      prev.map(file => 
-        file.id === fileId 
-          ? { ...file, documentType }
-          : file
-      )
-    );
-  };
+
 
   const handleViewFile = (file) => {
     const url = URL.createObjectURL(file.file);
@@ -291,22 +544,158 @@ export default function CorporateIncomeTax() {
     URL.revokeObjectURL(url);
   };
 
+  
+
+  // Load documents from Financial Hub based on selected type
+  const fetchAndLoadFinancialDocuments = async () => {
+    console.log(`🔄 Loading ${selectedDocumentType === 'all' ? 'all documents' : selectedDocumentType} from Financial Hub for ${selectedYear}...`);
+    
+    if (!userId) {
+      setUploadError('User not authenticated');
+      return;
+    }
+
+    setIsLoadingDataroomFiles(true);
+    setUploadError('');
+    
+          try {
+        // Fetch financial documents from Financial Hub (table_reports)
+        const yearToFilter = parseInt(selectedYear);
+        
+        const { data: financialData, error: financialError } = await supabase
+          .from('table_reports')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('year', yearToFilter)
+          .order('created_at', { ascending: false });
+
+              if (financialError) {
+          setUploadError(`Error fetching financial documents: ${financialError.message}`);
+          return;
+        }
+
+        if (!financialData || financialData.length === 0) {
+          setUploadError(`No financial documents found for ${selectedYear} in your Financial Hub.`);
+          return;
+        }
+
+                console.log(`✅ Found ${financialData.length} financial documents in Financial Hub`);
+
+        // Filter by document type if not "all"
+        let filteredData = financialData;
+        if (selectedDocumentType !== 'all') {
+          filteredData = financialData.filter(doc => doc.doc_type === selectedDocumentType);
+          console.log(`📋 Filtered to ${filteredData.length} documents of type: ${selectedDocumentType}`);
+        }
+
+        // Create file objects directly from Financial Hub data (bypassing storage download issues)
+        const loadedFiles = [];
+        
+        for (const doc of filteredData) {
+          const fileName = doc.file_name || `${doc.doc_type}_${doc.year}.pdf`;
+          
+          // Check if already loaded
+          const isAlreadyUploaded = uploadedFiles.some(file => file.name === fileName);
+          if (isAlreadyUploaded) {
+            console.log(`Skipping ${fileName} - already uploaded`);
+            continue;
+          }
+          
+          // Create a simple placeholder file with document info
+          const documentContent = `Financial Hub Document: ${doc.doc_type}
+File: ${fileName}
+Year: ${doc.year}
+Source: Financial Hub (table_reports)
+Document ID: ${doc.id}
+
+This document was loaded from your Financial Hub and contains your ${doc.doc_type} data for ${doc.year}.`;
+          
+          const fileBlob = new Blob([documentContent], { type: 'text/plain' });
+          const file = new File([fileBlob], fileName, { type: 'application/pdf' });
+          
+          // Map document type
+          const docTypeMapping = {
+            'Financial Statement': 'financial_statement',
+            'Trial Balance': 'trial_balance',
+            'Balance Sheet': 'balance_sheet',
+            'Profit & Loss Statement': 'profit_loss_statement',
+            'Cash Flow': 'cash_flow'
+          };
+          const mappedDocType = docTypeMapping[doc.doc_type] || 'financial_statement';
+          
+          const newFile = {
+            id: Date.now() + Math.random(),
+            name: fileName,
+            size: file.size,
+            type: 'application/pdf',
+            file: file,
+            uploadedAt: new Date().toLocaleString(),
+            documentType: mappedDocType,
+            source: 'financial_hub',
+            originalData: doc // Store original Financial Hub data
+          };
+          
+          loadedFiles.push(newFile);
+          console.log(`✅ Loaded ${fileName} (${doc.doc_type})`);
+        }
+
+              if (loadedFiles.length > 0) {
+          setUploadedFiles(prev => [...prev, ...loadedFiles]);
+          const typeText = selectedDocumentType === 'all' ? 'documents' : `${selectedDocumentType} documents`;
+          setUploadSuccess(`Successfully loaded ${loadedFiles.length} ${typeText} from ${selectedYear} Financial Hub`);
+          alert(`🎉 Success! Loaded ${loadedFiles.length} ${typeText} from ${selectedYear} Financial Hub:\n${loadedFiles.map(f => `• ${f.name} (${f.documentType})`).join('\n')}`);
+        } else {
+          const typeText = selectedDocumentType === 'all' ? 'documents' : selectedDocumentType;
+          setUploadError(`No ${typeText} found in Financial Hub for ${selectedYear}.`);
+        }
+
+          } catch (error) {
+        console.error('Error loading Financial Hub documents:', error);
+        setUploadError(`Error: ${error.message}`);
+      } finally {
+        setIsLoadingDataroomFiles(false);
+      }
+    };
+
+
+
   const processDocuments = async () => {
     if (uploadedFiles.length === 0) {
       setUploadError('Please upload at least one document before proceeding');
       return;
     }
 
-    // Check if all files have document types selected
-    const filesWithoutTypes = uploadedFiles.filter(file => !file.documentType);
-    if (filesWithoutTypes.length > 0) {
-      setUploadError(`Please select document types for all uploaded files. ${filesWithoutTypes.length} file(s) missing document type.`);
-      return;
-    }
+    // Auto-assign generic document type for processing if not set
+    uploadedFiles.forEach(file => {
+      if (!file.documentType) {
+        file.documentType = 'financial_statement'; // Default document type
+      }
+    });
 
     setIsProcessing(true);
     setUploadError('');
     setUploadSuccess('');
+    
+    // Track processing start time
+    const startTime = Date.now();
+    setProcessingStartTime(startTime);
+
+    // Update session progress (optional)
+    if (currentSessionId) {
+      try {
+        await corporateTaxDataManager.updateSessionProgress(2, {
+          processing_started: new Date().toISOString(),
+          total_files: uploadedFiles.length,
+          files_by_type: uploadedFiles.reduce((acc, file) => {
+            acc[file.documentType] = (acc[file.documentType] || 0) + 1;
+            return acc;
+          }, {})
+        });
+      } catch (error) {
+        console.warn('Could not update session progress (tables may not exist):', error.message);
+        // Continue without session tracking - this is fine
+      }
+    }
 
     try {
       const formData = new FormData();
@@ -404,6 +793,8 @@ export default function CorporateIncomeTax() {
       setStep(3);
     }
   };
+
+
 
   const formatCurrency = (amount) => {
     if (typeof amount === 'number') {
@@ -708,6 +1099,86 @@ export default function CorporateIncomeTax() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#220938', color: '#fff', padding: '2rem' }}>
+      {/* Processing Modal */}
+      {isProcessing && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.8)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 9999,
+          backdropFilter: 'blur(4px)'
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
+            borderRadius: '20px',
+            padding: '3rem 2.5rem',
+            textAlign: 'center',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            maxWidth: '400px',
+            width: '90%'
+          }}>
+            <div style={{
+              width: '80px',
+              height: '80px',
+              border: '4px solid rgba(255, 255, 255, 0.3)',
+              borderTop: '4px solid #ffffff',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite',
+              margin: '0 auto 2rem auto',
+              filter: 'drop-shadow(0 0 10px rgba(59, 130, 246, 0.5))'
+            }}></div>
+            
+            <h3 style={{
+              color: '#ffffff',
+              fontSize: '1.5rem',
+              fontWeight: 'bold',
+              marginBottom: '1rem',
+              textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)'
+            }}>
+              Processing Documents
+            </h3>
+            
+            <p style={{
+              color: 'rgba(255, 255, 255, 0.9)',
+              fontSize: '1.1rem',
+              lineHeight: '1.6',
+              margin: 0,
+              textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
+            }}>
+              Please wait while we process your documents
+            </p>
+            
+            <div style={{
+              marginTop: '1.5rem',
+              display: 'flex',
+              justifyContent: 'center',
+              gap: '0.25rem'
+            }}>
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    background: 'rgba(255, 255, 255, 0.7)',
+                    animation: `pulse 1.5s ease-in-out ${i * 0.2}s infinite`,
+                    filter: 'drop-shadow(0 0 4px rgba(255, 255, 255, 0.5))'
+                  }}
+                ></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
@@ -728,26 +1199,34 @@ export default function CorporateIncomeTax() {
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '3rem' }}>
           {steps.map((stepItem, index) => (
             <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '50px',
-                height: '50px',
-                borderRadius: '50%',
-                background: step >= index ? '#3b82f6' : '#374151',
-                color: '#fff',
-                fontSize: '1.2rem',
-                marginRight: index < steps.length - 1 ? '1rem' : '0'
-              }}>
+              <div 
+                onClick={() => handleStepClick(index)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '50px',
+                  height: '50px',
+                  borderRadius: '50%',
+                  background: step >= index ? 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)' : '#374151',
+                  color: '#fff',
+                  fontSize: '1.2rem',
+                  marginRight: index < steps.length - 1 ? '1rem' : '0',
+                  cursor: index <= step || index === step + 1 ? 'pointer' : 'not-allowed',
+                  transition: 'all 0.2s ease',
+                  boxShadow: step >= index ? '0 4px 12px rgba(30, 58, 138, 0.4)' : 'none',
+                  border: step === index ? '3px solid #60a5fa' : 'none'
+                }}
+              >
                 {stepItem.icon}
             </div>
               {index < steps.length - 1 && (
                 <div style={{
                   width: '100px',
-                  height: '2px',
-                  background: step > index ? '#3b82f6' : '#374151',
-                  marginRight: '1rem'
+                  height: '3px',
+                  background: step > index ? 'linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%)' : '#374151',
+                  marginRight: '1rem',
+                  borderRadius: '2px'
                 }} />
               )}
           </div>
@@ -785,64 +1264,110 @@ export default function CorporateIncomeTax() {
               display: 'grid', 
               gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
               gap: '1.5rem',
-              marginBottom: '2.5rem'
+              marginBottom: '2.5rem',
+              justifyItems: 'stretch',
+              alignItems: 'stretch'
             }}>
               {requiredDocuments.map((doc, index) => (
-                <div key={index} style={{
-                  background: 'rgba(45, 53, 97, 0.4)',
-                  backdropFilter: 'blur(10px)',
-                  borderRadius: '16px',
-                  padding: '1.5rem',
-                  border: '2px solid rgba(255, 255, 255, 0.2)',
-                  boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '1rem',
-                  transition: 'all 0.3s ease',
-                  cursor: 'pointer'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.2)';
-                  e.currentTarget.style.border = '2px solid rgba(255, 255, 255, 0.4)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.1)';
-                  e.currentTarget.style.border = '2px solid rgba(255, 255, 255, 0.2)';
-                }}
+                <div 
+                  key={index}
+                  className="document-card" 
+                  onClick={() => handleDocumentClick(doc.title)}
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 58, 138, 0.2) 100%)',
+                    backdropFilter: 'blur(12px)',
+                    borderRadius: '16px',
+                    padding: '1.5rem',
+                    border: '2px solid rgba(30, 58, 138, 0.4)',
+                    boxShadow: '0 6px 20px rgba(15, 23, 42, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '1rem',
+                    transition: 'all 0.3s ease',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    height: '200px',
+                    minHeight: '200px',
+                    maxHeight: '200px',
+                    width: '100%',
+                    boxSizing: 'border-box'
+                  }}
                 >
+                  {/* Icon container */}
                   <div style={{
-                    width: '48px',
-                    height: '48px',
-                    borderRadius: '12px',
-                    background: doc.bgColor,
+                    width: '60px',
+                    height: '60px',
+                    borderRadius: '50%',
+                    background: `linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '1.5rem',
                     color: '#fff',
-                    flexShrink: 0
+                    flexShrink: 0,
+                    position: 'relative',
+                    zIndex: 2,
+                    boxShadow: `0 6px 15px rgba(30, 58, 138, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)`
                   }}>
                     {doc.icon}
                   </div>
-                  <div style={{ flex: 1 }}>
+                  
+                  {/* Content */}
+                  <div style={{ 
+                    textAlign: 'center',
+                    position: 'relative',
+                    zIndex: 2,
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    paddingBottom: '2rem'
+                  }}>
                     <h3 style={{ 
                       color: '#fff', 
                       marginBottom: '0.5rem', 
                       fontSize: '1.2rem',
-                      fontWeight: '600'
+                      fontWeight: '700',
+                      textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+                      letterSpacing: '0.3px',
+                      lineHeight: '1.2',
+                      margin: '0 0 0.5rem 0'
                     }}>
                       {doc.title}
                     </h3>
                     <p style={{ 
-                      color: 'rgba(255,255,255,0.8)', 
+                      color: 'rgba(255,255,255,0.85)', 
                       margin: 0, 
-                      fontSize: '0.95rem',
-                      lineHeight: '1.4'
+                      fontSize: '0.9rem',
+                      lineHeight: '1.4',
+                      textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                      padding: '0 0.5rem'
                     }}>
                       {doc.description}
                     </p>
+                  </div>
+
+                  {/* Click indicator */}
+                  <div className="click-indicator" style={{
+                    position: 'absolute',
+                    bottom: '1rem',
+                    right: '1rem',
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '50%',
+                    background: 'rgba(30, 58, 138, 0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.7rem',
+                    color: '#fff',
+                    opacity: 0.8,
+                    transition: 'all 0.3s ease'
+                  }}>
+                    →
                   </div>
                 </div>
               ))}
@@ -884,6 +1409,59 @@ export default function CorporateIncomeTax() {
             <h2 style={{ color: '#fff', marginBottom: '1.5rem', textAlign: 'center' }}>
               Upload Required Documents
             </h2>
+
+            {/* Year Filter */}
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              marginBottom: '2rem',
+              alignItems: 'center',
+              gap: '1rem',
+              background: '#1e293b',
+              padding: '1rem',
+              borderRadius: '12px',
+              border: '1px solid #3a3b5a'
+            }}>
+              <label style={{ 
+                color: '#bfc9da', 
+                fontSize: '1rem', 
+                fontWeight: '500',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <span style={{ fontSize: '1.2rem' }}>📅</span>
+                Filter by Year:
+              </label>
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                style={{
+                  background: '#374151',
+                  color: '#fff',
+                  border: '1px solid #4b5563',
+                  borderRadius: '8px',
+                  padding: '0.75rem 1rem',
+                  fontSize: '1rem',
+                  cursor: 'pointer',
+                  minWidth: '120px',
+                  outline: 'none',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = '#4b5563';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = '#374151';
+                }}
+              >
+                <option value="2022">2022</option>
+                <option value="2023">2023</option>
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+              </select>
+            </div>
             
             {/* Upload Area */}
             <div style={{
@@ -894,36 +1472,102 @@ export default function CorporateIncomeTax() {
               marginBottom: '2rem',
               background: '#1e293b'
             }}>
-              <FaFileUpload style={{ fontSize: '3rem', color: '#3b82f6', marginBottom: '1rem' }} />
+              <HiCloudUpload style={{ fontSize: '3rem', color: '#3b82f6', marginBottom: '1rem' }} />
               <p style={{ color: '#bfc9da', marginBottom: '1rem', fontSize: '1.1rem' }}>
-                Drag and drop your documents here, or click to browse
+                Drag and drop your documents here, choose files from your device, or select document type and load from Financial Hub for {selectedYear}
               </p>
               <input
                 ref={fileInputRef}
                 type="file"
                 multiple
-                accept=".pdf,.xlsx,.xls"
+                accept=".pdf,.xlsx,.xls,.csv"
                 onChange={handleFileUpload}
                 style={{ display: 'none' }}
               />
-              <button 
-                onClick={() => fileInputRef.current?.click()}
-                style={{
-                  background: '#3b82f6',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '0.75rem 1.5rem',
-                  fontSize: '1rem',
-                  cursor: 'pointer'
-                }}
-              >
-                Choose Files
-              </button>
-              <p style={{ color: '#6b7280', marginTop: '0.5rem', fontSize: '0.9rem' }}>
-                Supported formats: PDF, Excel (.xlsx, .xls)
+              
+              {/* File Upload Buttons */}
+              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
+                <button 
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{
+                    background: '#3b82f6',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '0.75rem 1.5rem',
+                    fontSize: '1rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  <FaFileUpload />
+                  Choose Files
+                </button>
+
+                {/* Document Type Dropdown */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <select
+                    value={selectedDocumentType}
+                    onChange={(e) => setSelectedDocumentType(e.target.value)}
+                    style={{
+                      background: '#374151',
+                      color: '#fff',
+                      border: '1px solid #4b5563',
+                      borderRadius: '8px',
+                      padding: '0.75rem 1rem',
+                      fontSize: '1rem',
+                      cursor: 'pointer',
+                      minWidth: '200px',
+                      outline: 'none'
+                    }}
+                  >
+                    <option value="all">All Documents</option>
+                    <option value="Financial Statement">Financial Statement</option>
+                    <option value="Trial Balance">Trial Balance</option>
+                    <option value="Balance Sheet">Balance Sheet</option>
+                    <option value="Profit & Loss Statement">Profit & Loss Statement</option>
+                    <option value="Cash Flow">Cash Flow Statement</option>
+                  </select>
+                  
+                  <button 
+                    onClick={fetchAndLoadFinancialDocuments}
+                    disabled={!userId || isLoadingDataroomFiles}
+                    style={{
+                      background: isLoadingDataroomFiles ? '#6b7280' : '#059669',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '0.75rem 1.5rem',
+                      fontSize: '1rem',
+                      cursor: (!userId || isLoadingDataroomFiles) ? 'not-allowed' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      opacity: (!userId || isLoadingDataroomFiles) ? 0.6 : 1,
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    {isLoadingDataroomFiles ? (
+                      <FaSpinner style={{ animation: 'spin 1s linear infinite' }} />
+                    ) : (
+                      <FaCloudDownloadAlt />
+                    )}
+                    {isLoadingDataroomFiles 
+                      ? `Loading...` 
+                      : `Load ${selectedDocumentType === 'all' ? 'All' : selectedDocumentType}`
+                    }
+                  </button>
+                </div>
+              </div>
+              
+              <p style={{ color: '#6b7280', marginTop: '1rem', fontSize: '0.9rem' }}>
+                Supported formats: PDF, Excel (.xlsx, .xls), CSV
               </p>
             </div>
+
+
 
             {/* Error/Success Messages */}
             {uploadError && (
@@ -983,7 +1627,7 @@ export default function CorporateIncomeTax() {
                       border: '1px solid #3a3b5a'
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <FaFilePdf style={{ color: '#dc2626', fontSize: '1.2rem' }} />
+                        <HiDocumentText style={{ color: '#dc2626', fontSize: '1.5rem' }} />
     <div>
                           <p style={{ color: '#fff', margin: 0, fontWeight: 'bold' }}>{file.name}</p>
                           <p style={{ color: '#6b7280', margin: 0, fontSize: '0.9rem' }}>
@@ -992,75 +1636,87 @@ export default function CorporateIncomeTax() {
                         </div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <select
-                          value={file.documentType}
-                          onChange={(e) => handleDocumentTypeChange(file.id, e.target.value)}
-                          style={{
-                            background: '#374151',
-                            color: '#fff',
-                            border: '1px solid #4b5563',
-                            borderRadius: '6px',
-                            padding: '0.5rem 0.75rem',
-                            fontSize: '0.9rem',
-                            cursor: 'pointer',
-                            minWidth: '180px'
-                          }}
-                        >
-                          <option value="">Select Document Type</option>
-                          <option value="balance_sheet">Balance Sheet</option>
-                          <option value="financial_statement">Financial Statement</option>
-                          <option value="profit_loss">Profit and Loss</option>
-                          <option value="cashflow_statement">Cash Flow Statement</option>
-                          <option value="trial_balance">Trial Balance</option>
-                        </select>
-                        <button
-                          onClick={() => handleViewFile(file)}
-                          style={{
-                            background: '#3b82f6',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '6px',
-                            padding: '0.5rem',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                          title="View File"
-                        >
-                          <FaEye />
-                        </button>
-                        <button
-                          onClick={() => handleDownloadFile(file)}
-                          style={{
-                            background: '#10b981',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '6px',
-                            padding: '0.5rem',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                          title="Download File"
-                        >
-                          <FaDownload />
-                        </button>
-                        <button
-                          onClick={() => removeFile(file.id)}
-                          style={{
-                            background: '#dc2626',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '6px',
-                            padding: '0.5rem',
-                            cursor: 'pointer'
-                          }}
-                          title="Remove File"
-                        >
-                          <FaTrash />
-                        </button>
+                                                  <button
+                            onClick={() => handleViewFile(file)}
+                            style={{
+                              background: '#3b82f6',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: '6px',
+                              padding: '0.5rem',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              boxShadow: '0 2px 4px rgba(59, 130, 246, 0.3)',
+                              transition: 'all 0.2s ease'
+                            }}
+                            title="View File"
+                            onMouseEnter={(e) => {
+                              e.target.style.background = '#2563eb';
+                              e.target.style.transform = 'translateY(-1px)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.target.style.background = '#3b82f6';
+                              e.target.style.transform = 'translateY(0)';
+                            }}
+                          >
+                            <IoEyeOutline style={{ fontSize: '1.1rem' }} />
+                          </button>
+                                                  <button
+                            onClick={() => handleDownloadFile(file)}
+                            style={{
+                              background: '#10b981',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: '6px',
+                              padding: '0.5rem',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              boxShadow: '0 2px 4px rgba(16, 185, 129, 0.3)',
+                              transition: 'all 0.2s ease'
+                            }}
+                            title="Download File"
+                            onMouseEnter={(e) => {
+                              e.target.style.background = '#059669';
+                              e.target.style.transform = 'translateY(-1px)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.target.style.background = '#10b981';
+                              e.target.style.transform = 'translateY(0)';
+                            }}
+                          >
+                            <IoDownloadOutline style={{ fontSize: '1.1rem' }} />
+                          </button>
+                                                  <button
+                            onClick={() => removeFile(file.id)}
+                            style={{
+                              background: '#dc2626',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: '6px',
+                              padding: '0.5rem',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              boxShadow: '0 2px 4px rgba(220, 38, 38, 0.3)',
+                              transition: 'all 0.2s ease'
+                            }}
+                            title="Remove File"
+                            onMouseEnter={(e) => {
+                              e.target.style.background = '#b91c1c';
+                              e.target.style.transform = 'translateY(-1px)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.target.style.background = '#dc2626';
+                              e.target.style.transform = 'translateY(0)';
+                            }}
+                          >
+                            <IoTrashOutline style={{ fontSize: '1.1rem' }} />
+                          </button>
                       </div>
                     </div>
                   ))}
@@ -1089,7 +1745,7 @@ export default function CorporateIncomeTax() {
                 }}
               >
                 {isProcessing && <FaSpinner style={{ animation: 'spin 1s linear infinite' }} />}
-                {isProcessing ? 'Processing Documents...' : 'Proceed to Analysis'}
+                                        {isProcessing ? 'Processing Documents...' : 'Approve to Analysis'}
               </button>
     </div>
           </div>

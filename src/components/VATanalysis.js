@@ -5,24 +5,25 @@ import {
 } from 'recharts';
 import API_BASE_URL from './config';
 
+import './Vatanalysis.css';
+
 import step1 from '../assests/step1.png';
-import step2 from  '../assests/step2.png';
-import step3 from   '../assests/step3.png';
+import step2 from '../assests/step2.png';
+import step3 from '../assests/step3.png';
 import step4 from '../assests/step4.png';
 import step5 from '../assests/step5.png';
-
 import step6 from '../assests/step6.png';
 import step7 from '../assests/step7.png';
+import step8 from '../assests/step8.png';
 
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { useRef } from 'react';
-import step8 from '../assests/step8.png';
 
 
 const tutorialImages = [step1, step2, step3, step4, step5, step6, step7, step8];
 
-const VATanalysis = () => {
+const VAT = () => {
   const [activeTab, setActiveTab] = useState('Overview');
   const [selectedStrategy, setSelectedStrategy] = useState('Centralize EU VAT Registrations');
   const [showReport, setShowReport] = useState(false);
@@ -303,7 +304,7 @@ const VATanalysis = () => {
       case 'Overview':
         return (
           <div style={styles.chartContainer}>
-            <h4>Monthly VAT Breakdown</h4>
+            <h4 className='h41'>Monthly VAT Breakdown</h4>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -323,7 +324,7 @@ const VATanalysis = () => {
         return (
           <div style={styles.chartRow}>
             <div style={styles.chartHalf}>
-              <h4>Complex VAT Scenarios</h4>
+              <h4 className='h41'>Complex VAT Scenarios</h4>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -337,7 +338,7 @@ const VATanalysis = () => {
               </ResponsiveContainer>
             </div>
             <div style={styles.chartHalf}>
-              <h4>VAT Distribution for Jan</h4>
+              <h4 className='h41'>VAT Distribution for Jan</h4>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
@@ -361,7 +362,7 @@ const VATanalysis = () => {
         const selected = optimizationDetails[selectedStrategy];
         return (
           <div style={styles.chartContainer}>
-            <h4>VAT Optimization Opportunities</h4>
+            <h4 className='h41'>VAT Optimization Opportunities</h4>
             <p>Based on your current VAT position, we've identified the following optimization opportunities:</p>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 10 }}>
               {Object.keys(optimizationDetails).map((opt, idx) => (
@@ -391,7 +392,7 @@ const VATanalysis = () => {
       case 'VAT Return Filing':
         return (
           <div style={styles.chartContainer}>
-            <h4>VAT Return Filing Assistant</h4>
+            <h4 className='h41'>VAT Return Filing Assistant</h4>
             <p>Use our VAT Return Filing Assistant to prepare and submit your VAT return without an accountant.</p>
             <div style={{ display: 'flex', gap: 30, marginTop: 20 }}>
               <div style={{ flex: 1, backgroundColor: '#e7f0ff', padding: 20, borderRadius: 10 }}>
@@ -443,7 +444,7 @@ const VATanalysis = () => {
               <>
                 {/* Main VAT Boxes Section (Page 1 of PDF) */}
                 <div style={{ marginTop: 40 }} ref={reportRef}>
-                  <h3 style={{ marginBottom: 10 }}>VAT Analysis in Tax Return Format</h3>
+                  < h3 className='h31' style={{ marginBottom: 10 }}>VAT Analysis in Tax Return Format</h3>
 
                   {renderVATBoxSection('1a. Sales Taxed at the Standard Rate (21%)', transactions.filter(txn => txn.vat_category === '1a'))}
                   {renderVATBoxSection('1b. Sales Taxed at the Reduced Rate (9%)', transactions.filter(txn => txn.vat_category === '1b'))}
@@ -456,55 +457,46 @@ const VATanalysis = () => {
                 </div>
 
                 {/* Summary Section (Page 2 of PDF) */}
-                <div
-                  ref={summaryRef}
-                  style={{
-                    marginTop: 40,
-                    background: '#fff',
-                    color: '#000',
-                    borderRadius: 10,
-                    padding: 24,
-                  }}
-                >
-                  <h3 style={{ color: '#000', fontWeight: 700 }}>Summary</h3>
-                  <table style={{ ...styles.table, fontWeight: 700, color: '#000', background: '#fff' }}>
+                <div ref={summaryRef} style={{ marginTop: 40 }}>
+                  <h3 className='h31'>Summary</h3>
+                  <table style={{ ...styles.table, fontWeight: 'bold' }}>
                     <tbody>
                       <tr>
-                        <td style={{ color: '#000', fontWeight: 700 }}>Total sales subject to the standard 21% VAT rate:</td>
-                        <td style={{ color: '#000', fontWeight: 700 }}>€{sumAmounts(['1a']).net.toLocaleString()}</td>
-                        <td style={{ color: '#000', fontWeight: 700 }}>€{sumAmounts(['1a']).vat.toLocaleString()}</td>
-                        <td style={{ color: '#000', fontWeight: 700 }}>Total sales subject to the reduced 9% VAT rate:</td>
-                        <td style={{ color: '#000', fontWeight: 700 }}>€{sumAmounts(['1b']).net.toLocaleString()}</td>
-                        <td style={{ color: '#000', fontWeight: 700 }}>€{sumAmounts(['1b']).vat.toLocaleString()}</td>
+                        <td>Total sales subject to the standard 21% VAT rate:</td>
+                        <td>€{sumAmounts(['1a']).net.toLocaleString()}</td>
+                        <td>€{sumAmounts(['1a']).vat.toLocaleString()}</td>
+                        <td>Total sales subject to the reduced 9% VAT rate:</td>
+                        <td>€{sumAmounts(['1b']).net.toLocaleString()}</td>
+                        <td>€{sumAmounts(['1b']).vat.toLocaleString()}</td>
                       </tr>
                       <tr>
-                        <td style={{ color: '#000', fontWeight: 700 }}>Total zero-rated sales (EU and exports):</td>
-                        <td style={{ color: '#000', fontWeight: 700 }}>€{sumAmounts(['1c']).net.toLocaleString()}</td>
-                        <td style={{ color: '#000', fontWeight: 700 }}>€{sumAmounts(['1c']).vat.toLocaleString()}</td>
-                        <td style={{ color: '#000', fontWeight: 700 }}>Total reverse-charge supplies:</td>
-                        <td style={{ color: '#000', fontWeight: 700 }}>€{sumAmounts(['2a']).net.toLocaleString()}</td>
-                        <td style={{ color: '#000', fontWeight: 700 }}>€{sumAmounts(['2a']).vat.toLocaleString()}</td>
+                        <td>Total zero-rated sales (EU and exports):</td>
+                        <td>€{sumAmounts(['1c']).net.toLocaleString()}</td>
+                        <td>€{sumAmounts(['1c']).vat.toLocaleString()}</td>
+                        <td>Total reverse-charge supplies:</td>
+                        <td>€{sumAmounts(['2a']).net.toLocaleString()}</td>
+                        <td>€{sumAmounts(['2a']).vat.toLocaleString()}</td>
                       </tr>
                       <tr>
-                        <td style={{ color: '#000', fontWeight: 700 }}>Total intra-EU supplies of goods:</td>
-                        <td style={{ color: '#000', fontWeight: 700 }}>€{sumAmounts(['3a']).net.toLocaleString()}</td>
-                        <td style={{ color: '#000', fontWeight: 700 }}>€{sumAmounts(['3a']).vat.toLocaleString()}</td>
-                        <td style={{ color: '#000', fontWeight: 700 }}>Total intra-EU supplies of services:</td>
-                        <td style={{ color: '#000', fontWeight: 700 }}>€{sumAmounts(['3b']).net.toLocaleString()}</td>
-                        <td style={{ color: '#000', fontWeight: 700 }}>€{sumAmounts(['3b']).vat.toLocaleString()}</td>
+                        <td>Total intra-EU supplies of goods:</td>
+                        <td>€{sumAmounts(['3a']).net.toLocaleString()}</td>
+                        <td>€{sumAmounts(['3a']).vat.toLocaleString()}</td>
+                        <td>Total intra-EU supplies of services:</td>
+                        <td>€{sumAmounts(['3b']).net.toLocaleString()}</td>
+                        <td>€{sumAmounts(['3b']).vat.toLocaleString()}</td>
                       </tr>
                       <tr>
-                        <td style={{ color: '#000', fontWeight: 700 }}>Total intra-EU acquisitions of goods:</td>
-                        <td style={{ color: '#000', fontWeight: 700 }}>€{sumAmounts(['4a']).net.toLocaleString()}</td>
-                        <td style={{ color: '#000', fontWeight: 700 }}>€{sumAmounts(['4a']).vat.toLocaleString()}</td>
-                        <td style={{ color: '#000', fontWeight: 700 }}>Total purchases of services from other EU countries:</td>
-                        <td style={{ color: '#000', fontWeight: 700 }}>€{sumAmounts(['4b']).net.toLocaleString()}</td>
-                        <td style={{ color: '#000', fontWeight: 700 }}>€{sumAmounts(['4b']).vat.toLocaleString()}</td>
+                        <td>Total intra-EU acquisitions of goods:</td>
+                        <td>€{sumAmounts(['4a']).net.toLocaleString()}</td>
+                        <td>€{sumAmounts(['4a']).vat.toLocaleString()}</td>
+                        <td>Total purchases of services from other EU countries:</td>
+                        <td>€{sumAmounts(['4b']).net.toLocaleString()}</td>
+                        <td>€{sumAmounts(['4b']).vat.toLocaleString()}</td>
                       </tr>
                     </tbody>
                   </table>
 
-                  <h4 style={{ marginTop: 20, color: '#4ade80' /* green accent */ }}>
+                  <h4 className='h41' style={{ marginTop: 20, color: 'green' }}>
                     VAT Payable (VAT Collected - VAT Deductible): {calculateNetVAT()}
                   </h4>
 
@@ -538,7 +530,7 @@ const VATanalysis = () => {
                   maxWidth: '1200px',             // reduce this to limit width
                   margin: '0 auto',               // center it
                   padding: '0 20px 50px 20px',
-                  backgroundColor: 'rgb(10 8 38)'
+                  backgroundColor: '#fff'
                 }}>
 
                   {tutorialImages.map((img, index) => (
@@ -688,7 +680,7 @@ const VATanalysis = () => {
         >
           {showInvoices ? 'Hide Invoices' : 'Show Invoices'}
         </button>
-       
+        <button onClick={logout} style={styles.logoutBtn}>Logout</button>
       </div>
 
       {message && (
@@ -709,7 +701,7 @@ const VATanalysis = () => {
 
       {showInvoices && (
         <div style={styles.tableContainer}>
-          <h4>Extracted Transactions</h4>
+          <h4 className='h41'>Extracted Transactions</h4>
 
           {/* Filters Row */}
           <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
@@ -792,17 +784,17 @@ const VATanalysis = () => {
 const SummaryCard = ({ title, value }) => (
   <div style={styles.card}>
     <h5 style={{ marginBottom: 5 }}>{title}</h5>
-    <h3 style={{ color: '#000' }}>{value}</h3>
+    <h3 className='h31' style={{color:'#000'}}>{value}</h3>
   </div>
 );
 
 const styles = {
-  container: { padding: '30px', fontFamily: 'Segoe UI', backgroundColor: 'rgb(10 8 38)', minHeight: '100vh' },
-  heading: { textAlign: 'center', fontSize: 28, marginBottom: 20 },
-  summaryRow: { display: 'flex', justifyContent: 'space-around', marginBottom: 30,color: '#000000',backgroundColor: '#fff' },
-  tabNav: { display: 'flex', gap: 20, borderBottom: '1px solid #ccc', paddingBottom: 10, marginBottom: 20 ,color: '#fff',backgroundColor: '#fff'},
+  container: { padding: '30px', fontFamily: 'Segoe UI', backgroundColor: '#f8f9fa', minHeight: '100vh' },
+  heading: { textAlign: 'center', fontSize: 28, marginBottom: 20,color:'#000' },
+  summaryRow: { display: 'flex', justifyContent: 'space-around', marginBottom: 30 },
+  tabNav: { display: 'flex', gap: 20, borderBottom: '1px solid #ccc', paddingBottom: 10, marginBottom: 20 },
   tab: { background: 'none', border: 'none', fontSize: 16, padding: '8px 16px', cursor: 'pointer' },
-  card: {  padding: 20, borderRadius: 10, boxShadow: '0 2px 10px rgba(0,0,0,0.1)', width: 280, textAlign: 'center',color: '#000000' },
+  card: { backgroundColor: '#fff', padding: 20, borderRadius: 10, boxShadow: '0 2px 10px rgba(0,0,0,0.1)', width: 280, textAlign: 'center' },
   uploadBtn: { marginLeft: 10, padding: '8px 12px', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' },
   processBtn: { marginLeft: 10, padding: '8px 12px', backgroundColor: '#28a745', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' },
   logoutBtn: { marginLeft: 10, padding: '8px 12px', backgroundColor: '#dc3545', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' },
@@ -819,16 +811,9 @@ const styles = {
     cursor: 'pointer',
     transition: 'border 0.3s ease',
   },
-  table: {
-    width: '100%',
-    borderCollapse: 'collapse',
-    marginTop: 20,
-    color: '#000',
-    fontWeight: 700,
-    background: '#fff'
-  },
+  table: { width: '100%', borderCollapse: 'collapse', marginTop: 20 },
   th: { borderBottom: '1px solid #ccc', padding: '8px', backgroundColor: '#f2f2f2', textAlign: 'left' },
-  td: { borderBottom: '1px solid #ddd', padding: '8px' ,color: '#000000'},
+  td: { borderBottom: '1px solid #ddd', padding: '8px',color:"#000" },
   chartRow: { display: 'flex', justifyContent: 'space-between', gap: '20px', marginTop: 30, padding: 20, backgroundColor: '#fff', borderRadius: 10, boxShadow: '0 2px 10px rgba(0,0,0,0.1)' },
   chartHalf: { flex: 1 },
   inlineSpinner: {
@@ -850,7 +835,7 @@ const styles = {
 
 const renderVATBoxSection = (title, boxTransactions = []) => (
   <div style={{ marginBottom: 30 }}>
-    <h4 style={{ marginBottom: 10 }}>{title}</h4>
+    <h4 className='h41' style={{ marginBottom: 10 }}>{title}</h4>
     <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 10 }}>
       <thead>
         <tr style={{ backgroundColor: '#f2f2f2' }}>
@@ -895,4 +880,4 @@ const renderVATBoxSection = (title, boxTransactions = []) => (
 );
 
 
-export default VATanalysis;
+export default VAT;
