@@ -18,45 +18,184 @@ function KVKRegistrationForm() {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [formData, setFormData] = useState(null);
+  const [isLoadingData, setIsLoadingData] = useState(true);
+  const [dataLoaded, setDataLoaded] = useState(false);
   
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoadingData(true);
       try {
         const { data: { user } } = await supabase.auth.getUser();
         
         if (user) {
-          // Fetch company information
-          const { data: companyData, error: companyError } = await supabase
-            .from('company_information')
-            .select('incorporation_date')
+          // Fetch data from branch_registration_data table
+          const { data: branchData, error: branchError } = await supabase
+            .from('branch_registration_data')
+            .select('*')
             .eq('user_id', user.id)
             .single();
 
-          if (companyError && companyError.code !== 'PGRST116') {
-            console.error('Error fetching company data:', companyError);
+          if (branchError && branchError.code !== 'PGRST116') {
+            console.error('Error fetching branch registration data:', branchError);
           }
 
-          if (companyData && companyData.incorporation_date) {
-            setValue('startingDate', companyData.incorporation_date);
+          if (branchData) {
+            console.log('Fetched branch registration data:', branchData);
+            
+            // Auto-fill form fields from branch_registration_data
+            if (branchData.company_name) {
+              setValue('companyName', branchData.company_name);
+            }
+            
+            if (branchData.legal_form) {
+              setValue('legalForm', branchData.legal_form);
+            }
+            
+            if (branchData.reg_number) {
+              setValue('foreignRegistrationNumber', branchData.reg_number);
+              setValue('chamberNumber', branchData.reg_number); // Map to chamber number field
+            }
+            
+            if (branchData.foreign_register_name) {
+              setValue('registerName', branchData.foreign_register_name);
+            }
+            
+            if (branchData.foreign_registering_institution) {
+              setValue('registeringInstitution', branchData.foreign_registering_institution);
+            }
+            
+            if (branchData.foreign_registration_location) {
+              setValue('registrationLocation', branchData.foreign_registration_location);
+            }
+            
+            if (branchData.formally_registered_since) {
+              setValue('startingDate', branchData.formally_registered_since);
+              setValue('registrationDate', branchData.formally_registered_since);
+              setValue('originalRegistrationDate', branchData.formally_registered_since);
+            }
+            
+            if (branchData.registered_office) {
+              setValue('registeredOffice', branchData.registered_office);
+            }
+            
+            if (branchData.principal_place_of_business) {
+              setValue('companyAddress', branchData.principal_place_of_business);
+            }
+            
+            if (branchData.activities_description) {
+              setValue('companyActivities', branchData.activities_description);
+            }
+            
+            if (branchData.main_activity) {
+              setValue('mostImportantActivity', branchData.main_activity);
+            }
+            
+            if (branchData.trade_names) {
+              setValue('singleTradeName', branchData.trade_names);
+              setValue('tradeNameType', 'one');
+            }
+            
+            if (branchData.issued_capital) {
+              setValue('issuedCapital', branchData.issued_capital);
+            }
+            
+            if (branchData.country_of_incorporation) {
+              setValue('countryOfIncorporation', branchData.country_of_incorporation);
+            }
+            
+            if (branchData.is_eea !== undefined) {
+              setValue('eeaCompany', branchData.is_eea ? 'yes' : 'no');
+            }
+            
+            if (branchData.vat_number) {
+              setValue('taxNumber', branchData.vat_number);
+              setValue('knownToTax', 'yes');
+            }
+            
+            // Branch-specific data
+            if (branchData.branch_starting_date) {
+              setValue('startingDate', branchData.branch_starting_date);
+            }
+            
+            if (branchData.branch_address) {
+              setValue('companyAddress', branchData.branch_address);
+            }
+            
+            // Contact details from branch_registration_data
+            if (branchData.branch_phone) {
+              setValue('telephone1', branchData.branch_phone);
+            }
+            
+            if (branchData.branch_email) {
+              setValue('email', branchData.branch_email);
+            }
+            
+            if (branchData.branch_website) {
+              setValue('website', branchData.branch_website);
+            }
+            
+            if (branchData.message_box_name) {
+              setValue('messageBox', branchData.message_box_name);
+            }
+            
+            // Employee information from branch_registration_data
+            if (branchData.full_time_employees !== undefined && branchData.full_time_employees !== null) {
+              setValue('fullTimeEmployees', branchData.full_time_employees);
+            }
+            
+            if (branchData.part_time_employees !== undefined && branchData.part_time_employees !== null) {
+              setValue('partTimeEmployees', branchData.part_time_employees);
+            }
+            
+            // Set company type based on data
+            if (branchData.company_name && branchData.reg_number) {
+              setValue('companyType', 'continuation');
+            } else {
+              setValue('companyType', 'new');
+            }
+            
+            setDataLoaded(true);
           }
 
-          // Fetch user email from user_profiles
-          const { data: userData, error: userError } = await supabase
-            .from('user_profiles')
-            .select('email')
-            .eq('user_id', user.id)
-            .single();
+          // Fallback: Fetch from other tables if branch_registration_data is empty
+          if (!branchData) {
+            console.log('No branch registration data found, fetching from other tables...');
+            
+            // Fetch company information
+            const { data: companyData, error: companyError } = await supabase
+              .from('company_information')
+              .select('incorporation_date')
+              .eq('user_id', user.id)
+              .single();
 
-          if (userError) {
-            console.error('Error fetching user email:', userError);
-          }
+            if (companyError && companyError.code !== 'PGRST116') {
+              console.error('Error fetching company data:', companyError);
+            }
 
-          if (userData && userData.email) {
-            setValue('email', userData.email);
+            if (companyData && companyData.incorporation_date) {
+              setValue('startingDate', companyData.incorporation_date);
+            }
+
+            // Fetch user email from user_profiles
+            const { data: userData, error: userError } = await supabase
+              .from('user_profiles')
+              .select('email')
+              .eq('user_id', user.id)
+              .single();
+
+            if (userError) {
+              console.error('Error fetching user email:', userError);
+            }
+
+            if (userData && userData.email) {
+              setValue('email', userData.email);
+            }
           }
         }
       } catch (error) {
         console.error('Error fetching data:', error);
+      } finally {
+        setIsLoadingData(false);
       }
     };
 
@@ -1173,6 +1312,20 @@ function KVKRegistrationForm() {
   return (
     <div className="registration-form">
       <h1>KVK Company Registration</h1>
+      
+      {isLoadingData && (
+        <div className="loading-message">
+          <div className="loading-spinner"></div>
+          <p>Loading your company data from branch registration...</p>
+        </div>
+      )}
+      
+      {dataLoaded && (
+        <div className="success-message">
+          <div className="success-icon">✓</div>
+          <p>Form automatically populated with company info, contact details, and employee data from branch registration!</p>
+        </div>
+      )}
       
       {error && <div className="error-message">{error}</div>}
       

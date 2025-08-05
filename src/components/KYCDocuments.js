@@ -102,6 +102,8 @@ const KYC = () => {
     shares: '0'
   });
   const [showDocumentUploadModal, setShowDocumentUploadModal] = useState(false);
+  const [targetCompanyDetails, setTargetCompanyDetails] = useState(null);
+  const [loadingTargetCompanyDetails, setLoadingTargetCompanyDetails] = useState(false);
 
   const formatFileSize = (bytes) => {
     if (!bytes) return '0 Bytes';
@@ -1251,6 +1253,59 @@ const handleUploadDocument = async (documentType) => {
     setDetailsModalOpen(true);
   };
 
+  // Handle viewing target company details
+  const handleViewTargetCompanyDetails = async (companyName) => {
+    setLoadingTargetCompanyDetails(true);
+    
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData?.session?.user) throw new Error('No user session');
+      const userId = sessionData.session.user.id;
+      
+      // Fetch target company details from the target_companies table
+      const { data: targetCompanyData, error } = await supabase
+        .from('target_companies')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('company_name', companyName)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching target company details:', error);
+        // If no data found, create a placeholder object
+        setSelectedTargetCompany({
+          company_name: companyName,
+          reg_number: 'Not Set',
+          vat_number: 'Not Set',
+          incorporation_date: 'Not Set',
+          base_location: 'Not Set',
+          registered_address: 'Not Set',
+          directors: [],
+          shareholders: []
+        });
+      } else {
+        console.log('Fetched target company details:', targetCompanyData);
+        setSelectedTargetCompany(targetCompanyData);
+      }
+    } catch (err) {
+      console.error('Error in handleViewTargetCompanyDetails:', err);
+      // If error, create a placeholder object
+      setSelectedTargetCompany({
+        company_name: companyName,
+        reg_number: 'Not Set',
+        vat_number: 'Not Set',
+        incorporation_date: 'Not Set',
+        base_location: 'Not Set',
+        registered_address: 'Not Set',
+        directors: [],
+        shareholders: []
+      });
+    } finally {
+      setLoadingTargetCompanyDetails(false);
+      setShowTargetCompanyDetails(true);
+    }
+  };
+
   // Function to render extracted data in a structured format
   const renderExtractedData = (extractedData, documentType) => {
     if (!extractedData) return null;
@@ -1900,7 +1955,12 @@ const handleUploadDocument = async (documentType) => {
           >
             Overview
           </button>
-          
+          <button
+            className={activeTab === 'profile' ? 'active' : ''}
+            onClick={() => setActiveTab('profile')}
+          >
+            Profile
+          </button>
          
           <button
             className={activeTab === 'representatives' ? 'active' : ''}
@@ -3262,6 +3322,598 @@ View Full Structure
               >
                 Close
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'profile' && (
+        <div className="profile-section">
+          <div className="profile-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+            <h2 style={{ color: '#fff', fontWeight: 700, fontSize: '1.15rem' }}>Company Profiles</h2>
+            <button 
+              style={{
+                background: '#EF4444',
+                color: '#FFFFFF',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: 'none',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              <span style={{ fontSize: '16px' }}>+</span>
+              Add Company
+            </button>
+          </div>
+          
+          <div className="company-profiles-content" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            {/* Company Profile Card */}
+            <div className="company-card" style={{
+              background: '#18163a',
+              borderRadius: 12,
+              padding: 20,
+              border: '2px solid #FF4D80',
+              boxShadow: '0 2px 8px 0 rgba(75,0,130,0.08)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: '6px',
+                  background: '#FF4D80',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <FileText size={16} color="#fff" />
+                </div>
+                <div>
+                  <div style={{ color: '#fff', fontSize: '16px', fontWeight: '600' }}>hoc.ai</div>
+                  <div style={{ color: '#9CA3AF', fontSize: '14px' }}>hyd • 21</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button 
+                  onClick={() => handleViewTargetCompanyDetails('hoc.ai')}
+                  style={{
+                    background: '#3B82F6',
+                    color: '#FFFFFF',
+                    padding: '6px 12px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <Eye size={14} />
+                  View Details
+                </button>
+                <button 
+                  style={{
+                    background: '#FF4D80',
+                    color: '#FFFFFF',
+                    padding: '6px 12px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <FileText size={14} />
+                  Edit
+                </button>
+              </div>
+            </div>
+
+            {/* Target Companies Section */}
+            <div style={{ marginTop: 32 }}>
+              <h3 style={{ color: '#fff', fontWeight: 700, fontSize: '1.15rem', marginBottom: 16 }}>Target Companies</h3>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {/* Target Company Card 1 */}
+                <div className="target-company-card" style={{
+                  background: '#18163a',
+                  borderRadius: 12,
+                  padding: 20,
+                  border: '2px solid #F59E0B',
+                  boxShadow: '0 2px 8px 0 rgba(75,0,130,0.08)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      background: '#F59E0B'
+                    }}></div>
+                    <div>
+                      <div style={{ color: '#fff', fontSize: '16px', fontWeight: '600' }}>houseofcompanies</div>
+                      <div style={{ color: '#9CA3AF', fontSize: '14px' }}>hyderabad • 345</div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button 
+                      onClick={() => handleViewTargetCompanyDetails('houseofcompanies')}
+                      style={{
+                        background: '#3B82F6',
+                        color: '#FFFFFF',
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      <Eye size={14} />
+                      View Details
+                    </button>
+                    <button 
+                      style={{
+                        background: '#FF4D80',
+                        color: '#FFFFFF',
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      <FileText size={14} />
+                      Edit
+                    </button>
+                  </div>
+                </div>
+
+                {/* Target Company Card 2 */}
+                <div className="target-company-card" style={{
+                  background: '#18163a',
+                  borderRadius: 12,
+                  padding: 20,
+                  border: '2px solid #F59E0B',
+                  boxShadow: '0 2px 8px 0 rgba(75,0,130,0.08)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      background: '#F59E0B'
+                    }}></div>
+                    <div>
+                      <div style={{ color: '#fff', fontSize: '16px', fontWeight: '600' }}>hocebranch.ai</div>
+                      <div style={{ color: '#9CA3AF', fontSize: '14px' }}>netherland • 345</div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button 
+                      onClick={() => handleViewTargetCompanyDetails('hocebranch.ai')}
+                      style={{
+                        background: '#3B82F6',
+                        color: '#FFFFFF',
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      <Eye size={14} />
+                      View Details
+                    </button>
+                    <button 
+                      style={{
+                        background: '#FF4D80',
+                        color: '#FFFFFF',
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      <FileText size={14} />
+                      Edit
+                    </button>
+                  </div>
+                </div>
+
+                {/* Target Company Card 3 */}
+                <div className="target-company-card" style={{
+                  background: '#18163a',
+                  borderRadius: 12,
+                  padding: 20,
+                  border: '2px solid #F59E0B',
+                  boxShadow: '0 2px 8px 0 rgba(75,0,130,0.08)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      background: '#F59E0B'
+                    }}></div>
+                    <div>
+                      <div style={{ color: '#fff', fontSize: '16px', fontWeight: '600' }}>house</div>
+                      <div style={{ color: '#9CA3AF', fontSize: '14px' }}>hyderabad • 21bgj</div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button 
+                      onClick={() => handleViewTargetCompanyDetails('house')}
+                      style={{
+                        background: '#3B82F6',
+                        color: '#FFFFFF',
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      <Eye size={14} />
+                      View Details
+                    </button>
+                    <button 
+                      style={{
+                        background: '#FF4D80',
+                        color: '#FFFFFF',
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      <FileText size={14} />
+                      Edit
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Target Company Details Modal for Profile Tab */}
+      {activeTab === 'profile' && showTargetCompanyDetails && selectedTargetCompany && (
+        <div className="base-company-details-view" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.8)',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px'
+        }}>
+          <div style={{
+            background: '#0f0f23',
+            borderRadius: '12px',
+            padding: '24px',
+            maxWidth: '900px',
+            width: '100%',
+            maxHeight: '90vh',
+            overflow: 'auto'
+          }}>
+            <div className="base-company-header" style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              marginBottom: '24px',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              paddingBottom: '16px'
+            }}>
+              <button 
+                className="back-btn" 
+                onClick={() => {
+                  setShowTargetCompanyDetails(false);
+                  setSelectedTargetCompany(null);
+                }}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  padding: '8px',
+                  borderRadius: '6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <span style={{fontSize:'1.4rem',display:'flex',alignItems:'center'}}>&larr;</span>
+              </button>
+              <span className="company-title" style={{ color: '#fff', fontSize: '18px', fontWeight: '600' }}>
+                {selectedTargetCompany.company_name || 'Untitled Company'}
+              </span>
+              <span className="base-company-badge" style={{
+                background: '#F59E0B',
+                color: '#fff',
+                padding: '4px 12px',
+                borderRadius: '20px',
+                fontSize: '12px',
+                fontWeight: '500'
+              }}>
+                Target Company
+              </span>
+            </div>
+            
+            <div className="details-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '24px' }}>
+              {/* Left: Company Details */}
+              <div className="company-details-card" style={{
+                background: '#18163a',
+                borderRadius: '12px',
+                padding: '24px',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                  <h3 className="section-title" style={{ color: '#fff', fontSize: '16px', fontWeight: '600', margin: 0 }}>
+                    Company Details
+                  </h3>
+                  <button 
+                    className="edit-btn" 
+                    onClick={handleEditTargetCompany}
+                    style={{
+                      background: '#FF4D80',
+                      color: '#fff',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <span>✏️</span>
+                    <span>Edit Details</span>
+                  </button>
+                </div>
+                <hr style={{ borderColor: '#fff', opacity: 0.2, margin: '12px 0 24px 0' }} />
+                <div className="company-details-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <div>
+                    <div className="detail-label" style={{ color: '#9CA3AF', fontSize: '12px', marginBottom: '4px' }}>
+                      Company Name
+                    </div>
+                    <div className="detail-value" style={{ color: '#fff', fontSize: '14px', fontWeight: '600' }}>
+                      {selectedTargetCompany.company_name || 'Not Set'}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="detail-label" style={{ color: '#9CA3AF', fontSize: '12px', marginBottom: '4px' }}>
+                      Registration Number
+                    </div>
+                    <div className="detail-value" style={{ color: '#fff', fontSize: '14px', fontWeight: '600' }}>
+                      {selectedTargetCompany.reg_number || 'Not Set'}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="detail-label" style={{ color: '#9CA3AF', fontSize: '12px', marginBottom: '4px' }}>
+                      Tax ID
+                    </div>
+                    <div className="detail-value" style={{ color: '#fff', fontSize: '14px', fontWeight: '600' }}>
+                      {selectedTargetCompany.vat_number || 'Not Set'}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="detail-label" style={{ color: '#9CA3AF', fontSize: '12px', marginBottom: '4px' }}>
+                      Incorporation Date
+                    </div>
+                    <div className="detail-value" style={{ color: '#fff', fontSize: '14px', fontWeight: '600' }}>
+                      {selectedTargetCompany.incorporation_date || 'Not Set'}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="detail-label" style={{ color: '#9CA3AF', fontSize: '12px', marginBottom: '4px' }}>
+                      Country
+                    </div>
+                    <div className="detail-value" style={{ color: '#fff', fontSize: '14px', fontWeight: '600' }}>
+                      {selectedTargetCompany.base_location || 'Not Set'}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="detail-label" style={{ color: '#9CA3AF', fontSize: '12px', marginBottom: '4px' }}>
+                      Address
+                    </div>
+                    <div className="detail-value" style={{ color: '#fff', fontSize: '14px', fontWeight: '600' }}>
+                      {selectedTargetCompany.registered_address || 'Not Set'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Right: Directors and Shareholders */}
+              <div className="side-cards" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {/* Directors Card */}
+                <div className="side-card" style={{
+                  background: '#18163a',
+                  borderRadius: '12px',
+                  padding: '20px',
+                  border: '1px solid rgba(255, 255, 255, 0.1)'
+                }}>
+                  <div className="side-card-title" style={{ color: '#fff', fontSize: '14px', fontWeight: '600', marginBottom: '16px' }}>
+                    Directors
+                  </div>
+                  {selectedTargetCompany.directors && selectedTargetCompany.directors.length > 0 ? (
+                    selectedTargetCompany.directors.map((d, i) => (
+                      <div className="side-card-row" key={i} style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '8px 0',
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+                      }}>
+                        <span className="side-card-icon" style={{ fontSize: '16px' }}>👤</span>
+                        <span className="side-card-name" style={{ color: '#fff', fontSize: '14px', flex: 1 }}>
+                          {d.fullName || d.name}
+                        </span>
+                        <button 
+                          className="edit-btn" 
+                          onClick={() => handleEditTargetDirector(i)}
+                          style={{
+                            background: 'transparent',
+                            color: '#3B82F6',
+                            border: 'none',
+                            fontSize: '12px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <div style={{ color: '#9CA3AF', fontSize: '14px', textAlign: 'center', padding: '20px 0' }}>
+                      No directors added yet
+                    </div>
+                  )}
+                  <button 
+                    className="add-director-btn" 
+                    onClick={() => setShowAddTargetDirectorModal(true)}
+                    style={{
+                      background: '#10B981',
+                      color: '#fff',
+                      border: 'none',
+                      padding: '8px 16px',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      cursor: 'pointer',
+                      marginTop: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      width: '100%',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <span>+</span>
+                    <span>Add Director</span>
+                  </button>
+                </div>
+                
+                {/* Shareholders Card */}
+                <div className="side-card" style={{
+                  background: '#18163a',
+                  borderRadius: '12px',
+                  padding: '20px',
+                  border: '1px solid rgba(255, 255, 255, 0.1)'
+                }}>
+                  <div className="side-card-title" style={{ color: '#fff', fontSize: '14px', fontWeight: '600', marginBottom: '16px' }}>
+                    Shareholders
+                  </div>
+                  {selectedTargetCompany.shareholders && selectedTargetCompany.shareholders.length > 0 ? (
+                    selectedTargetCompany.shareholders.map((s, i) => (
+                      <div className="side-card-row" key={i} style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '8px 0',
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+                      }}>
+                        <span className="side-card-icon" style={{ fontSize: '16px' }}>🧑‍💼</span>
+                        <span className="side-card-name" style={{ color: '#fff', fontSize: '14px', flex: 1 }}>
+                          {s.name}
+                        </span>
+                        <span className="side-card-meta" style={{ color: '#9CA3AF', fontSize: '12px' }}>
+                          {s.percentage || s.percent || '50%'} ownership
+                        </span>
+                        <button 
+                          className="edit-btn" 
+                          onClick={() => handleEditTargetShareholder(i)}
+                          style={{
+                            background: 'transparent',
+                            color: '#3B82F6',
+                            border: 'none',
+                            fontSize: '12px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <div style={{ color: '#9CA3AF', fontSize: '14px', textAlign: 'center', padding: '20px 0' }}>
+                      No shareholders added yet
+                    </div>
+                  )}
+                  <button 
+                    className="add-shareholder-btn" 
+                    onClick={() => setShowAddTargetShareholderModal(true)}
+                    style={{
+                      background: '#3B82F6',
+                      color: '#fff',
+                      border: 'none',
+                      padding: '8px 16px',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      cursor: 'pointer',
+                      marginTop: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      width: '100%',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <span>+</span>
+                    <span>Add Shareholder</span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

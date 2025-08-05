@@ -706,13 +706,13 @@
     color: #fff;
     border: none;
     border-radius: 16px;
-    padding: 0.5rem 1.5rem;
+    padding: 0.75rem 2rem;
     font-weight: 500;
-    font-size: 1rem;
+    font-size: 1.1rem;
     cursor: pointer;
     transition: background 0.2s, box-shadow 0.2s;
     box-shadow: 0 2px 8px rgba(234,58,112,0.08);
-    min-width: 120px;
+    min-width: 140px;
     flex-direction: row;
 }
 .onboarding-btn:hover {
@@ -1255,6 +1255,22 @@
   border: 1.5px solid #3b82f6;
 }
 
+/* Style for select dropdown options */
+.company-info-form select option {
+  background: #232448;
+  color: #fff;
+  padding: 8px 12px;
+}
+
+.company-info-form select option:hover {
+  background: #2e2f50;
+}
+
+.company-info-form select option:checked {
+  background: #FF4D80;
+  color: #fff;
+}
+
 /* Popup width and padding improvements */
 .onboarding-popup,
 .business-hub-popup {
@@ -1378,6 +1394,13 @@
   color: #bdbdfc;
   font-size: 1rem;
   margin: 0;
+}
+select {
+  color: #fafaf8;
+  background-color: #12123A;
+  text-indent: 1px;
+  text-overflow: '';
+  width: auto;
 }
 
 /* Corporate Hub Header Styles */
@@ -1665,5 +1688,152 @@
   .data-center-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
+  }
+}
+
+/* Target Companies Styles */
+.tab-badge.optional {
+  background: #8B5CF6;
+  color: #FFFFFF;
+}
+
+.target-companies-section {
+  margin-top: 1rem;
+}
+
+.target-companies-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.target-companies-header h3 {
+  color: #FFFFFF;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.add-target-company-btn {
+  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.add-target-company-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.no-target-companies {
+  text-align: center;
+  padding: 2rem;
+  color: #9CA3AF;
+}
+
+.no-target-companies p {
+  margin: 0.5rem 0;
+  font-size: 14px;
+}
+
+.target-companies-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.target-company-item {
+  background: #1A1A4A;
+  border: 1px solid #2D2250;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.target-company-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.target-company-header h4 {
+  color: #FFFFFF;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.remove-company-btn {
+  background: #FF4D80;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.remove-company-btn:hover {
+  background: #E63946;
+  transform: translateY(-1px);
+}
+
+.target-company-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.field-group label {
+  color: #D1D5DB;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.field-group input {
+  background: #12123A;
+  border: 1px solid #2D2250;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #FFFFFF;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.field-group input:focus {
+  outline: none;
+  border-color: #8B5CF6;
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+}
+
+.field-group input::placeholder {
+  color: #9CA3AF;
+}
+
+@media (max-width: 768px) {
+  .target-company-fields {
+    grid-template-columns: 1fr;
+  }
+  
+  .target-companies-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
   }
 }

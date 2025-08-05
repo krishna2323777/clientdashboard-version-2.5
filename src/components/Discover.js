@@ -94,7 +94,7 @@ export default function Discover() {
               <div className="discover-update-icon">{u.icon}</div>
               <span className={`discover-update-badge badge-${u.type.replace(/\s/g, '').toLowerCase()}`}>{u.type}</span>
               <h3>{u.title}</h3>
-              <p>{u.description.split(' ')[0] + '...'} {/* Shorten description */}</p>
+              <p>{u.description}</p>
               <span className="discover-update-date">{u.date}</span>
             </div>
           ))}
@@ -102,90 +102,67 @@ export default function Discover() {
       </section>
 
       <div className="discover-tabs">
-        <button className={activeTab === 'blog' ? 'active' : ''} onClick={() => setActiveTab('blog')}>
-          <span role="img" aria-label="view" style={{marginRight: '8px'}}>👁️</span> View Blog Posts
-        </button>
-        <button className={activeTab === 'video' ? 'active' : ''} onClick={() => setActiveTab('video')}>
-          <span role="img" aria-label="view" style={{marginRight: '8px'}}>👁️</span> View Video Tutorials
-        </button>
-        <button className={activeTab === 'library' ? 'active' : ''} onClick={() => setActiveTab('library')}>
-          <span role="img" aria-label="view" style={{marginRight: '8px'}}>👁️</span> View Library
-        </button>
+        <button className={activeTab === 'all' ? 'active' : ''} onClick={() => setActiveTab('all')}>All Content</button>
+        <button className={activeTab === 'blog' ? 'active' : ''} onClick={() => setActiveTab('blog')}>Blog Posts</button>
+        <button className={activeTab === 'video' ? 'active' : ''} onClick={() => setActiveTab('video')}>Video Tutorials</button>
+        <button className={activeTab === 'library' ? 'active' : ''} onClick={() => setActiveTab('library')}>Library</button>
       </div>
 
       <div className="discover-section-content">
 
-      {activeTab === 'blog' && (
-        <section className="discover-articles" style={{ position: 'relative' }}>
-          <h3 className="section-title">Blog</h3>
-          <button className="carousel-arrow left" style={{display: 'none'}} onClick={() => {
-            const el = document.querySelector('.discover-articles-list');
-            if (el) el.scrollBy({ left: -340, behavior: 'smooth' });
-          }}>&lt;</button>
-          <button className="carousel-arrow right" style={{display: 'none'}} onClick={() => {
-            const el = document.querySelector('.discover-articles-list');
-            if (el) el.scrollBy({ left: 340, behavior: 'smooth' });
-          }}>&gt;</button>
-          <div className="discover-articles-list">
-            {blogPosts.map((post, i) => (
-              <div
-                className="discover-article-card"
-                key={i}
-                onClick={() => window.open(post.link, '_blank')}
-                style={{ position: 'relative' }}
-              >
-                <img src={post.image} alt={post.title} className="discover-article-img" />
-                <div className="discover-article-content">
-                  <div className="discover-article-meta">
-                    {post.date}
-                  </div>
-                  <h3 className="discover-article-title"><span className="title-icon">📝</span>{post.title.split(':')[0]}</h3>
-                </div>
-                <button className="read-more-btn" onClick={e => { e.stopPropagation(); window.open(post.link, '_blank'); }}>Read</button>
-              </div>
-            ))}
+      {(activeTab === 'all' || activeTab === 'blog') && (
+  <section className="discover-articles">
+    <h3 className="section-title">Blog Posts</h3>
+    <div className="discover-articles-list">
+      {blogPosts.map((post, i) => (
+        <div
+          className="discover-article-card"
+          key={i}
+          onClick={() => window.open(post.link, '_blank')}
+        >
+          <img src={post.image} alt={post.title} className="discover-article-img" />
+          <div className="discover-article-content">
+            <div className="discover-article-meta">
+              {post.date} &nbsp;•&nbsp; {post.readTime}
+            </div>
+            <h3 className="discover-article-title">{post.title}</h3>
           </div>
-          <div className="see-more-container">
-            <button
-              className="see-more-btn"
-              onClick={() => window.open(BLOGS_URL, '_blank')}
-            >
-              More
-            </button>
-          </div>
-        </section>
-      )}
+        </div>
+      ))}
+    </div>
+    <div className="see-more-container">
+      <button
+        className="see-more-btn"
+        onClick={() => window.open(BLOGS_URL, '_blank')}
+      >
+        See More
+      </button>
+    </div>
+  </section>
+)}
 
-      {activeTab === 'video' && (
-        <section className="discover-videos" style={{ position: 'relative' }}>
-          <h3 className="section-title">Videos</h3>
-          <button className="carousel-arrow left" style={{display: 'none'}} onClick={() => {
-            const el = document.querySelector('.discover-videos-list');
-            if (el) el.scrollBy({ left: -340, behavior: 'smooth' });
-          }}>&lt;</button>
-          <button className="carousel-arrow right" style={{display: 'none'}} onClick={() => {
-            const el = document.querySelector('.discover-videos-list');
-            if (el) el.scrollBy({ left: 340, behavior: 'smooth' });
-          }}>&gt;</button>
-          <div className="discover-videos-list">
-            {videos.map((v, i) => (
-              <div className="discover-video-card" key={i} style={{ position: 'relative' }}>
-                <div className="discover-video-thumb" style={{ position: 'relative' }}>
-                  <img src={v.image} alt={v.title} />
-                  <span className="discover-video-play">▶</span>
-                </div>
-                <div className="discover-video-info">
-                  <h3><span className="title-icon">▶️</span>{v.title.split(' ')[0]}</h3>
-                  <div className="discover-video-meta">
-                    <span>{v.duration}</span>
+        {(activeTab === 'all' || activeTab === 'video') && (
+          <section className="discover-videos">
+            <h3 className="section-title">Video Tutorials</h3>
+            <div className="discover-videos-list">
+              {videos.map((v, i) => (
+                <div className="discover-video-card" key={i}>
+                  <div className="discover-video-thumb">
+                    <img src={v.image} alt={v.title} />
+                    <span className="discover-video-play">▶</span>
+                  </div>
+                  <div className="discover-video-info">
+                    <h3>{v.title}</h3>
+                    <div className="discover-video-meta">
+                      <span>{v.duration}</span>
+                      <span>{v.views}</span>
+                    </div>
                   </div>
                 </div>
-                <button className="watch-btn" onClick={() => window.open('#', '_blank')}>Watch</button>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+              ))}
+            </div>
+          </section>
+        )}
 
         {activeTab === 'library' && (
           <section className="discover-library">
@@ -193,43 +170,8 @@ export default function Discover() {
             <LibrarySection />
           </section>
         )}
-      </div>
 
-      {/* Enhanced Bottom Section */}
-      <section className="discover-bottom-enhanced">
-        <div className="discover-cta-banner">
-          <h2>Ready to unlock your business potential?</h2>
-          <p>Join our global community and access exclusive resources, expert insights, and more!</p>
-          <a href="#" className="discover-cta-btn">Get Started</a>
-        </div>
-        <div className="discover-quick-tips">
-          <div className="tip-card">
-            <span className="tip-icon">🚀</span>
-            <div>
-              <div className="tip-title">Quick Start</div>
-              <div className="tip-desc">See our onboarding guide for new users.</div>
-            </div>
-          </div>
-          <div className="tip-card">
-            <span className="tip-icon">💡</span>
-            <div>
-              <div className="tip-title">Pro Tips</div>
-              <div className="tip-desc">Discover advanced features to boost productivity.</div>
-            </div>
-          </div>
-          <div className="tip-card">
-            <span className="tip-icon">📞</span>
-            <div>
-              <div className="tip-title">Support</div>
-              <div className="tip-desc">Contact our team for personalized help.</div>
-            </div>
-          </div>
-        </div>
-        <div className="discover-testimonial">
-          <div className="testimonial-quote">“This platform made our international expansion seamless and stress-free!”</div>
-          <div className="testimonial-user">— Priya S., CFO, GlobalTech Ltd.</div>
-        </div>
-      </section>
+      </div>
     </div>
   );
 }

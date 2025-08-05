@@ -29,6 +29,10 @@ const Header = ({ userEmail, onMenuToggle, isMenuOpen }) => {
   const [showTaxHubPopup, setShowTaxHubPopup] = useState(false);
   const [showFinancialHubPopup, setShowFinancialHubPopup] = useState(false);
   const [activeCompanyInfoTab, setActiveCompanyInfoTab] = useState('basic');
+  const [targetCompanies, setTargetCompanies] = useState([]);
+  const [targetCompaniesLoading, setTargetCompaniesLoading] = useState(false);
+  const [targetCompaniesSaving, setTargetCompaniesSaving] = useState(false);
+  const [targetCompaniesMsg, setTargetCompaniesMsg] = useState('');
   const [basicInfo, setBasicInfo] = useState({
     name: '',
     company_name: '',
@@ -327,6 +331,9 @@ const Header = ({ userEmail, onMenuToggle, isMenuOpen }) => {
             .single();
           if (userError && userError.code !== 'PGRST116') throw userError;
           if (companyError && companyError.code !== 'PGRST116') throw companyError;
+          console.log('Fetched user data from user_profiles:', userData);
+          console.log('Email from user_profiles:', userData?.email);
+          
           setBasicInfo({
             name: userData?.name || '',
             company_name: userData?.company_name || '',
@@ -456,6 +463,83 @@ const Header = ({ userEmail, onMenuToggle, isMenuOpen }) => {
     }
   }, [showCompanyInfoForm, activeCompanyInfoTab]);
 
+  useEffect(() => {
+    if (showCompanyInfoForm && activeCompanyInfoTab === 'target-companies') {
+      const fetchTargetCompanies = async () => {
+        setTargetCompaniesLoading(true);
+        setTargetCompaniesMsg('');
+        try {
+          const { data: sessionData } = await supabase.auth.getSession();
+          if (!sessionData?.session?.user) throw new Error('No user session');
+          const userId = sessionData.session.user.id;
+          
+          // Fetch target companies from target_companies table
+          const { data: targetCompaniesData, error: targetCompaniesError } = await supabase
+            .from('target_companies')
+            .select('company_name, reg_number, vat_number, incorporation_date, base_location, registered_address, directors, shareholders, company_type')
+            .eq('user_id', userId);
+          
+          if (targetCompaniesError) {
+            console.warn('Error fetching target companies:', targetCompaniesError);
+            // If table doesn't exist or other error, just set empty array
+            setTargetCompanies([]);
+            return;
+          }
+          
+          if (targetCompaniesData && targetCompaniesData.length > 0) {
+            const formattedCompanies = targetCompaniesData.map(company => {
+              // Safe JSON parsing for directors
+              let directors = [];
+              try {
+                if (company.directors && company.directors !== 'null' && company.directors !== '') {
+                  directors = typeof company.directors === 'string' 
+                    ? JSON.parse(company.directors) 
+                    : company.directors;
+                }
+              } catch (e) {
+                console.warn('Error parsing directors:', e);
+                directors = [];
+              }
+
+              // Safe JSON parsing for shareholders
+              let shareholders = [];
+              try {
+                if (company.shareholders && company.shareholders !== 'null' && company.shareholders !== '') {
+                  shareholders = typeof company.shareholders === 'string' 
+                    ? JSON.parse(company.shareholders) 
+                    : company.shareholders;
+                }
+              } catch (e) {
+                console.warn('Error parsing shareholders:', e);
+                shareholders = [];
+              }
+
+              return {
+                name: company.company_name || '',
+                reg_number: company.reg_number || '',
+                vat_number: company.vat_number || '',
+                incorporation_date: company.incorporation_date || '',
+                country: company.base_location || '',
+                address: company.registered_address || '',
+                directors: directors,
+                shareholders: shareholders,
+                company_type: company.company_type || 'ebranch'
+              };
+            });
+            setTargetCompanies(formattedCompanies);
+          } else {
+            setTargetCompanies([]);
+          }
+        } catch (err) {
+          setTargetCompaniesMsg('Failed to load target companies: ' + err.message);
+        } finally {
+          setTargetCompaniesLoading(false);
+        }
+      };
+      fetchTargetCompanies();
+    }
+  }, [showCompanyInfoForm, activeCompanyInfoTab]);
+
   const handleBasicInfoChange = (e) => {
     const { name, value } = e.target;
     setBasicInfo((prev) => ({ ...prev, [name]: value }));
@@ -465,11 +549,45 @@ const Header = ({ userEmail, onMenuToggle, isMenuOpen }) => {
     e.preventDefault();
     setBasicInfoSaving(true);
     setBasicInfoMsg('');
+    
+    console.log('Submitting basic info:', basicInfo);
+    
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData?.session?.user) throw new Error('No user session');
       const userId = sessionData.session.user.id;
-      const { error } = await supabase
+      
+      console.log('User ID:', userId);
+      
+      // First, check if user_profiles record exists, if not create it
+      const { data: existingProfile, error: checkError } = await supabase
+        .from('user_profiles')
+        .select('user_id')
+        .eq('user_id', userId)
+        .single();
+      
+      if (checkError && checkError.code === 'PGRST116') {
+        // Record doesn't exist, create it
+        console.log('Creating new user profile');
+        const { error: insertError } = await supabase
+          .from('user_profiles')
+          .insert({
+            user_id: userId,
+            name: basicInfo.name,
+            company_name: basicInfo.company_name,
+            address: basicInfo.address,
+            phone: basicInfo.phone,
+            status: basicInfo.status,
+            email: basicInfo.email
+          });
+        
+        if (insertError) throw insertError;
+      } else if (checkError) {
+        throw checkError;
+      } else {
+        // Record exists, update it
+        console.log('Updating existing user profile');
+        const { error: userError } = await supabase
         .from('user_profiles')
         .update({
           name: basicInfo.name,
@@ -477,11 +595,57 @@ const Header = ({ userEmail, onMenuToggle, isMenuOpen }) => {
           address: basicInfo.address,
           phone: basicInfo.phone,
           status: basicInfo.status,
+            email: basicInfo.email,
         })
         .eq('user_id', userId);
-      if (error) throw error;
+        
+        if (userError) throw userError;
+      }
+      
+      // Check if company_info record exists, if not create it
+      const { data: existingCompany, error: companyCheckError } = await supabase
+        .from('company_info')
+        .select('user_id')
+        .eq('user_id', userId)
+        .single();
+      
+      if (companyCheckError && companyCheckError.code === 'PGRST116') {
+        // Record doesn't exist, create it
+        console.log('Creating new company info');
+        const { error: companyInsertError } = await supabase
+          .from('company_info')
+          .insert({
+            user_id: userId,
+            base_location: basicInfo.country,
+            company_name: basicInfo.company_name
+          });
+        
+        if (companyInsertError) throw companyInsertError;
+      } else if (companyCheckError) {
+        throw companyCheckError;
+      } else {
+        // Record exists, update it
+        console.log('Updating existing company info');
+        const { error: companyError } = await supabase
+          .from('company_info')
+          .update({
+            base_location: basicInfo.country,
+          })
+          .eq('user_id', userId);
+        
+        if (companyError) throw companyError;
+      }
+      
+      console.log('Basic info saved successfully');
       setBasicInfoMsg('Profile updated successfully!');
+      
+      // Clear the success message after 3 seconds
+      setTimeout(() => {
+        setBasicInfoMsg('');
+      }, 3000);
+      
     } catch (err) {
+      console.error('Error saving basic info:', err);
       setBasicInfoMsg('Failed to save: ' + err.message);
     } finally {
       setBasicInfoSaving(false);
@@ -497,11 +661,42 @@ const Header = ({ userEmail, onMenuToggle, isMenuOpen }) => {
     e.preventDefault();
     setStandardInfoSaving(true);
     setStandardInfoMsg('');
+    
+    console.log('Submitting standard info:', standardInfo);
+    
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData?.session?.user) throw new Error('No user session');
       const userId = sessionData.session.user.id;
-      const { error } = await supabase
+      
+      console.log('User ID:', userId);
+      
+      // Check if company_info record exists, if not create it
+      const { data: existingCompany, error: companyCheckError } = await supabase
+        .from('company_info')
+        .select('user_id')
+        .eq('user_id', userId)
+        .single();
+      
+      if (companyCheckError && companyCheckError.code === 'PGRST116') {
+        // Record doesn't exist, create it
+        console.log('Creating new company info for standard info');
+        const { error: companyInsertError } = await supabase
+          .from('company_info')
+          .insert({
+            user_id: userId,
+            reg_number: standardInfo.reg_number,
+            incorporation_date: standardInfo.incorporation_date,
+            business_activity: standardInfo.business_activity,
+          });
+        
+        if (companyInsertError) throw companyInsertError;
+      } else if (companyCheckError) {
+        throw companyCheckError;
+      } else {
+        // Record exists, update it
+        console.log('Updating existing company info for standard info');
+        const { error: companyError } = await supabase
         .from('company_info')
         .update({
           reg_number: standardInfo.reg_number,
@@ -509,9 +704,43 @@ const Header = ({ userEmail, onMenuToggle, isMenuOpen }) => {
           business_activity: standardInfo.business_activity,
         })
         .eq('user_id', userId);
-      if (error) throw error;
+        
+        if (companyError) throw companyError;
+      }
+      
+      // Also update phone in user_profiles if it exists
+      if (standardInfo.phone) {
+        const { data: existingProfile, error: profileCheckError } = await supabase
+          .from('user_profiles')
+          .select('user_id')
+          .eq('user_id', userId)
+          .single();
+        
+        if (!profileCheckError) {
+          // Profile exists, update phone
+          const { error: phoneError } = await supabase
+            .from('user_profiles')
+            .update({
+              phone: standardInfo.phone,
+            })
+            .eq('user_id', userId);
+          
+          if (phoneError) {
+            console.warn('Failed to update phone in user_profiles:', phoneError);
+          }
+        }
+      }
+      
+      console.log('Standard info saved successfully');
       setStandardInfoMsg('Standard info updated successfully!');
+      
+      // Clear the success message after 3 seconds
+      setTimeout(() => {
+        setStandardInfoMsg('');
+      }, 3000);
+      
     } catch (err) {
+      console.error('Error saving standard info:', err);
       setStandardInfoMsg('Failed to save: ' + err.message);
     } finally {
       setStandardInfoSaving(false);
@@ -567,32 +796,211 @@ const Header = ({ userEmail, onMenuToggle, isMenuOpen }) => {
     }));
   };
 
-  const handleAdvancedInfoSubmit = async (e) => {
+    const handleAdvancedInfoSubmit = async (e) => {
     e.preventDefault();
     setAdvancedInfoSaving(true);
     setAdvancedInfoMsg('');
+    
+    console.log('Submitting advanced info:', advancedInfo);
+    
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData?.session?.user) throw new Error('No user session');
       const userId = sessionData.session.user.id;
       
-      const { error } = await supabase
-        .from('company_info')
-        .update({
-          legal_form: advancedInfo.legal_form,
-          vat_number: advancedInfo.vat_number,
-          directors: JSON.stringify(advancedInfo.directors),
-          shareholders: JSON.stringify(advancedInfo.shareholders),
-        })
-        .eq('user_id', userId);
+      console.log('User ID:', userId);
       
-      if (error) throw error;
+      // Check if company_info record exists, if not create it
+      const { data: existingCompany, error: companyCheckError } = await supabase
+        .from('company_info')
+        .select('user_id')
+        .eq('user_id', userId)
+        .single();
+      
+      if (companyCheckError && companyCheckError.code === 'PGRST116') {
+        // Record doesn't exist, create it
+        console.log('Creating new company info for advanced info');
+        const { error: companyInsertError } = await supabase
+          .from('company_info')
+          .insert({
+            user_id: userId,
+            legal_form: advancedInfo.legal_form,
+            vat_number: advancedInfo.vat_number,
+            directors: JSON.stringify(advancedInfo.directors),
+            shareholders: JSON.stringify(advancedInfo.shareholders),
+          });
+        
+        if (companyInsertError) throw companyInsertError;
+      } else if (companyCheckError) {
+        throw companyCheckError;
+      } else {
+        // Record exists, update it
+        console.log('Updating existing company info for advanced info');
+        const { error: companyError } = await supabase
+          .from('company_info')
+          .update({
+            legal_form: advancedInfo.legal_form,
+            vat_number: advancedInfo.vat_number,
+            directors: JSON.stringify(advancedInfo.directors),
+            shareholders: JSON.stringify(advancedInfo.shareholders),
+          })
+          .eq('user_id', userId);
+        
+        if (companyError) throw companyError;
+      }
+      
+      // Also update registered_address in user_profiles if it exists
+      if (advancedInfo.registered_address) {
+        const { data: existingProfile, error: profileCheckError } = await supabase
+          .from('user_profiles')
+          .select('user_id')
+          .eq('user_id', userId)
+          .single();
+        
+        if (!profileCheckError) {
+          // Profile exists, update address
+          const { error: addressError } = await supabase
+            .from('user_profiles')
+            .update({
+              address: advancedInfo.registered_address,
+            })
+            .eq('user_id', userId);
+          
+          if (addressError) {
+            console.warn('Failed to update address in user_profiles:', addressError);
+          }
+        }
+      }
+      
+      console.log('Advanced info saved successfully');
       setAdvancedInfoMsg('Advanced info updated successfully!');
+      
+      // Clear the success message after 3 seconds
+      setTimeout(() => {
+        setAdvancedInfoMsg('');
+      }, 3000);
+      
     } catch (err) {
-      setAdvancedInfoMsg('Failed to save: ' + err.message);
       console.error('Error saving advanced info:', err);
+      setAdvancedInfoMsg('Failed to save: ' + err.message);
     } finally {
       setAdvancedInfoSaving(false);
+    }
+  };
+
+  const handleRemoveTargetCompany = async (index) => {
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData?.session?.user) throw new Error('No user session');
+      const userId = sessionData.session.user.id;
+      
+      // Remove from UI first for immediate feedback
+      const updatedCompanies = targetCompanies.filter((_, i) => i !== index);
+      setTargetCompanies(updatedCompanies);
+      
+      // Delete all existing target companies for this user
+      const { error: deleteError } = await supabase
+        .from('target_companies')
+        .delete()
+        .eq('user_id', userId);
+      
+      if (deleteError) {
+        console.warn('Error deleting existing target companies:', deleteError);
+      }
+      
+      // Insert the updated list (without the removed company)
+      if (updatedCompanies.length > 0) {
+        const targetCompaniesData = updatedCompanies.map(company => ({
+          user_id: userId,
+          company_name: company.name || '',
+          reg_number: company.reg_number || '',
+          vat_number: company.vat_number || '',
+          incorporation_date: company.incorporation_date || '',
+          base_location: company.country || '',
+          registered_address: company.address || '',
+          directors: company.directors ? JSON.stringify(company.directors) : '[]',
+          shareholders: company.shareholders ? JSON.stringify(company.shareholders) : '[]',
+          company_type: company.company_type || 'ebranch'
+        }));
+        
+        const { error: insertError } = await supabase
+          .from('target_companies')
+          .insert(targetCompaniesData);
+        
+        if (insertError) {
+          console.error('Error saving updated target companies:', insertError);
+          // Revert UI change if database save failed
+          setTargetCompanies(targetCompanies);
+        }
+      }
+      
+      console.log('Target company removed successfully');
+      
+    } catch (err) {
+      console.error('Error removing target company:', err);
+      // Revert UI change if there was an error
+      setTargetCompanies(targetCompanies);
+    }
+  };
+
+  const handleTargetCompaniesSubmit = async () => {
+    setTargetCompaniesSaving(true);
+    setTargetCompaniesMsg('');
+    
+    console.log('Submitting target companies:', targetCompanies);
+    
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData?.session?.user) throw new Error('No user session');
+      const userId = sessionData.session.user.id;
+      
+      console.log('User ID:', userId);
+      
+      // Delete existing target companies for this user
+      const { error: deleteError } = await supabase
+        .from('target_companies')
+        .delete()
+        .eq('user_id', userId);
+      
+      if (deleteError) {
+        console.warn('Error deleting existing target companies:', deleteError);
+      }
+      
+      // Insert new target companies
+      if (targetCompanies.length > 0) {
+        const targetCompaniesData = targetCompanies.map(company => ({
+          user_id: userId,
+          company_name: company.name || '',
+          reg_number: company.reg_number || '',
+          vat_number: company.vat_number || '',
+          incorporation_date: company.incorporation_date || '',
+          base_location: company.country || '',
+          registered_address: company.address || '',
+          directors: company.directors ? JSON.stringify(company.directors) : '[]',
+          shareholders: company.shareholders ? JSON.stringify(company.shareholders) : '[]',
+          company_type: company.company_type || 'ebranch'
+        }));
+        
+        const { error: insertError } = await supabase
+          .from('target_companies')
+          .insert(targetCompaniesData);
+        
+        if (insertError) throw insertError;
+      }
+      
+      console.log('Target companies saved successfully');
+      setTargetCompaniesMsg('Target companies updated successfully!');
+      
+      // Clear the success message after 3 seconds
+      setTimeout(() => {
+        setTargetCompaniesMsg('');
+      }, 3000);
+      
+    } catch (err) {
+      console.error('Error saving target companies:', err);
+      setTargetCompaniesMsg('Failed to save: ' + err.message);
+    } finally {
+      setTargetCompaniesSaving(false);
     }
   };
 
@@ -919,6 +1327,9 @@ const Header = ({ userEmail, onMenuToggle, isMenuOpen }) => {
                   <div className={`tab${activeCompanyInfoTab === 'advanced' ? ' active' : ''}`} onClick={() => setActiveCompanyInfoTab('advanced')}>
                     Advanced Info <span className="tab-badge legal">For legal services</span>
                   </div>
+                  <div className={`tab${activeCompanyInfoTab === 'target-companies' ? ' active' : ''}`} onClick={() => setActiveCompanyInfoTab('target-companies')}>
+                   Ebranch <span className="tab-badge optional">Optional</span>
+                  </div>
                 </div>
                 {activeCompanyInfoTab === 'basic' && (
                   <>
@@ -958,7 +1369,7 @@ const Header = ({ userEmail, onMenuToggle, isMenuOpen }) => {
                       <label>Contact Email
                         <div className="input-with-icon">
                           <span className="input-icon">✉️</span>
-                          <input type="email" name="email" value={basicInfo.email} disabled />
+                          <input type="email" name="email" value={basicInfo.email} onChange={handleBasicInfoChange} disabled={basicInfoLoading} placeholder="Enter contact email" />
                         </div>
                       </label>
                       {basicInfoMsg && <div style={{ color: basicInfoMsg.includes('success') ? '#00D084' : '#FF4D80', marginTop: 8 }}>{basicInfoMsg}</div>}
@@ -1023,7 +1434,7 @@ const Header = ({ userEmail, onMenuToggle, isMenuOpen }) => {
                       <label>Registered Address
                         <div className="input-with-icon">
                           <span className="input-icon">📍</span>
-                          <input type="text" name="registered_address" value={basicInfo?.address } onChange={handleAdvancedInfoChange} disabled={advancedInfoLoading} placeholder="Enter full registered address" />
+                          <input type="text" name="registered_address" value={advancedInfo.registered_address} onChange={handleAdvancedInfoChange} disabled={advancedInfoLoading} placeholder="Enter full registered address" />
                         </div>
                         <div className="company-info-helper">Required for branch registration and legal entity formation</div>
                       </label>
@@ -1081,6 +1492,173 @@ const Header = ({ userEmail, onMenuToggle, isMenuOpen }) => {
                         <button type="submit" className="company-info-save" disabled={advancedInfoLoading}>Save Information</button>
                       </div>
                     </form>
+                  </>
+                )}
+                {activeCompanyInfoTab === 'target-companies' && (
+                  <>
+                    <div className="company-info-alert company-info-alert-blue">
+                      <span className="alert-icon">🎯</span>
+                      Target companies help us understand your business interests and provide better recommendations for international expansion and partnerships.
+                    </div>
+                    <div className="target-companies-section">
+                      <div className="target-companies-header">
+                        <h3>Ebranch</h3>
+                        <button 
+                          type="button" 
+                          className="add-target-company-btn"
+                          onClick={() => setTargetCompanies([...targetCompanies, { 
+                            name: '', 
+                            reg_number: '', 
+                            vat_number: '', 
+                            incorporation_date: '', 
+                            country: '', 
+                            address: '',
+                            directors: [],
+                            shareholders: [],
+                            company_type: 'ebranch'
+                          }])}
+                        >
+                          + Add Company
+                        </button>
+                      </div>
+                      {targetCompanies.length === 0 ? (
+                        <div className="no-target-companies">
+                          <p>No target companies added yet.</p>
+                          <p>Click "Add Company" to start adding your target companies.</p>
+                        </div>
+                      ) : (
+                        <div className="target-companies-list">
+                          {targetCompanies.map((company, index) => (
+                            <div key={index} className="target-company-item">
+                              <div className="target-company-header">
+                                <h4>Company {index + 1}</h4>
+                                <button 
+                                  type="button" 
+                                  className="remove-company-btn"
+                                  onClick={() => handleRemoveTargetCompany(index)}
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                              <div className="target-company-fields">
+                                <div className="field-group">
+                                  <label>Company Name</label>
+                                  <input 
+                                    type="text" 
+                                    value={company.name} 
+                                    onChange={(e) => {
+                                      const updated = [...targetCompanies];
+                                      updated[index].name = e.target.value;
+                                      setTargetCompanies(updated);
+                                    }}
+                                    placeholder="Enter company name"
+                                  />
+                                </div>
+                                <div className="field-group">
+                                  <label>Registration Number</label>
+                                  <input 
+                                    type="text" 
+                                    value={company.reg_number} 
+                                    onChange={(e) => {
+                                      const updated = [...targetCompanies];
+                                      updated[index].reg_number = e.target.value;
+                                      setTargetCompanies(updated);
+                                    }}
+                                    placeholder="Enter registration number"
+                                  />
+                                </div>
+                                <div className="field-group">
+                                  <label>VAT Number</label>
+                                  <input 
+                                    type="text" 
+                                    value={company.vat_number} 
+                                    onChange={(e) => {
+                                      const updated = [...targetCompanies];
+                                      updated[index].vat_number = e.target.value;
+                                      setTargetCompanies(updated);
+                                    }}
+                                    placeholder="Enter VAT number"
+                                  />
+                                </div>
+                                <div className="field-group">
+                                  <label>Incorporation Date</label>
+                                  <input 
+                                    type="text" 
+                                    value={company.incorporation_date} 
+                                    onChange={(e) => {
+                                      const updated = [...targetCompanies];
+                                      updated[index].incorporation_date = e.target.value;
+                                      setTargetCompanies(updated);
+                                    }}
+                                    placeholder="Enter incorporation date"
+                                  />
+                                </div>
+                                <div className="field-group">
+                                  <label>Base Location</label>
+                                  <input 
+                                    type="text" 
+                                    value={company.country} 
+                                    onChange={(e) => {
+                                      const updated = [...targetCompanies];
+                                      updated[index].country = e.target.value;
+                                      setTargetCompanies(updated);
+                                    }}
+                                    placeholder="Enter base location"
+                                  />
+                                </div>
+                                <div className="field-group">
+                                  <label>Registered Address</label>
+                                  <input 
+                                    type="text" 
+                                    value={company.address} 
+                                    onChange={(e) => {
+                                      const updated = [...targetCompanies];
+                                      updated[index].address = e.target.value;
+                                      setTargetCompanies(updated);
+                                    }}
+                                    placeholder="Enter registered address"
+                                  />
+                                </div>
+                                <div className="field-group">
+                                  <label>Company Type</label>
+                                  <select 
+                                    value={company.company_type || 'ebranch'} 
+                                    onChange={(e) => {
+                                      const updated = [...targetCompanies];
+                                      updated[index].company_type = e.target.value;
+                                      setTargetCompanies(updated);
+                                    }}
+                                  >
+                                    
+                                    <option value="legal_entity">Legal Entity</option>
+                                    <option value="virtual_office">Virtual Office</option>
+                                    <option value="branch_office">Branch Office</option>
+                                  </select>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {targetCompaniesMsg && (
+                        <div style={{ color: targetCompaniesMsg.includes('success') ? '#00D084' : '#FF4D80', marginTop: 8 }}>
+                          {targetCompaniesMsg}
+                        </div>
+                      )}
+                      <div className="company-info-form-actions">
+                        <button type="button" className="company-info-cancel" disabled={targetCompaniesSaving}>
+                          Cancel
+                        </button>
+                        <button 
+                          type="button" 
+                          className="company-info-save" 
+                          disabled={targetCompaniesSaving}
+                          onClick={handleTargetCompaniesSubmit}
+                        >
+                          {targetCompaniesSaving ? 'Saving...' : 'Save Target Companies'}
+                        </button>
+                      </div>
+                    </div>
                   </>
                 )}
               </div>

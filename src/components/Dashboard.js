@@ -82,6 +82,8 @@ export default function Dashboard() {
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'map'
   const [showAlert, setShowAlert] = useState(true);
   const [userName, setUserName] = useState('');
+  const [showDataNotification, setShowDataNotification] = useState(false);
+  const [showComplianceNotification, setShowComplianceNotification] = useState(true);
 
   useEffect(() => {
     const fetchCompany = async () => {
@@ -164,6 +166,9 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-container">
+      {/* EU Compliance Notification Banner */}
+      
+
       {/* Header Section */}
       <div className="dashboard-header">
         <div className="welcome-section" style={{ alignItems: 'flex-start', textAlign: 'left' }}>
@@ -172,6 +177,7 @@ export default function Dashboard() {
            
           
         </div>
+        
         <button className="ai-assistant-btn">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 12l2 2 4-4"/>
@@ -184,26 +190,33 @@ export default function Dashboard() {
         </button>
       </div>
 
-      {/* Alert Banner */}
-      {showAlert && (
-        <div className="alert-banner">
-          <div className="alert-content">
-            <div className="alert-icon">%</div>
-            <div className="alert-text">
-              <strong>New VAT Return Due</strong>
-              <span>Your Q1 VAT return is due in 14 days</span>
-                </div>
+      {showComplianceNotification && (
+        <div className="compliance-notification-banner">
+          <div className="compliance-notification-content">
+            <div className="compliance-notification-left">
+              <div className="compliance-notification-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
               </div>
-          <button className="alert-close" onClick={() => setShowAlert(false)}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
-                  </svg>
-          </button>
+              <div className="compliance-notification-text">
+                <div className="compliance-notification-title">New EU Compliance Update</div>
+                <div className="compliance-notification-subtitle">Recent changes to EU regulations affect your business</div>
+              </div>
+            </div>
+            <div className="compliance-notification-right">
+              <button 
+                className="compliance-notification-action"
+                onClick={() => setShowComplianceNotification(false)}
+              >
+                <div className="x-symbol">×</div>
+              </button>
+            </div>
+          </div>
         </div>
       )}
-
-      {/* Global Presence Section */}
+     
+     
       <div className="global-presence-section">
         <div className="section-header">
           <div className="section-title">
@@ -323,9 +336,20 @@ export default function Dashboard() {
             </div>
             <span className="hub-label">Tax</span>
           </button>
-          <button className="navigation-hub-btn data" onClick={() => navigate('/dataroom')}>
+          <button className="navigation-hub-btn data" onClick={() => {
+            setShowDataNotification(true);
+            navigate('/dataroom');
+          }}>
             <div className="hub-icon">
               <FaDatabase />
+              {showDataNotification && (
+                <div className="notification-badge">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </div>
+              )}
             </div>
             <span className="hub-label">Data</span>
           </button>

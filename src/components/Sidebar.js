@@ -7,7 +7,7 @@ import { MdViewSidebar } from 'react-icons/md';
 import { FaBuilding, FaChartPie, FaFileInvoiceDollar, FaHeadset } from "react-icons/fa";
 import { FiSettings } from "react-icons/fi";
 import { PiCertificate } from "react-icons/pi";
-import { Handshake, FileSignature, ClipboardList, Star, Globe, Percent, Database, BookOpen, Bot, FolderOpen, Home, Users, Layers } from "lucide-react";
+import { Handshake, FileSignature, ClipboardList, Star, Globe, Percent, Database, BookOpen, Bot, FolderOpen, Home, Users, Layers, Mail } from "lucide-react";
 import { FaBuildingUser } from "react-icons/fa6";
 import { BiData } from "react-icons/bi";
 import SupportButton from './SupportButton';
@@ -193,6 +193,12 @@ const Sidebar = ({ onToggle }) => {
                 <NavLink to="/comprehensive-tax-dashboard" className={({isActive}) => isActive ? 'active' : ''} onClick={handleNavClick}>
                   <span className="icon"><Percent size={18} /></span>
                   {!collapsed && <span className="label">Tax Hub</span>}
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/mailbox" className={({isActive}) => isActive ? 'active' : ''} onClick={handleNavClick}>
+                  <span className="icon"><Mail size={18} /></span>
+                  {!collapsed && <span className="label">Mailbox</span>}
                 </NavLink>
               </li>
              

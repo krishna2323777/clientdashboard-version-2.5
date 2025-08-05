@@ -1055,7 +1055,7 @@ export default function DocumentUploadModal({ open, onClose, selectedType, onDoc
                   className={`doc-modal-card ${localSelectedType === 'kyc' ? 'selected' : ''}`}
                   onClick={() => { setLocalSelectedType('kyc'); setStep(1); setUserFlowType('kyc'); }}
                 >
-                  <div className="doc-modal-card-title">KYC Verification</div>
+                  <div className="doc-modal-card-title">KYB Verification</div>
                   <div className="doc-modal-card-desc">Documents for Know Your Customer verification</div>
                 </div>
                 <div
@@ -1073,7 +1073,7 @@ export default function DocumentUploadModal({ open, onClose, selectedType, onDoc
             <div className="doc-modal-userflow-box" style={{ display: userFlowType ? 'block' : 'none' }}>
               {userFlowType === 'kyc' && (
                 <>
-                  <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#FF4D80', marginBottom: 10 }}>KYC Verification User Flow</div>
+                  <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#FF4D80', marginBottom: 10 }}>KYB Verification User Flow</div>
                   <CurvedTimeline steps={kycUserFlowSteps} colors={timelineColors} />
                 </>
               )}

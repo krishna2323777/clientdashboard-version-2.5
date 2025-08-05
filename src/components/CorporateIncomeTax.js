@@ -118,6 +118,11 @@ export default function CorporateIncomeTax() {
   const [existingAnalysis, setExistingAnalysis] = useState(null);
   const [isCheckingExisting, setIsCheckingExisting] = useState(true);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+  const [showFileUploadModal, setShowFileUploadModal] = useState(false);
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [approvalChecked, setApprovalChecked] = useState(false);
+  const [showFileSelection, setShowFileSelection] = useState(false);
   const [isLoadingDataroomFiles, setIsLoadingDataroomFiles] = useState(false);
   const [currentSessionId, setCurrentSessionId] = useState(null);
   const [processingStartTime, setProcessingStartTime] = useState(null);
@@ -408,6 +413,15 @@ export default function CorporateIncomeTax() {
     try {
       if (!existingAnalysis) return;
 
+      // Check if this is sample data (string ID) or real database data (numeric ID)
+      if (typeof existingAnalysis.id === 'string' && existingAnalysis.id.startsWith('sample-')) {
+        // This is sample data, just reset the state without database deletion
+        console.log('Deleting sample analysis data');
+        startNewAnalysis();
+        return;
+      }
+
+      // This is real database data, delete from database
       const { error } = await supabase
         .from('corporate_tax_analysis')
         .delete()
@@ -426,8 +440,29 @@ export default function CorporateIncomeTax() {
     }
   };
 
+  // Function to create sample analysis data for testing
+  const createSampleAnalysis = () => {
+    const sampleData = {
+      id: 'sample-123',
+      user_id: userId || 'test-user',
+      company_name: 'Stichting V.F.F.V.',
+      fiscal_year: '2024',
+      total_revenue: 0,
+      total_expenses: 77279222.77,
+      taxable_income: -77279222.77,
+      final_tax_owed: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    setExistingAnalysis(sampleData);
+    console.log('Sample analysis created:', sampleData);
+    return sampleData;
+  };
+
   const handleFileUpload = async (event) => {
+    console.log('File upload triggered');
     const files = Array.from(event.target.files);
+    console.log('Files selected:', files.length);
     if (files.length === 0) return;
 
     // Validate files
@@ -504,7 +539,11 @@ export default function CorporateIncomeTax() {
       }
     }
 
-    setUploadedFiles(prev => [...prev, ...newFiles]);
+    setUploadedFiles(prev => {
+      const updatedFiles = [...prev, ...newFiles];
+      console.log('Updated uploaded files:', updatedFiles.length);
+      return updatedFiles;
+    });
     setUploadSuccess(`${validFiles.length} file(s) uploaded successfully`);
     setUploadError('');
 
@@ -1084,7 +1123,7 @@ This document was loaded from your Financial Hub and contains your ${doc.doc_typ
 
   // Show loading state while checking for existing analysis
   if (isCheckingExisting) {
-  return (
+    return (
       <div style={{ minHeight: '100vh', background: '#220938', color: '#fff', padding: '2rem' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
           <div style={{ textAlign: 'center' }}>
@@ -1098,7 +1137,7 @@ This document was loaded from your Financial Hub and contains your ${doc.doc_typ
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#220938', color: '#fff', padding: '2rem' }}>
+    <div style={{ minHeight: '100vh', background: '#220938', color: '#fff', padding: '1rem' }}>
       {/* Processing Modal */}
       {isProcessing && (
         <div style={{
@@ -1181,22 +1220,22 @@ This document was loaded from your Financial Hub and contains your ${doc.doc_typ
 
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-          <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', color: '#fff' }}>
+        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+          <h1 style={{ fontSize: '1.8rem', marginBottom: '0.5rem', color: '#fff' }}>
             Corporate Income Tax Filing
           </h1>
-          <p style={{ fontSize: '1.2rem', color: '#bfc9da' }}>
+          <p style={{ fontSize: '1rem', color: '#bfc9da' }}>
             Streamlined CIT preparation with intelligent document analysis
           </p>
           {userEmail && (
-            <p style={{ fontSize: '1rem', color: '#9ca3af', marginTop: '0.5rem' }}>
+            <p style={{ fontSize: '0.9rem', color: '#9ca3af', marginTop: '0.3rem' }}>
               Filing for: {userEmail}
             </p>
           )}
         </div>
 
         {/* Progress Steps */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '3rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
           {steps.map((stepItem, index) => (
             <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
               <div 
@@ -1205,27 +1244,27 @@ This document was loaded from your Financial Hub and contains your ${doc.doc_typ
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  width: '50px',
-                  height: '50px',
+                  width: '40px',
+                  height: '40px',
                   borderRadius: '50%',
                   background: step >= index ? 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)' : '#374151',
                   color: '#fff',
-                  fontSize: '1.2rem',
-                  marginRight: index < steps.length - 1 ? '1rem' : '0',
+                  fontSize: '1rem',
+                  marginRight: index < steps.length - 1 ? '0.5rem' : '0',
                   cursor: index <= step || index === step + 1 ? 'pointer' : 'not-allowed',
                   transition: 'all 0.2s ease',
                   boxShadow: step >= index ? '0 4px 12px rgba(30, 58, 138, 0.4)' : 'none',
-                  border: step === index ? '3px solid #60a5fa' : 'none'
+                  border: step === index ? '2px solid #60a5fa' : 'none'
                 }}
               >
                 {stepItem.icon}
             </div>
               {index < steps.length - 1 && (
                 <div style={{
-                  width: '100px',
-                  height: '3px',
+                  width: '60px',
+                  height: '2px',
                   background: step > index ? 'linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%)' : '#374151',
-                  marginRight: '1rem',
+                  marginRight: '0.5rem',
                   borderRadius: '2px'
                 }} />
               )}
@@ -1237,36 +1276,180 @@ This document was loaded from your Financial Hub and contains your ${doc.doc_typ
         {step === 0 && (
           <div style={{ 
             background: 'linear-gradient(135deg, #2d3561 0%, #3a4374 100%)',
-            borderRadius: '24px', 
-            padding: '3rem 2rem', 
-            marginBottom: '2rem',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
+            borderRadius: '16px', 
+            padding: '2rem', 
+            marginBottom: '1rem',
+            boxShadow: '0 10px 20px rgba(0,0,0,0.1)'
           }}>
+            {/* Document Title */}
             <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-              <h2 style={{ 
+              <h1 style={{ 
                 color: '#fff', 
                 marginBottom: '0.5rem', 
-                fontSize: '2rem',
+                fontSize: '1.8rem',
+                fontWeight: '700'
+              }}>
+                Dutch Corporate Income Tax Analysis 2024 - Stichting V.F.F.V.
+              </h1>
+            </div>
+
+            {/* Account Overview Section */}
+            <div style={{ 
+              background: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              marginBottom: '2rem',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
+            }}>
+              <h2 style={{ 
+                color: '#fff', 
+                marginBottom: '1rem', 
+                fontSize: '1.3rem',
+                fontWeight: '600'
+              }}>
+                Account Overview
+              </h2>
+              <div style={{ display: 'grid', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#bfc9da', fontWeight: '500' }}>Account Holder:</span>
+                  <span style={{ color: '#fff', fontWeight: '600' }}>Stichting V.F.F.V.</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#bfc9da', fontWeight: '500' }}>KvK Number:</span>
+                  <span style={{ color: '#fff', fontWeight: '600' }}>62871676</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#bfc9da', fontWeight: '500' }}>IBAN:</span>
+                  <span style={{ color: '#fff', fontWeight: '600' }}>NL38 BUNQ 2208 0966 14</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Introduction Section */}
+            <div style={{ 
+              background: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              marginBottom: '2rem',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
+            }}>
+              <h2 style={{ 
+                color: '#fff', 
+                marginBottom: '1rem', 
+                fontSize: '1.3rem',
+                fontWeight: '600'
+              }}>
+                Introduction
+              </h2>
+              <p style={{ 
+                color: 'rgba(255,255,255,0.9)', 
+                fontSize: '1rem',
+                lineHeight: '1.6',
+                marginBottom: '1rem'
+              }}>
+                Welcome to your streamlined Dutch Corporate Income Tax (CIT) analysis for 2024.
+              </p>
+              <p style={{ 
+                color: 'rgba(255,255,255,0.9)', 
+                fontSize: '1rem',
+                lineHeight: '1.6',
+                margin: 0
+              }}>
+                At House of Companies, we're committed to empowering you with clear, actionable insights to optimize your tax position and drive your business forward.
+              </p>
+            </div>
+
+            {/* Key Considerations Section */}
+            <div style={{ 
+              background: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              marginBottom: '2rem',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
+            }}>
+              <h2 style={{ 
+                color: '#fff', 
+                marginBottom: '1rem', 
+                fontSize: '1.3rem',
+                fontWeight: '600'
+              }}>
+                Key Considerations
+              </h2>
+              <div style={{ display: 'grid', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                  <span style={{ 
+                    color: '#3b82f6', 
+                    fontSize: '1.2rem',
+                    fontWeight: 'bold',
+                    minWidth: '20px'
+                  }}>•</span>
+                  <div>
+                    <span style={{ color: '#fff', fontWeight: '600' }}>Tax Rate: </span>
+                    <span style={{ color: 'rgba(255,255,255,0.9)' }}>
+                      The standard Dutch Corporate Income Tax (CIT) rate for 2024 is 25.8% for profits exceeding €395,000, and 19% for profits up to €395,000.
+                    </span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                  <span style={{ 
+                    color: '#3b82f6', 
+                    fontSize: '1.2rem',
+                    fontWeight: 'bold',
+                    minWidth: '20px'
+                  }}>•</span>
+                  <div>
+                    <span style={{ color: '#fff', fontWeight: '600' }}>Deductions: </span>
+                    <span style={{ color: 'rgba(255,255,255,0.9)' }}>
+                      Ensure all business-related expenses are properly documented to maximize deductions.
+                    </span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                  <span style={{ 
+                    color: '#3b82f6', 
+                    fontSize: '1.2rem',
+                    fontWeight: 'bold',
+                    minWidth: '20px'
+                  }}>•</span>
+                  <div>
+                    <span style={{ color: '#fff', fontWeight: '600' }}>Innovation Box: </span>
+                    <span style={{ color: 'rgba(255,255,255,0.9)' }}>
+                      If a foundation engages in innovative activities, it may qualify for a reduced effective tax rate of 9% on income from these activities.
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Required Documents Section */}
+            <div style={{ 
+              background: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              marginBottom: '2rem',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
+            }}>
+              <h2 style={{ 
+                color: '#fff', 
+                marginBottom: '1rem', 
+                fontSize: '1.3rem',
                 fontWeight: '600'
               }}>
                 Required Documents for CIT Filing
               </h2>
               <p style={{ 
                 color: 'rgba(255,255,255,0.8)', 
-                fontSize: '1.1rem',
-                margin: 0
+                fontSize: '0.9rem',
+                marginBottom: '1.5rem'
               }}>
                 Please ensure all documents are complete and up to date
               </p>
-            </div>
             
             <div style={{ 
               display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
-              gap: '1.5rem',
-              marginBottom: '2.5rem',
-              justifyItems: 'stretch',
-              alignItems: 'stretch'
+                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
+              gap: '1rem',
+                marginBottom: '1rem'
             }}>
               {requiredDocuments.map((doc, index) => (
                 <div 
@@ -1276,41 +1459,41 @@ This document was loaded from your Financial Hub and contains your ${doc.doc_typ
                   style={{
                     background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 58, 138, 0.2) 100%)',
                     backdropFilter: 'blur(12px)',
-                    borderRadius: '16px',
-                    padding: '1.5rem',
+                    borderRadius: '12px',
+                    padding: '1rem',
                     border: '2px solid rgba(30, 58, 138, 0.4)',
-                    boxShadow: '0 6px 20px rgba(15, 23, 42, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                    boxShadow: '0 4px 15px rgba(15, 23, 42, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    gap: '1rem',
+                    gap: '0.5rem',
                     transition: 'all 0.3s ease',
                     cursor: 'pointer',
                     position: 'relative',
                     overflow: 'hidden',
-                    height: '200px',
-                    minHeight: '200px',
-                    maxHeight: '200px',
+                      height: '140px',
+                      minHeight: '140px',
+                      maxHeight: '140px',
                     width: '100%',
                     boxSizing: 'border-box'
                   }}
                 >
                   {/* Icon container */}
                   <div style={{
-                    width: '60px',
-                    height: '60px',
+                      width: '40px',
+                      height: '40px',
                     borderRadius: '50%',
                     background: `linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '1.5rem',
+                      fontSize: '1rem',
                     color: '#fff',
                     flexShrink: 0,
                     position: 'relative',
                     zIndex: 2,
-                    boxShadow: `0 6px 15px rgba(30, 58, 138, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)`
+                    boxShadow: `0 4px 10px rgba(30, 58, 138, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)`
                   }}>
                     {doc.icon}
                   </div>
@@ -1324,27 +1507,27 @@ This document was loaded from your Financial Hub and contains your ${doc.doc_typ
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
-                    paddingBottom: '2rem'
+                      paddingBottom: '0.5rem'
                   }}>
                     <h3 style={{ 
                       color: '#fff', 
-                      marginBottom: '0.5rem', 
-                      fontSize: '1.2rem',
+                      marginBottom: '0.3rem', 
+                        fontSize: '0.9rem',
                       fontWeight: '700',
                       textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
-                      letterSpacing: '0.3px',
+                      letterSpacing: '0.2px',
                       lineHeight: '1.2',
-                      margin: '0 0 0.5rem 0'
+                      margin: '0 0 0.3rem 0'
                     }}>
                       {doc.title}
                     </h3>
                     <p style={{ 
                       color: 'rgba(255,255,255,0.85)', 
                       margin: 0, 
-                      fontSize: '0.9rem',
-                      lineHeight: '1.4',
+                        fontSize: '0.7rem',
+                      lineHeight: '1.3',
                       textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
-                      padding: '0 0.5rem'
+                      padding: '0 0.3rem'
                     }}>
                       {doc.description}
                     </p>
@@ -1353,16 +1536,16 @@ This document was loaded from your Financial Hub and contains your ${doc.doc_typ
                   {/* Click indicator */}
                   <div className="click-indicator" style={{
                     position: 'absolute',
-                    bottom: '1rem',
-                    right: '1rem',
-                    width: '24px',
-                    height: '24px',
+                      bottom: '0.5rem',
+                      right: '0.5rem',
+                      width: '20px',
+                      height: '20px',
                     borderRadius: '50%',
                     background: 'rgba(30, 58, 138, 0.4)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '0.7rem',
+                      fontSize: '0.6rem',
                     color: '#fff',
                     opacity: 0.8,
                     transition: 'all 0.3s ease'
@@ -1371,54 +1554,193 @@ This document was loaded from your Financial Hub and contains your ${doc.doc_typ
                   </div>
                 </div>
               ))}
+              </div>
             </div>
             
-            <div style={{ textAlign: 'center' }}>
+
+
+            {/* Next Steps Section */}
+            <div style={{ 
+              background: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              marginBottom: '2rem',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
+            }}>
+              <h2 style={{ 
+                color: '#fff', 
+                marginBottom: '1rem', 
+                fontSize: '1.3rem',
+                fontWeight: '600'
+              }}>
+                Next Steps
+              </h2>
+              <div style={{ display: 'grid', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                  <span style={{ 
+                    background: '#3b82f6',
+                    color: '#fff',
+                    borderRadius: '50%',
+                    width: '24px',
+                    height: '24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.8rem',
+                    fontWeight: 'bold',
+                    flexShrink: 0
+                  }}>1</span>
+                  <span style={{ color: 'rgba(255,255,255,0.9)' }}>
+                    Upload complete financial records to a secure platform.
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                  <span style={{ 
+                    background: '#3b82f6',
+                    color: '#fff',
+                    borderRadius: '50%',
+                    width: '24px',
+                    height: '24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.8rem',
+                    fontWeight: 'bold',
+                    flexShrink: 0
+                  }}>2</span>
+                  <span style={{ color: 'rgba(255,255,255,0.9)' }}>
+                    An AI-powered system will analyze the data and generate preliminary CIT calculations.
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                  <span style={{ 
+                    background: '#3b82f6',
+                    color: '#fff',
+                    borderRadius: '50%',
+                    width: '24px',
+                    height: '24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.8rem',
+                    fontWeight: 'bold',
+                    flexShrink: 0
+                  }}>3</span>
+                  <span style={{ color: 'rgba(255,255,255,0.9)' }}>
+                    A team of tax experts will review the analysis and provide tailored recommendations.
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                  <span style={{ 
+                    background: '#3b82f6',
+                    color: '#fff',
+                    borderRadius: '50%',
+                    width: '24px',
+                    height: '24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.8rem',
+                    fontWeight: 'bold',
+                    flexShrink: 0
+                  }}>4</span>
+                  <span style={{ color: 'rgba(255,255,255,0.9)' }}>
+                    You will receive a comprehensive CIT report and strategy, all without the need for traditional accounting overhead.
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+
+            
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              marginTop: '2rem'
+            }}>
               <button
                 onClick={() => setShowConfirmationModal(true)}
                 style={{
                   background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                   color: '#fff',
                   border: '2px solid rgba(255,255,255,0.3)',
-                  borderRadius: '12px',
-                  padding: '1rem 2.5rem',
-                  fontSize: '1.1rem',
+                  borderRadius: '8px',
+                  padding: '0.75rem 1.5rem',
+                  fontSize: '1rem',
                   fontWeight: '600',
                   cursor: 'pointer',
                   transition: 'all 0.3s ease',
-                  boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
+                  boxShadow: '0 3px 10px rgba(0,0,0,0.2)',
                   backdropFilter: 'blur(10px)'
                 }}
                 onMouseOver={(e) => {
                   e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = '0 8px 25px rgba(0,0,0,0.3)';
+                  e.target.style.boxShadow = '0 6px 20px rgba(0,0,0,0.3)';
                 }}
                 onMouseOut={(e) => {
                   e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
+                  e.target.style.boxShadow = '0 3px 10px rgba(0,0,0,0.2)';
                 }}
               >
                 Proceed
+              </button>
+              
+              <button
+                onClick={() => {
+                  if (existingAnalysis) {
+                    // Force immediate state update
+                    setShowAnalysisModal(prevState => !prevState);
+                  } else {
+                    // Create sample data and show analysis
+                    const sampleData = createSampleAnalysis();
+                    setShowAnalysisModal(true);
+                  }
+                }}
+                style={{
+                  background: showAnalysisModal 
+                    ? 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)' 
+                    : 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '0.75rem 1.5rem',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 3px 10px rgba(0,0,0,0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 6px 20px rgba(0,0,0,0.3)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 3px 10px rgba(0,0,0,0.2)';
+                }}
+              >
+                <span>{showAnalysisModal ? '❌' : '📊'}</span>
+                {showAnalysisModal ? 'Hide Analysis' : 'Your Previous Analysis'}
               </button>
             </div>
           </div>
         )}
 
         {step === 1 && (
-          <div style={{ background: '#23244d', borderRadius: '16px', padding: '2rem', marginBottom: '2rem' }}>
-            <h2 style={{ color: '#fff', marginBottom: '1.5rem', textAlign: 'center' }}>
+          <div style={{ background: '#23244d', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem' }}>
+            <h2 style={{ color: '#fff', marginBottom: '1rem', textAlign: 'center', fontSize: '1.3rem' }}>
               Upload Required Documents
             </h2>
 
-            {/* Year Filter */}
+            {/* Year Selection */}
             <div style={{ 
-              display: 'flex', 
-              justifyContent: 'center', 
               marginBottom: '2rem',
-              alignItems: 'center',
-              gap: '1rem',
               background: '#1e293b',
-              padding: '1rem',
+              padding: '1.5rem',
               borderRadius: '12px',
               border: '1px solid #3a3b5a'
             }}>
@@ -1426,55 +1748,87 @@ This document was loaded from your Financial Hub and contains your ${doc.doc_typ
                 color: '#bfc9da', 
                 fontSize: '1rem', 
                 fontWeight: '500',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
+                display: 'block',
+                marginBottom: '1rem'
               }}>
-                <span style={{ fontSize: '1.2rem' }}>📅</span>
-                Filter by Year:
+                Select Year:
               </label>
-              <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(e.target.value)}
+              <div style={{ 
+                display: 'flex', 
+                gap: '1rem', 
+                flexWrap: 'wrap'
+              }}>
+                {['2023', '2024', '2025'].map((year) => (
+                  <button
+                    key={year}
+                    onClick={() => setSelectedYear(year)}
                 style={{
-                  background: '#374151',
+                      background: selectedYear === year ? '#ec4899' : '#374151',
                   color: '#fff',
-                  border: '1px solid #4b5563',
+                      border: 'none',
                   borderRadius: '8px',
-                  padding: '0.75rem 1rem',
+                      padding: '0.75rem 1.5rem',
                   fontSize: '1rem',
+                      fontWeight: '600',
                   cursor: 'pointer',
-                  minWidth: '120px',
-                  outline: 'none',
-                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
+                      transition: 'all 0.3s ease',
+                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                    }}
+                    onMouseOver={(e) => {
+                      if (selectedYear !== year) {
                   e.target.style.background = '#4b5563';
+                      }
                 }}
-                onMouseLeave={(e) => {
+                    onMouseOut={(e) => {
+                      if (selectedYear !== year) {
                   e.target.style.background = '#374151';
-                }}
-              >
-                <option value="2022">2022</option>
-                <option value="2023">2023</option>
-                <option value="2024">2024</option>
-                <option value="2025">2025</option>
-              </select>
+                      }
+                    }}
+                  >
+                    {year}
+                  </button>
+                ))}
+              </div>
             </div>
             
-            {/* Upload Area */}
+            {/* Upload Options */}
             <div style={{
-              border: '2px dashed #3b82f6',
-              borderRadius: '12px',
-              padding: '3rem',
-              textAlign: 'center',
-              marginBottom: '2rem',
-              background: '#1e293b'
+              display: 'grid', 
+              gridTemplateColumns: '1fr 1fr', 
+              gap: '1.5rem', 
+              marginBottom: '2rem'
             }}>
-              <HiCloudUpload style={{ fontSize: '3rem', color: '#3b82f6', marginBottom: '1rem' }} />
-              <p style={{ color: '#bfc9da', marginBottom: '1rem', fontSize: '1.1rem' }}>
-                Drag and drop your documents here, choose files from your device, or select document type and load from Financial Hub for {selectedYear}
+              {/* Choose Files Box */}
+              <div style={{
+                background: '#1e293b',
+                borderRadius: '12px',
+                padding: '2rem',
+                border: '1px solid #3a3b5a',
+              textAlign: 'center',
+                transition: 'all 0.3s ease'
+              }}>
+                <div style={{ 
+                  fontSize: '3rem', 
+                  color: '#3b82f6', 
+                  marginBottom: '1rem' 
+                }}>
+                  📁
+                </div>
+                <h3 style={{ 
+                  color: '#fff', 
+              marginBottom: '1rem',
+                  fontSize: '1.2rem',
+                  fontWeight: '600'
+                }}>
+                  Choose Files
+                </h3>
+                <p style={{ 
+                  color: '#bfc9da', 
+                  marginBottom: '1.5rem', 
+                  fontSize: '0.9rem',
+                  lineHeight: '1.5'
+                }}>
+                  Upload documents directly from your device
               </p>
               <input
                 ref={fileInputRef}
@@ -1484,11 +1838,11 @@ This document was loaded from your Financial Hub and contains your ${doc.doc_typ
                 onChange={handleFileUpload}
                 style={{ display: 'none' }}
               />
-              
-              {/* File Upload Buttons */}
-              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
                 <button 
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={() => {
+                    console.log('Select Files button clicked');
+                    setShowFileUploadModal(true);
+                  }}
                   style={{
                     background: '#3b82f6',
                     color: '#fff',
@@ -1496,57 +1850,94 @@ This document was loaded from your Financial Hub and contains your ${doc.doc_typ
                     borderRadius: '8px',
                     padding: '0.75rem 1.5rem',
                     fontSize: '1rem',
+                    fontWeight: '600',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.5rem'
+                    gap: '0.5rem',
+                    margin: '0 auto',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
                   }}
                 >
                   <FaFileUpload />
-                  Choose Files
+                  Select Files
                 </button>
+              </div>
 
-                {/* Document Type Dropdown */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <select
-                    value={selectedDocumentType}
-                    onChange={(e) => setSelectedDocumentType(e.target.value)}
-                    style={{
-                      background: '#374151',
+
+
+              {/* Import from Base Company Box */}
+              <div style={{
+                background: '#1e293b',
+                borderRadius: '12px',
+                padding: '2rem',
+                border: '1px solid #3a3b5a',
+                textAlign: 'center',
+                transition: 'all 0.3s ease'
+              }}>
+                <div style={{ 
+                  fontSize: '3rem', 
+                  color: '#ec4899', 
+                  marginBottom: '1rem' 
+                }}>
+                  🏢
+                </div>
+                <h3 style={{ 
                       color: '#fff',
-                      border: '1px solid #4b5563',
-                      borderRadius: '8px',
-                      padding: '0.75rem 1rem',
-                      fontSize: '1rem',
-                      cursor: 'pointer',
-                      minWidth: '200px',
-                      outline: 'none'
-                    }}
-                  >
-                    <option value="all">All Documents</option>
-                    <option value="Financial Statement">Financial Statement</option>
-                    <option value="Trial Balance">Trial Balance</option>
-                    <option value="Balance Sheet">Balance Sheet</option>
-                    <option value="Profit & Loss Statement">Profit & Loss Statement</option>
-                    <option value="Cash Flow">Cash Flow Statement</option>
-                  </select>
-                  
+                  marginBottom: '1rem', 
+                  fontSize: '1.2rem',
+                  fontWeight: '600'
+                }}>
+                  Import from Base Company
+                </h3>
+                <p style={{ 
+                  color: '#bfc9da', 
+                  marginBottom: '1.5rem', 
+                      fontSize: '0.9rem',
+                  lineHeight: '1.5'
+                }}>
+                  Load documents from your base company system
+                </p>
                   <button 
                     onClick={fetchAndLoadFinancialDocuments}
                     disabled={!userId || isLoadingDataroomFiles}
                     style={{
-                      background: isLoadingDataroomFiles ? '#6b7280' : '#059669',
+                    background: isLoadingDataroomFiles ? '#6b7280' : '#ec4899',
                       color: '#fff',
                       border: 'none',
-                      borderRadius: '8px',
-                      padding: '0.75rem 1.5rem',
-                      fontSize: '1rem',
+                    borderRadius: '8px',
+                    padding: '0.75rem 1.5rem',
+                    fontSize: '1rem',
+                    fontWeight: '600',
                       cursor: (!userId || isLoadingDataroomFiles) ? 'not-allowed' : 'pointer',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '0.5rem',
+                    gap: '0.5rem',
+                    margin: '0 auto',
                       opacity: (!userId || isLoadingDataroomFiles) ? 0.6 : 1,
-                      whiteSpace: 'nowrap'
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                  }}
+                  onMouseOver={(e) => {
+                    if (!isLoadingDataroomFiles && userId) {
+                      e.target.style.transform = 'translateY(-2px)';
+                      e.target.style.boxShadow = '0 4px 12px rgba(236, 72, 153, 0.3)';
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (!isLoadingDataroomFiles && userId) {
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+                    }
                     }}
                   >
                     {isLoadingDataroomFiles ? (
@@ -1555,16 +1946,11 @@ This document was loaded from your Financial Hub and contains your ${doc.doc_typ
                       <FaCloudDownloadAlt />
                     )}
                     {isLoadingDataroomFiles 
-                      ? `Loading...` 
-                      : `Load ${selectedDocumentType === 'all' ? 'All' : selectedDocumentType}`
+                    ? 'Loading...' 
+                    : 'Import Documents'
                     }
                   </button>
                 </div>
-              </div>
-              
-              <p style={{ color: '#6b7280', marginTop: '1rem', fontSize: '0.9rem' }}>
-                Supported formats: PDF, Excel (.xlsx, .xls), CSV
-              </p>
             </div>
 
 
@@ -1613,9 +1999,9 @@ This document was loaded from your Financial Hub and contains your ${doc.doc_typ
 
             {/* Uploaded Files List */}
             {uploadedFiles.length > 0 && (
-              <div style={{ marginBottom: '2rem' }}>
-                <h3 style={{ color: '#fff', marginBottom: '1rem' }}>Uploaded Documents</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div style={{ marginBottom: '1rem' }}>
+                <h3 style={{ color: '#fff', marginBottom: '0.75rem', fontSize: '1.1rem' }}>Uploaded Documents</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {uploadedFiles.map((file) => (
                     <div key={file.id} style={{
                       background: '#1e293b',
@@ -1727,25 +2113,29 @@ This document was loaded from your Financial Hub and contains your ${doc.doc_typ
             {/* Proceed Button */}
             <div style={{ textAlign: 'center' }}>
               <button
-                onClick={processDocuments}
+                onClick={() => {
+                  if (uploadedFiles.length > 0) {
+                    setShowApprovalModal(true);
+                  }
+                }}
                 disabled={isProcessing || uploadedFiles.length === 0}
                 style={{
                   background: isProcessing || uploadedFiles.length === 0 ? '#6b7280' : '#059669',
                   color: '#fff',
                   border: 'none',
-                  borderRadius: '8px',
-                  padding: '1rem 2rem',
-                  fontSize: '1.1rem',
+                  borderRadius: '6px',
+                  padding: '0.75rem 1.5rem',
+                  fontSize: '1rem',
                   fontWeight: 'bold',
                   cursor: isProcessing || uploadedFiles.length === 0 ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.5rem',
+                  gap: '0.4rem',
                   margin: '0 auto'
                 }}
               >
                 {isProcessing && <FaSpinner style={{ animation: 'spin 1s linear infinite' }} />}
-                                        {isProcessing ? 'Processing Documents...' : 'Approve to Analysis'}
+                {isProcessing ? 'Processing Documents...' : 'Approve to Analysis'}
               </button>
     </div>
           </div>
@@ -2148,7 +2538,7 @@ This document was loaded from your Financial Hub and contains your ${doc.doc_typ
           </div>
         )}
 
-        {(step === 4 || existingAnalysis) && (
+        {(step === 4 || (existingAnalysis && showAnalysisModal)) && (
           <div style={{ background: '#23244d', borderRadius: '16px', padding: '2rem', marginBottom: '2rem' }}>
             <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
               <h2 style={{ color: '#fff', marginBottom: '1rem' }}>
@@ -2411,6 +2801,820 @@ This document was loaded from your Financial Hub and contains your ${doc.doc_typ
             </div>
           </div>
         )}
+
+        {/* Analysis Display */}
+        {showAnalysisModal && (
+          <div style={{ 
+            background: 'linear-gradient(135deg, #2d3561 0%, #3a4374 100%)',
+            borderRadius: '16px', 
+            padding: '2rem', 
+            marginBottom: '1rem',
+            boxShadow: '0 10px 20px rgba(0,0,0,0.1)'
+          }}>
+            {/* Header */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '2rem',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              paddingBottom: '1rem'
+            }}>
+              <h2 style={{
+                color: '#fff',
+                fontSize: '1.5rem',
+                fontWeight: '600',
+                margin: 0
+              }}>
+                Your Corporate Tax Analysis
+              </h2>
+              <button
+                onClick={() => setShowAnalysisModal(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#bfc9da',
+                  fontSize: '1.5rem',
+                  cursor: 'pointer',
+                  padding: '0.5rem',
+                  borderRadius: '4px',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.color = '#fff';
+                  e.target.style.background = 'rgba(255, 255, 255, 0.1)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.color = '#bfc9da';
+                  e.target.style.background = 'none';
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Analysis Date */}
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '8px',
+              padding: '1rem',
+              marginBottom: '2rem',
+              textAlign: 'center'
+            }}>
+              <p style={{
+                color: '#bfc9da',
+                margin: 0,
+                fontSize: '1rem'
+              }}>
+                Analysis completed on {existingAnalysis ? new Date(existingAnalysis.created_at).toLocaleDateString() : new Date().toLocaleDateString()}
+              </p>
+            </div>
+
+            {/* Company Information */}
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              marginBottom: '2rem',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
+            }}>
+              <h3 style={{
+                color: '#3b82f6',
+                marginBottom: '1rem',
+                fontSize: '1.2rem',
+                fontWeight: '600'
+              }}>
+                Company Information
+              </h3>
+              <div style={{ display: 'grid', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#bfc9da' }}>Company:</span>
+                  <span style={{ color: '#fff', fontWeight: '600' }}>
+                    {existingAnalysis?.company_name || 'Stichting V.F.F.V.'}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#bfc9da' }}>Fiscal Year:</span>
+                  <span style={{ color: '#fff', fontWeight: '600' }}>
+                    {existingAnalysis?.fiscal_year || '2024'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Financial Summary */}
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              marginBottom: '2rem',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
+            }}>
+              <h3 style={{
+                color: '#3b82f6',
+                marginBottom: '1rem',
+                fontSize: '1.2rem',
+                fontWeight: '600'
+              }}>
+                Financial Summary
+              </h3>
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.05)',
+                borderRadius: '8px',
+                overflow: 'hidden'
+              }}>
+                <table style={{
+                  width: '100%',
+                  borderCollapse: 'collapse'
+                }}>
+                  <thead>
+                    <tr style={{
+                      background: 'rgba(30, 58, 138, 0.3)',
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+                    }}>
+                      <th style={{
+                        padding: '1rem',
+                        textAlign: 'left',
+                        color: '#fff',
+                        fontWeight: '600',
+                        fontSize: '0.9rem'
+                      }}>
+                        Item
+                      </th>
+                      <th style={{
+                        padding: '1rem',
+                        textAlign: 'right',
+                        color: '#fff',
+                        fontWeight: '600',
+                        fontSize: '0.9rem'
+                      }}>
+                        Amount
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                      <td style={{ padding: '1rem', color: '#bfc9da' }}>Revenue</td>
+                      <td style={{ 
+                        padding: '1rem', 
+                        textAlign: 'right', 
+                        color: '#fff',
+                        fontWeight: '600'
+                      }}>
+                        €{formatCurrency(existingAnalysis?.total_revenue || 0)}
+                      </td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                      <td style={{ padding: '1rem', color: '#bfc9da' }}>Expenses</td>
+                      <td style={{ 
+                        padding: '1rem', 
+                        textAlign: 'right', 
+                        color: '#fff',
+                        fontWeight: '600'
+                      }}>
+                        €{formatCurrency(existingAnalysis?.total_expenses || 77279222.77)}
+                      </td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                      <td style={{ padding: '1rem', color: '#bfc9da' }}>Taxable Income</td>
+                      <td style={{ 
+                        padding: '1rem', 
+                        textAlign: 'right', 
+                        color: (existingAnalysis?.taxable_income || -77279222.77) < 0 ? '#10b981' : '#fff',
+                        fontWeight: '600'
+                      }}>
+                        €{formatCurrency(existingAnalysis?.taxable_income || -77279222.77)}
+                      </td>
+                    </tr>
+                    <tr style={{
+                      background: 'rgba(30, 58, 138, 0.2)',
+                      borderTop: '2px solid rgba(30, 58, 138, 0.4)'
+                    }}>
+                      <td style={{ 
+                        padding: '1rem', 
+                        color: '#fff',
+                        fontWeight: '600'
+                      }}>
+                        Final Tax Owed
+                      </td>
+                      <td style={{ 
+                        padding: '1rem', 
+                        textAlign: 'right', 
+                        color: '#fff',
+                        fontWeight: '700',
+                        fontSize: '1.1rem'
+                      }}>
+                        €{formatCurrency(existingAnalysis?.final_tax_owed || 0)}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{
+              display: 'flex',
+              gap: '1rem',
+              justifyContent: 'center',
+              flexWrap: 'wrap'
+            }}>
+              <button
+                onClick={() => downloadAnalysisReport(existingAnalysis)}
+                style={{
+                  background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '0.75rem 1.5rem',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 6px 20px rgba(0,0,0,0.3)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 3px 10px rgba(0,0,0,0.2)';
+                }}
+              >
+                <span>📄</span>
+                Download PDF Report
+              </button>
+              <button
+                onClick={() => {
+                  setShowAnalysisModal(false);
+                  startNewAnalysis();
+                }}
+                style={{
+                  background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '0.75rem 1.5rem',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 6px 20px rgba(0,0,0,0.3)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 3px 10px rgba(0,0,0,0.2)';
+                }}
+              >
+                <span>🔄</span>
+                Start New Analysis
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Approval Modal */}
+        {showApprovalModal && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000
+          }}>
+            <div style={{
+              backgroundColor: '#fff',
+              borderRadius: '16px',
+              padding: '2rem',
+              maxWidth: '600px',
+              width: '90%',
+              maxHeight: '90vh',
+              overflow: 'auto',
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+              border: '1px solid rgba(0, 0, 0, 0.1)'
+            }}>
+              {/* Header */}
+              <h2 style={{
+                color: '#000',
+                fontSize: '1.5rem',
+                fontWeight: '600',
+                margin: '0 0 1.5rem 0',
+                textAlign: 'center'
+              }}>
+                Approve Corporate Income Tax Analysis
+              </h2>
+
+              {/* Information Banner */}
+              <div style={{
+                background: '#fef3c7',
+                border: '1px solid #f59e0b',
+                borderRadius: '8px',
+                padding: '1rem',
+                marginBottom: '1.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <div style={{
+                  color: '#f59e0b',
+                  fontSize: '1.2rem'
+                }}>
+                  ⚠️
+                </div>
+                <p style={{
+                  color: '#92400e',
+                  margin: 0,
+                  fontSize: '0.95rem',
+                  lineHeight: '1.5'
+                }}>
+                  Please review the tax analysis carefully. Your approval will initiate the preparation process for your Corporate Income Tax filing.
+                </p>
+              </div>
+
+              {/* Analysis Document Section */}
+              <div style={{
+                background: '#f8fafc',
+                borderRadius: '12px',
+                padding: '1.5rem',
+                marginBottom: '1.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem'
+                }}>
+                  <div style={{
+                    fontSize: '2rem'
+                  }}>
+                    📄
+                  </div>
+                  <div>
+                    <h3 style={{
+                      color: '#000',
+                      margin: '0 0 0.25rem 0',
+                      fontSize: '1.1rem',
+                      fontWeight: '600'
+                    }}>
+                      Dutch Corporate Income Tax Analysis 2024
+                    </h3>
+                    <p style={{
+                      color: '#6b7280',
+                      margin: 0,
+                      fontSize: '0.9rem'
+                    }}>
+                      For Stichting V.F.F.V.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    // View analysis details
+                    console.log('View analysis clicked');
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#3b82f6',
+                    fontSize: '1.2rem',
+                    cursor: 'pointer',
+                    padding: '0.5rem',
+                    borderRadius: '4px',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.background = '#eff6ff';
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.background = 'none';
+                  }}
+                >
+                  👁️
+                </button>
+              </div>
+
+              {/* Approval Checkbox */}
+              <div style={{
+                marginBottom: '1.5rem'
+              }}>
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '0.75rem',
+                  cursor: 'pointer'
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={approvalChecked}
+                    onChange={(e) => setApprovalChecked(e.target.checked)}
+                    style={{
+                      marginTop: '0.25rem',
+                      transform: 'scale(1.2)'
+                    }}
+                  />
+                  <div>
+                    <p style={{
+                      color: '#000',
+                      margin: '0 0 0.5rem 0',
+                      fontSize: '0.95rem',
+                      lineHeight: '1.5'
+                    }}>
+                      I approve this tax analysis and confirm that the information appears accurate to the best of my knowledge
+                    </p>
+                    <p style={{
+                      color: '#6b7280',
+                      margin: 0,
+                      fontSize: '0.85rem',
+                      lineHeight: '1.4'
+                    }}>
+                      By checking this box, you acknowledge that you have reviewed the tax analysis and are ready to proceed with CIT preparation.
+                    </p>
+                  </div>
+                </label>
+              </div>
+
+
+
+              {/* Action Buttons */}
+              <div style={{
+                display: 'flex',
+                gap: '1rem',
+                justifyContent: 'center'
+              }}>
+                <button
+                  onClick={() => {
+                    setShowApprovalModal(false);
+                    setApprovalChecked(false);
+                  }}
+                  style={{
+                    background: '#6b7280',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '0.75rem 1.5rem',
+                    fontSize: '1rem',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    if (approvalChecked) {
+                      setShowApprovalModal(false);
+                      setApprovalChecked(false);
+                      processDocuments();
+                    }
+                  }}
+                  disabled={!approvalChecked}
+                  style={{
+                    background: approvalChecked ? '#059669' : '#d1d5db',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '0.75rem 1.5rem',
+                    fontSize: '1rem',
+                    fontWeight: '600',
+                    cursor: approvalChecked ? 'pointer' : 'not-allowed',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  Approve & Proceed
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+      {/* File Upload Modal */}
+      {showFileUploadModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000,
+          backdropFilter: 'blur(4px)'
+        }}>
+          <div style={{
+            backgroundColor: '#1a1b2e',
+            borderRadius: '12px',
+            padding: '1.5rem',
+            maxWidth: '500px',
+            width: '90%',
+            maxHeight: '70vh',
+            overflow: 'auto',
+            boxShadow: '0 25px 50px rgba(0, 0, 0, 0.4)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            position: 'relative'
+          }}>
+            {/* Header */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '1.5rem',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              paddingBottom: '0.75rem'
+            }}>
+              <h2 style={{
+                color: '#fff',
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                margin: 0
+              }}>
+                📄 Upload Documents
+              </h2>
+              <button
+                onClick={() => setShowFileUploadModal(false)}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  border: 'none',
+                  color: '#bfc9da',
+                  fontSize: '1.25rem',
+                  cursor: 'pointer',
+                  padding: '0.25rem 0.5rem',
+                  borderRadius: '6px',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '32px',
+                  height: '32px'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.color = '#fff';
+                  e.target.style.background = 'rgba(255, 255, 255, 0.2)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.color = '#bfc9da';
+                  e.target.style.background = 'rgba(255, 255, 255, 0.1)';
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* File Selection Area */}
+            <div style={{
+              background: '#2a2b3e',
+              borderRadius: '8px',
+              padding: '1rem',
+              marginBottom: '1.5rem',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
+            }}>
+              <h3 style={{
+                color: '#fff',
+                marginBottom: '0.75rem',
+                fontSize: '1rem',
+                fontWeight: '500'
+              }}>
+                Select Files
+              </h3>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                background: '#374151',
+                borderRadius: '6px',
+                padding: '0.75rem',
+                border: '1px solid #4b5563'
+              }}>
+                <button
+                  onClick={() => {
+                    const fileInput = document.createElement('input');
+                    fileInput.type = 'file';
+                    fileInput.multiple = true;
+                    fileInput.accept = '.pdf,.xlsx,.xls,.csv';
+                    fileInput.onchange = (event) => {
+                      handleFileUpload(event);
+                    };
+                    fileInput.click();
+                  }}
+                  style={{
+                    background: '#3b82f6',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '0.5rem 0.75rem',
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    fontWeight: '500',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.background = '#2563eb';
+                    e.target.style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.background = '#3b82f6';
+                    e.target.style.transform = 'translateY(0)';
+                  }}
+                >
+                  <FaFileUpload style={{ fontSize: '0.9rem' }} />
+                  Choose Files
+                </button>
+                <span style={{ color: '#9ca3af', fontSize: '0.85rem' }}>
+                  {uploadedFiles.length === 0 ? 'No files selected' : `${uploadedFiles.length} file${uploadedFiles.length > 1 ? 's' : ''}`}
+                </span>
+              </div>
+            </div>
+
+            {/* Selected Files */}
+            {uploadedFiles.length > 0 && (
+              <div style={{
+                background: '#2a2b3e',
+                borderRadius: '8px',
+                padding: '1rem',
+                marginBottom: '1.5rem',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                maxHeight: '200px',
+                overflow: 'auto'
+              }}>
+                <h3 style={{
+                  color: '#fff',
+                  marginBottom: '0.75rem',
+                  fontSize: '1rem',
+                  fontWeight: '500'
+                }}>
+                  Selected Files ({uploadedFiles.length})
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {uploadedFiles.map((file, index) => (
+                    <div key={file.id} style={{
+                      background: '#374151',
+                      borderRadius: '6px',
+                      padding: '0.75rem',
+                      border: '1px solid #4b5563'
+                    }}>
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '0.5rem'
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          flex: 1,
+                          minWidth: 0
+                        }}>
+                          <span style={{ fontSize: '1rem' }}>📄</span>
+                          <span style={{ 
+                            color: '#fff', 
+                            fontSize: '0.85rem',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                          }}>
+                            {file.name}
+                          </span>
+                        </div>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem'
+                        }}>
+                          <span style={{ color: '#9ca3af', fontSize: '0.75rem' }}>
+                            {(file.size / 1024).toFixed(1)} KB
+                          </span>
+                          <button
+                            onClick={() => removeFile(file.id)}
+                            style={{
+                              background: '#dc2626',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: '4px',
+                              padding: '0.25rem 0.5rem',
+                              fontSize: '0.75rem',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease'
+                            }}
+                            onMouseOver={(e) => {
+                              e.target.style.background = '#b91c1c';
+                            }}
+                            onMouseOut={(e) => {
+                              e.target.style.background = '#dc2626';
+                            }}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                      <div style={{ marginTop: '0.5rem' }}>
+                        <label style={{
+                          color: '#9ca3af',
+                          fontSize: '0.75rem',
+                          marginBottom: '0.25rem',
+                          display: 'block'
+                        }}>
+                          Document Type:
+                        </label>
+                        <select
+                          value={file.documentType || ''}
+                          onChange={(e) => {
+                            const updatedFiles = [...uploadedFiles];
+                            updatedFiles[index].documentType = e.target.value;
+                            setUploadedFiles(updatedFiles);
+                          }}
+                          style={{
+                            background: '#1f2937',
+                            color: '#fff',
+                            border: '1px solid #4b5563',
+                            borderRadius: '4px',
+                            padding: '0.4rem',
+                            fontSize: '0.8rem',
+                            width: '100%',
+                            outline: 'none'
+                          }}
+                        >
+                          <option value="">Select type...</option>
+                          <option value="Financial Statement">Financial Statement</option>
+                          <option value="Profit and Loss Statement">Profit & Loss</option>
+                          <option value="Trial Balance">Trial Balance</option>
+                          <option value="Balance Sheet">Balance Sheet</option>
+                          <option value="Cashflow Statement">Cashflow</option>
+                        </select>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Upload Button */}
+            <div style={{ 
+              textAlign: 'center',
+              marginTop: '1.5rem'
+            }}>
+              <button
+                onClick={() => {
+                  if (uploadedFiles.length > 0) {
+                    setShowFileUploadModal(false);
+                  }
+                }}
+                disabled={uploadedFiles.length === 0}
+                style={{
+                  background: uploadedFiles.length > 0 
+                    ? 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)' 
+                    : '#6b7280',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '0.75rem 1.5rem',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  cursor: uploadedFiles.length > 0 ? 'pointer' : 'not-allowed',
+                  transition: 'all 0.3s ease',
+                  minWidth: '140px'
+                }}
+                onMouseOver={(e) => {
+                  if (uploadedFiles.length > 0) {
+                    e.target.style.transform = 'translateY(-1px)';
+                    e.target.style.boxShadow = '0 4px 12px rgba(236, 72, 153, 0.3)';
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (uploadedFiles.length > 0) {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = 'none';
+                  }
+                }}
+              >
+                Upload {uploadedFiles.length} Files
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       </div>
     </div>
   );

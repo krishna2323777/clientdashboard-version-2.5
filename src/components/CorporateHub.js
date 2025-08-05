@@ -29,7 +29,7 @@ const CorporateHub = () => {
       badge: 'Premium',
       badgeColor: '#3b82f6',
       grade: 'Professional Grade',
-      onClick: () => navigate('/dutch-branch-registration'),
+      onClick: () => navigate('/branch-registration'),
       available: true,
       comingSoon: false
     },

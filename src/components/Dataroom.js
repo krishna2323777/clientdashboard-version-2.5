@@ -4,10 +4,10 @@ import DocumentUploadModal from './DocumentUploadModal';
 import { supabase } from './SupabaseClient';
 import { useNavigate } from 'react-router-dom';
 
-const docTypes = [
+const initialDocTypes = [
   {
     icon: (
-      <span className="dru-doc-icon dru-doc-icon-kyc">
+      <span className="dru-doc-icon dru-doc-icon-kyb">
         <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
           <rect x="4" y="4" width="16" height="16" rx="3" fill="#00D084"/>
           <path d="M12 14a3 3 0 100-6 3 3 0 000 6z" fill="#fff"/>
@@ -15,8 +15,9 @@ const docTypes = [
         </svg>
       </span>
     ),
-    title: 'KYC Verification',
+    title: 'KYB Verification',
     type: 'kyc',
+    count: 0,
     requiredDocs: [
       'Passport/ID Documents (Required)',
       'Proof of Address (Required)',
@@ -37,6 +38,7 @@ const docTypes = [
     ),
     title: 'Financial Documents',
     type: 'financial',
+    count: 0,
     requiredDocs: [
       'Invoices',
       'Financial Statements',
@@ -47,26 +49,7 @@ const docTypes = [
       'Debt & Loan Documentation',
       'Other Documents'
     ]
-  },
-  {
-    icon: (
-      <span className="dru-doc-icon dru-doc-icon-mailbox">
-        <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
-          <rect x="4" y="4" width="16" height="16" rx="3" fill="#FF6B35"/>
-          <path d="M4 8l8 6 8-6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M4 8v8a2 2 0 002 2h12a2 2 0 002-2V8" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </span>
-    ),
-    title: 'Mailbox',
-    type: 'mailbox',
-    requiredDocs: [
-      'Email Communications',
-      'Notifications',
-      'System Messages',
-      'Document Alerts'
-    ]
-  },
+  }
 ];
 
 const financialCategories = [
@@ -98,6 +81,7 @@ const Dataroom = () => {
   const [tooltip, setTooltip] = useState({ show: false, content: [], position: { x: 0, y: 0 } });
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [selectedDocumentData, setSelectedDocumentData] = useState(null);
+  const [docTypes, setDocTypes] = useState(initialDocTypes);
 
   // Fetch documents from Supabase
   const fetchDocuments = async () => {
@@ -125,6 +109,22 @@ const Dataroom = () => {
         .eq('user_id', userId);
 
       if (financialError) throw financialError;
+
+      // Fetch signed documents from kvk_signed_forms table
+      const { data: signedDocs, error: signedError } = await supabase
+        .from('kvk_signed_forms')
+        .select('*')
+        .eq('user_id', userId);
+
+      if (signedError) throw signedError;
+
+      // Fetch generated documents from form submission tables
+      const [form6Data, form9Data, form11Data, form13Data] = await Promise.all([
+        supabase.from('form_6_submissions').select('*').eq('user_id', userId),
+        supabase.from('form_9_submissions').select('*').eq('user_id', userId),
+        supabase.from('form_11_submissions').select('*').eq('user_id', userId),
+        supabase.from('form_13_submissions').select('*').eq('user_id', userId)
+      ]);
 
       // Combine and format documents
       const allDocs = [];
@@ -161,6 +161,51 @@ const Dataroom = () => {
             fileSize: doc.file_size,
             status: 'uploaded',
             filePath: doc.file_path
+          });
+        });
+      }
+
+      // Format signed documents from kvk_signed_forms
+      if (signedDocs) {
+        signedDocs.forEach(doc => {
+          allDocs.push({
+            id: doc.id,
+            name: doc.form_type || 'Signed Document',
+            type: 'signed',
+            category: doc.form_type,
+            year: new Date(doc.created_at || doc.upload_date).getFullYear().toString(),
+            uploadDate: doc.created_at || doc.upload_date,
+            fileSize: doc.file_size || 0,
+            status: doc.status || 'uploaded',
+            filePath: doc.file_path,
+            representativeId: doc.representative_id,
+            extractedData: doc.extracted_data
+          });
+        });
+      }
+
+      // Format generated documents from form submissions
+      const generatedDocs = [
+        ...(form6Data.data || []).map(s => ({ ...s, formType: 'form-6' })),
+        ...(form9Data.data || []).map(s => ({ ...s, formType: 'form-9' })),
+        ...(form11Data.data || []).map(s => ({ ...s, formType: 'form-11' })),
+        ...(form13Data.data || []).map(s => ({ ...s, formType: 'form-13' }))
+      ];
+
+      if (generatedDocs.length > 0) {
+        generatedDocs.forEach(doc => {
+          allDocs.push({
+            id: doc.id,
+            name: doc.formType || 'Generated Form',
+            type: 'signed',
+            category: doc.formType,
+            year: new Date(doc.submission_date || doc.created_at).getFullYear().toString(),
+            uploadDate: doc.submission_date || doc.created_at,
+            fileSize: doc.file_size || 0,
+            status: 'generated',
+            filePath: doc.file_path,
+            representativeId: doc.representative_id,
+            extractedData: doc.extracted_data
           });
         });
       }
@@ -210,6 +255,21 @@ const Dataroom = () => {
     fetchDocuments();
   }, []);
 
+  // Update document counts when documents change
+  useEffect(() => {
+    const kycCount = documents.filter(doc => doc.type === 'kyc').length;
+    const financialCount = documents.filter(doc => doc.type === 'financial').length;
+    
+    setDocTypes(prev => prev.map(doc => {
+      if (doc.type === 'kyc') {
+        return { ...doc, count: kycCount };
+      } else if (doc.type === 'financial') {
+        return { ...doc, count: financialCount };
+      }
+      return doc;
+    }));
+  }, [documents]);
+
   const openModal = (type) => {
     setSelectedType(type);
     setSelectedFinancialCategory(null);
@@ -250,6 +310,25 @@ const Dataroom = () => {
             <line x1="16" y1="13" x2="8" y2="13" stroke="#fff" strokeWidth="2"/>
             <line x1="16" y1="17" x2="8" y2="17" stroke="#fff" strokeWidth="2"/>
             <polyline points="10,9 9,9 8,9" stroke="#fff" strokeWidth="2"/>
+          </svg>
+        </div>
+      );
+    } else if (type === 'signed') {
+      return (
+        <div style={{ 
+          width: '40px', 
+          height: '40px', 
+          borderRadius: '8px', 
+          background: '#FF6B35',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="#fff" strokeWidth="2"/>
+            <polyline points="14,2 14,8 20,8" stroke="#fff" strokeWidth="2"/>
+            <path d="M9 12l2 2 4-4" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M12 2v6" stroke="#fff" strokeWidth="2"/>
           </svg>
         </div>
       );
@@ -294,6 +373,25 @@ const Dataroom = () => {
             <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
           Analyzed
+        </div>
+      );
+    } else if (status === 'generated') {
+      return (
+        <div style={{
+          background: '#8B5CF6',
+          color: 'white',
+          padding: '4px 8px',
+          borderRadius: '12px',
+          fontSize: '12px',
+          fontWeight: '500',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px'
+        }}>
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24">
+            <path d="M12 2v6M12 14v6M4.93 4.93l4.24 4.24M18.36 18.36l-4.24-4.24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Generated
         </div>
       );
     } else if (status === 'pending' || status === 'processing') {
@@ -347,6 +445,14 @@ const Dataroom = () => {
         
         if (error) throw error;
         signedUrl = data.signedUrl;
+      } else if (doc.type === 'signed') {
+        // Get signed URL for signed documents
+        const { data, error } = await supabase.storage
+          .from('kvk-forms')
+          .createSignedUrl(doc.filePath, 3600); // 1 hour expiry
+        
+        if (error) throw error;
+        signedUrl = data.signedUrl;
       } else {
         // Get signed URL for financial documents
         const { data, error } = await supabase.storage
@@ -379,6 +485,14 @@ const Dataroom = () => {
         // Get signed URL for KYC documents
         const { data, error } = await supabase.storage
           .from('kyc-documents')
+          .createSignedUrl(doc.filePath, 3600); // 1 hour expiry
+        
+        if (error) throw error;
+        signedUrl = data.signedUrl;
+      } else if (doc.type === 'signed') {
+        // Get signed URL for signed documents
+        const { data, error } = await supabase.storage
+          .from('kvk-forms')
           .createSignedUrl(doc.filePath, 3600); // 1 hour expiry
         
         if (error) throw error;
@@ -598,26 +712,24 @@ const Dataroom = () => {
               style={{ 
                 minWidth: 240, 
                 maxWidth: 280, 
-                cursor: (doc.type === 'kyc' || doc.type === 'mailbox') ? 'pointer' : 'default', 
+                cursor: (doc.type === 'kyc') ? 'pointer' : 'default', 
                 boxShadow: '0 8px 32px rgba(255,77,128,0.10)',
                 transition: 'all 0.3s ease'
               }}
               onClick={() => {
                 if (doc.type === 'kyc') {
                   navigate('/documents/kyc');
-                } else if (doc.type === 'mailbox') {
-                  navigate('/mailbox');
                 }
               }}
               onMouseEnter={(e) => {
-                if (doc.type === 'kyc' || doc.type === 'mailbox') {
+                if (doc.type === 'kyc') {
                   e.target.style.transform = 'translateY(-2px)';
                   e.target.style.boxShadow = '0 12px 40px rgba(255,77,128,0.20)';
                 }
                 handleMouseEnter(e, doc);
               }}
               onMouseLeave={(e) => {
-                if (doc.type === 'kyc' || doc.type === 'mailbox') {
+                if (doc.type === 'kyc') {
                   e.target.style.transform = 'translateY(0)';
                   e.target.style.boxShadow = '0 8px 32px rgba(255,77,128,0.10)';
                 }
@@ -626,7 +738,7 @@ const Dataroom = () => {
             >
               <div className="dru-doc-card-icon">{doc.icon}</div>
               <div className="dru-doc-card-title">{doc.title}</div>
-              <div className="dru-doc-card-count">{doc.count}</div>
+              <div className="dru-doc-card-count">{doc.count} documents</div>
             </div>
           ))}
         </div>
@@ -654,7 +766,7 @@ const Dataroom = () => {
           </div>
         )}
 
-        <div className="dru-upload-dashed-box" onClick={() => openModal('customKYC')} style={{ cursor: 'pointer' }}>
+        <div className="dru-upload-dashed-box" onClick={() => openModal('customKYB')} style={{ cursor: 'pointer' }}>
           <div className="dru-upload-dashed-content">
             <div className="dru-upload-dashed-icon">
               <svg width="40" height="40" fill="none" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#18143a"/><path d="M20 28V14M20 14l-5 5M20 14l5 5" stroke="#FF4D80" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -702,7 +814,7 @@ const Dataroom = () => {
               background: '#00D084'
             }}></div>
             <span style={{ color: '#D1D5DB', fontSize: '14px' }}>
-              KYC: {documents.filter(doc => doc.type === 'kyc').length} documents
+              KYB: {documents.filter(doc => doc.type === 'kyc').length} documents
             </span>
           </div>
           <div style={{
@@ -722,6 +834,25 @@ const Dataroom = () => {
             }}></div>
             <span style={{ color: '#D1D5DB', fontSize: '14px' }}>
               Financial: {documents.filter(doc => doc.type === 'financial').length} documents
+            </span>
+          </div>
+          <div style={{
+            background: '#232448',
+            border: '1px solid #2e2f50',
+            borderRadius: '8px',
+            padding: '12px 16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            <div style={{
+              width: '12px',
+              height: '12px',
+              borderRadius: '50%',
+              background: '#FF6B35'
+            }}></div>
+            <span style={{ color: '#D1D5DB', fontSize: '14px' }}>
+              Signed: {documents.filter(doc => doc.type === 'signed').length} documents
             </span>
           </div>
           <div style={{
@@ -786,8 +917,9 @@ const Dataroom = () => {
                 }}
               >
                 <option value="all">All Documents</option>
-                <option value="kyc">KYC Documents</option>
+                <option value="kyc">KYB Documents</option>
                 <option value="financial">Financial Documents</option>
+                <option value="signed">Signed Documents</option>
               </select>
             </div>
 

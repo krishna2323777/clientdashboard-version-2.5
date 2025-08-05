@@ -1,5 +1,5 @@
 // src/components/KVKRegistrationForm.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { PDFDocument, rgb } from 'pdf-lib';
 import axios from 'axios';
@@ -7,17 +7,166 @@ import './Form9.css'; // Import the CSS file
 import { supabase } from './SupabaseClient';
 
 function Form9() {
-  const { register, handleSubmit, watch, formState: { errors } } = useForm();
+  const { register, handleSubmit, watch, formState: { errors }, setValue } = useForm();
   const [isProcessing, setIsProcessing] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState(null);
   const [error, setError] = useState(null);
   const [formData, setFormData] = useState(null);
   const [showConfirmPopup, setShowConfirmPopup] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(true);
+  const [dataLoaded, setDataLoaded] = useState(false);
   
   const isRegistered = watch("isRegistered");
   const branchType = watch("branchType");
   
   const pdfUrl = process.env.PUBLIC_URL + '/assets/kvk-form1.pdf';
+
+  // Fetch data from branch_registration_data on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoadingData(true);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: branchData, error: branchError } = await supabase
+            .from('branch_registration_data')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+
+          if (branchData) {
+            // Company information
+            if (branchData.company_name) {
+              setValue('companyName', branchData.company_name);
+            }
+            
+            if (branchData.principal_place_of_business) {
+              setValue('principalPlaceOfBusiness', branchData.principal_place_of_business);
+            }
+            
+            if (branchData.reg_number) {
+              setValue('registrationNumber', branchData.reg_number);
+              setValue('isRegistered', 'yes');
+            }
+            
+            // Branch information
+            if (branchData.branch_starting_date) {
+              setValue('startingDate', branchData.branch_starting_date);
+            }
+            
+            if (branchData.is_continuation_of_existing_branch) {
+              setValue('branchType', 'continuation');
+              if (branchData.company_name) {
+                setValue('previousBranchName', branchData.company_name);
+              }
+              if (branchData.registered_office) {
+                setValue('registeredOffice', branchData.registered_office);
+              }
+              if (branchData.reg_number) {
+                setValue('chamberNumber', branchData.reg_number);
+              }
+              if (branchData.branch_starting_date) {
+                setValue('continuationDate', branchData.branch_starting_date);
+                setValue('originalStartingDate', branchData.branch_starting_date);
+              }
+            } else {
+              setValue('branchType', 'new');
+            }
+            
+            // Business activities
+            if (branchData.activities_description) {
+              setValue('businessDescription', branchData.activities_description);
+            }
+            
+            if (branchData.main_activity) {
+              setValue('mostImportantActivity', branchData.main_activity);
+            }
+            
+            if (branchData.trade_names) {
+              setValue('singleTradeName', branchData.trade_names);
+              setValue('tradeNameType', 'one');
+            }
+            
+            // Branch address
+            if (branchData.branch_address) {
+              setValue('branchAddress', branchData.branch_address);
+            }
+            
+            // Contact details
+            if (branchData.branch_phone) {
+              setValue('telephone1', branchData.branch_phone);
+            }
+            
+            if (branchData.branch_email) {
+              setValue('email', branchData.branch_email);
+            }
+            
+            if (branchData.branch_website) {
+              setValue('website', branchData.branch_website);
+            }
+            
+            // Employee information
+            if (branchData.full_time_employees !== undefined && branchData.full_time_employees !== null) {
+              setValue('fullTimeEmployees', branchData.full_time_employees);
+            }
+            
+            if (branchData.part_time_employees !== undefined && branchData.part_time_employees !== null) {
+              setValue('partTimeEmployees', branchData.part_time_employees);
+            }
+            
+            setDataLoaded(true);
+          } else {
+            // Fallback to other tables if no branch data
+            const { data: companyData, error: companyError } = await supabase
+              .from('company_info')
+              .select('*')
+              .eq('user_id', user.id)
+              .single();
+
+            const { data: userData, error: userError } = await supabase
+              .from('user_profiles')
+              .select('*')
+              .eq('user_id', user.id)
+              .single();
+
+            if (companyData) {
+              if (companyData.company_name) {
+                setValue('companyName', companyData.company_name);
+              }
+              if (companyData.business_activity) {
+                setValue('businessDescription', companyData.business_activity);
+                setValue('mostImportantActivity', companyData.business_activity);
+              }
+              if (companyData.reg_number) {
+                setValue('registrationNumber', companyData.reg_number);
+                setValue('isRegistered', 'yes');
+              }
+            }
+
+            if (userData) {
+              if (userData.address) {
+                setValue('principalPlaceOfBusiness', userData.address);
+                setValue('branchAddress', userData.address);
+              }
+              if (userData.phone) {
+                setValue('telephone1', userData.phone);
+              }
+              if (userData.email) {
+                setValue('email', userData.email);
+              }
+            }
+            
+            setDataLoaded(true);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+    fetchData();
+  }, [setValue]);
   
   const onSubmit = async (data) => {
     setIsProcessing(true);
@@ -693,6 +842,20 @@ function Form9() {
       <h1>Form-9 Branch Registration Form</h1>
       
       {error && <div className="error-message">{error}</div>}
+      
+      {isLoadingData && (
+        <div className="loading-message">
+          <div className="loading-spinner"></div>
+          <p>Loading your branch registration data...</p>
+        </div>
+      )}
+      
+      {dataLoaded && (
+        <div className="success-message">
+          <div className="success-icon">✓</div>
+          <p>Form automatically populated with your branch registration data!</p>
+        </div>
+      )}
       
       <form onSubmit={handleSubmit(onSubmit)}>
         {/* Section 1 - Company details */}

@@ -87,7 +87,7 @@ function Form11() {
   const [publicUrl, setPublicUrl] = useState(null);
   
   // Use local PDF file path
-  const pdfUrl = process.env.PUBLIC_URL + '/assets/form-11.pdf';
+  const pdfUrl = process.env.PUBLIC_URL + '/assets/form 11.pdf';
   
 
 useEffect(() => {
@@ -170,9 +170,88 @@ const onSubmit = async (data) => {
 };
 
 // Add state for storing form data
-const [formData, setFormData] = useState(null);
-// Add state for custom confirmation popup
-const [showConfirmPopup, setShowConfirmPopup] = useState(false);
+  const [formData, setFormData] = useState(null);
+  // Add state for custom confirmation popup
+  const [showConfirmPopup, setShowConfirmPopup] = useState(false);
+  
+  // Function to map data from BranchRegistrationRequirements to Form11
+  const mapBranchDataToForm11 = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('User not authenticated');
+        return;
+      }
+
+      // Fetch branch registration data
+      const { data: branchData, error: branchError } = await supabase
+        .from('branch_registration_data')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (branchError && branchError.code !== 'PGRST116') {
+        console.error('Error fetching branch data:', branchError);
+        return;
+      }
+
+      // Fetch company info data
+      const { data: companyData, error: companyError } = await supabase
+        .from('company_info')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (companyError && companyError.code !== 'PGRST116') {
+        console.error('Error fetching company data:', companyError);
+        return;
+      }
+
+      // Map company data to Form11 fields
+      if (branchData) {
+        // Section 1 - Legal Entity Details
+        setValue('section1LegalEntityName', branchData.company_name || '');
+        setValue('section1RegisteredOffice', branchData.registered_office || '');
+        setValue('section1IsRegistered', branchData.reg_number ? 'yes' : 'no');
+        setValue('section1KvkNumber', branchData.reg_number || '');
+      }
+
+      // Map officials data if available
+      if (branchData?.officials_data && branchData.officials_data.length > 0) {
+        const firstOfficial = branchData.officials_data[0];
+        
+        // Section 2 - Legal personality (assuming natural person)
+        setValue('section2NaturalPersonCheckbox', ['natural']);
+        
+        // Section 3 - Natural person details
+        if (firstOfficial.full_name) {
+          const nameParts = firstOfficial.full_name.split(',');
+          setValue('section3Surname', nameParts[0] || '');
+          setValue('section3GivenNames', nameParts[1] || '');
+        }
+        setValue('section3CitizenServiceNumber', firstOfficial.passport_number || '');
+        setValue('section3DateOfBirth', firstOfficial.date_of_birth || '');
+        setValue('section3PlaceOfBirth', firstOfficial.place_of_birth || '');
+        setValue('section3CountryOfBirth', firstOfficial.country_of_birth || '');
+        setValue('section3PrivateAddress', firstOfficial.residential_address || '');
+        
+        // Section 4 - Position details
+        setValue('section4Position', firstOfficial.role === 'Director' ? 'director' : 'supervisoryBoardMember');
+        setValue('section4OfficialAuthority', firstOfficial.authorities || 'sole');
+        setValue('section4positionStartDate', firstOfficial.appointment_date || '');
+        
+        // Section 11 - Signature
+        setValue('section11SignatureName', firstOfficial.full_name || '');
+        setValue('section11SignatureEmail', firstOfficial.email || '');
+        setValue('section11SignaturePhone', firstOfficial.phone || '');
+        setValue('section11SignatureDate', new Date().toISOString().split('T')[0]);
+      }
+
+      console.log('Data mapped from BranchRegistrationRequirements to Form11');
+    } catch (error) {
+      console.error('Error mapping data:', error);
+    }
+  };
 
 // Show confirmation popup
 const handleDownloadClick = () => {
@@ -320,14 +399,19 @@ const handlePdfDownload = async () => {
   }
 };
 
-// Clean up the URL when component unmounts
-useEffect(() => {
-  return () => {
-    if (downloadUrl) {
-      URL.revokeObjectURL(downloadUrl);
-    }
-  };
-}, [downloadUrl]);
+  // Clean up the URL when component unmounts
+  useEffect(() => {
+    return () => {
+      if (downloadUrl) {
+        URL.revokeObjectURL(downloadUrl);
+      }
+    };
+  }, [downloadUrl]);
+
+  // Auto-map data from BranchRegistrationRequirements when component loads
+  useEffect(() => {
+    mapBranchDataToForm11();
+  }, []);
 
   // Add function to download blank form
   const downloadBlankForm = () => {
@@ -352,6 +436,8 @@ useEffect(() => {
       <h1>KVK Form 11 - Registration of a legal entity official</h1>
       
       {error && <div className="error-message">{error}</div>}
+      
+
       
       {!pdfExists && (
         <div className="note-box error-note">
