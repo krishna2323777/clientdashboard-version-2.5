@@ -84,6 +84,11 @@ export default function Dashboard() {
   const [userName, setUserName] = useState('');
   const [showDataNotification, setShowDataNotification] = useState(false);
   const [showComplianceNotification, setShowComplianceNotification] = useState(true);
+  const [calendarBanner, setCalendarBanner] = useState(null);
+
+  // --- Add these states for rotating banners ---
+  const [calendarBanners, setCalendarBanners] = useState([]);
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
   useEffect(() => {
     const fetchCompany = async () => {
@@ -159,25 +164,51 @@ export default function Dashboard() {
       }
     };
 
+    // --- Fetch all banners instead of just one ---
+    const fetchCalendarBanners = async () => {
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (!sessionData.session) return;
+
+        const { data, error } = await supabase
+          .from("calendar")
+          .select("title, description, due_date")
+          .eq("user_id", sessionData.session.user.id)
+          .order("due_date", { ascending: true });
+
+        if (!error && data && data.length > 0) {
+          setCalendarBanners(data);
+          setCalendarBanner(data[0]); // Show the first one initially
+        }
+      } catch (err) {
+        // Optionally handle error
+      }
+    };
+
     fetchCompany();
+    fetchCalendarBanners();
   }, []);
+
+  // --- Animation: rotate banners every 4 seconds ---
+  useEffect(() => {
+    if (calendarBanners.length <= 1) return;
+    setCalendarBanner(calendarBanners[currentBannerIndex]);
+    const interval = setInterval(() => {
+      setCurrentBannerIndex((prev) => (prev + 1) % calendarBanners.length);
+    }, 4000);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line
+  }, [calendarBanners, currentBannerIndex]);
 
   if (!company) return <div style={{ color: "#fff", textAlign: "center", marginTop: "2rem" }}>Loading...</div>;
 
   return (
     <div className="dashboard-container">
-      {/* EU Compliance Notification Banner */}
-      
-
-      {/* Header Section */}
+      {/* Calendar Alert Banner (from Supabase) */}
       <div className="dashboard-header">
         <div className="welcome-section" style={{ alignItems: 'flex-start', textAlign: 'left' }}>
           <h1 className="welcome-title">Welcome back{userName ? `, ${userName}` : ''}</h1>
-         
-           
-          
         </div>
-        
         <button className="ai-assistant-btn">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 12l2 2 4-4"/>
@@ -189,32 +220,53 @@ export default function Dashboard() {
           AI Assistant
         </button>
       </div>
-
-      {showComplianceNotification && (
+      {calendarBanner && (
         <div className="compliance-notification-banner">
           <div className="compliance-notification-content">
             <div className="compliance-notification-left">
               <div className="compliance-notification-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
                 </svg>
               </div>
               <div className="compliance-notification-text">
-                <div className="compliance-notification-title">New EU Compliance Update</div>
-                <div className="compliance-notification-subtitle">Recent changes to EU regulations affect your business</div>
+                <div className="compliance-notification-title">{calendarBanner.title}</div>
+                <div className="compliance-notification-subtitle">{calendarBanner.description}</div>
               </div>
             </div>
             <div className="compliance-notification-right">
-              <button 
+              <button
                 className="compliance-notification-action"
-                onClick={() => setShowComplianceNotification(false)}
+                onClick={() => navigate('/calendar')}
+                title="Go to Calendar"
               >
-                <div className="x-symbol">×</div>
+                <svg
+                  width="28"
+                  height="28"
+                  viewBox="0 0 28 28"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  style={{ display: "block" }}
+                >
+                  <polyline
+                    points="10 7 18 14 10 21"
+                    stroke="#2563EB"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    fill="none"
+                  />
+                </svg>
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Header Section */}
+      
+
+     
      
      
       <div className="global-presence-section">

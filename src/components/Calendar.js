@@ -33,6 +33,29 @@ const ComplianceDeadlines = () => {
 
   useEffect(() => {
     fetchTasks();
+    
+    // Check if there's pending task data from the analysis modal
+    const pendingTaskData = sessionStorage.getItem('pendingTaskData');
+    if (pendingTaskData) {
+      try {
+        const taskData = JSON.parse(pendingTaskData);
+        setFormData({
+          title: taskData.title || "",
+          description: taskData.description || "",
+          type: taskData.type || "Company",
+          due_date: taskData.due_date || "",
+          priority: taskData.priority || "Medium",
+          status: taskData.status || "Pending",
+          assigned_to: taskData.assigned_to || "",
+        });
+        setShowForm(true);
+        // Clear the pending task data
+        sessionStorage.removeItem('pendingTaskData');
+      } catch (error) {
+        console.error('Error parsing pending task data:', error);
+        sessionStorage.removeItem('pendingTaskData');
+      }
+    }
   }, []);
 
   const fetchTasks = async () => {
@@ -278,14 +301,14 @@ const ComplianceDeadlines = () => {
       </div>
 
       {showForm && (
-        <div className="deadline-form-overlay" onClick={handleCloseModal}>
+        <div className="calendar-task-modal-overlay" onClick={handleCloseModal}>
           <div
-            className="deadline-form-container"
-            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
+            className="calendar-task-modal-container"
+            onClick={(e) => e.stopPropagation()}
           >
-            <h3>Create New Company Task</h3>
+            <h3 className="calendar-task-modal-title">Create New Company Task</h3>
             <form onSubmit={handleFormSubmit}>
-              <div className="form-group">
+              <div className="calendar-task-modal-group">
                 <label htmlFor="title">Title</label>
                 <input
                   type="text"
@@ -297,8 +320,7 @@ const ComplianceDeadlines = () => {
                   placeholder="Enter task title"
                 />
               </div>
-
-              <div className="form-group">
+              <div className="calendar-task-modal-group">
                 <label htmlFor="description">Description</label>
                 <textarea
                   id="description"
@@ -309,9 +331,8 @@ const ComplianceDeadlines = () => {
                   placeholder="Enter task description"
                 />
               </div>
-
-              <div className="form-row">
-                <div className="form-group">
+              <div className="calendar-task-modal-row">
+                <div className="calendar-task-modal-group">
                   <label htmlFor="due_date">Deadline</label>
                   <input
                     type="date"
@@ -322,8 +343,7 @@ const ComplianceDeadlines = () => {
                     required
                   />
                 </div>
-
-                <div className="form-group">
+                <div className="calendar-task-modal-group">
                   <label htmlFor="priority">Priority</label>
                   <select
                     id="priority"
@@ -338,9 +358,8 @@ const ComplianceDeadlines = () => {
                   </select>
                 </div>
               </div>
-
-              <div className="form-row">
-                <div className="form-group">
+              <div className="calendar-task-modal-row">
+                <div className="calendar-task-modal-group">
                   <label htmlFor="type">Category</label>
                   <select
                     id="type"
@@ -356,8 +375,7 @@ const ComplianceDeadlines = () => {
                     ))}
                   </select>
                 </div>
-
-                <div className="form-group">
+                <div className="calendar-task-modal-group">
                   <label htmlFor="status">Status</label>
                   <select
                     id="status"
@@ -373,8 +391,7 @@ const ComplianceDeadlines = () => {
                   </select>
                 </div>
               </div>
-
-              <div className="form-group">
+              <div className="calendar-task-modal-group">
                 <label htmlFor="assigned_to">Assigned To (optional)</label>
                 <input
                   type="text"
@@ -385,15 +402,13 @@ const ComplianceDeadlines = () => {
                   placeholder="Enter assignee name"
                 />
               </div>
-
-              {/* Company Tags */}
-              <div className="form-group company-tags">
+              <div className="calendar-task-modal-group calendar-task-modal-tags">
                 <label>Company Tags</label>
-                <div className="tags-container">
+                <div className="calendar-task-modal-tags-container">
                   {["documentation", "policy", "operations", "structure"].map((tag) => (
                     <span
                       key={tag}
-                      className={`tag ${selectedTags.includes(tag) ? "selected" : ""}`}
+                      className={`calendar-task-modal-tag ${selectedTags.includes(tag) ? "selected" : ""}`}
                       onClick={() => handleTagClick(tag)}
                     >
                       {tag}
@@ -401,16 +416,15 @@ const ComplianceDeadlines = () => {
                   ))}
                 </div>
               </div>
-
-              <div className="form-actions">
+              <div className="calendar-task-modal-actions">
                 <button
                   type="button"
-                  className="cancel-button"
+                  className="calendar-task-modal-cancel"
                   onClick={() => setShowForm(false)}
                 >
                   Cancel
                 </button>
-                <button type="submit" className="submit-button">
+                <button type="submit" className="calendar-task-modal-submit">
                   Create Task
                 </button>
               </div>

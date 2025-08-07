@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaEuroSign, FaBuilding, FaCheckCircle, FaShieldAlt, FaFileAlt, FaStar, FaLock } from 'react-icons/fa';
 import './CorporateHub.css';
 
 const CorporateHub = () => {
   const navigate = useNavigate();
+  const [expandedVatInfo, setExpandedVatInfo] = useState(false);
 
   const corporateServices = [
     {
@@ -16,7 +17,7 @@ const CorporateHub = () => {
       badge: 'Featured',
       badgeColor: '#3b82f6',
       grade: 'Professional Grade',
-      onClick: () => navigate('/vat'),
+      onClick: () => navigate('/vat-requirement'), // <-- updated route
       available: true,
       comingSoon: false
     },
@@ -95,6 +96,14 @@ const CorporateHub = () => {
       fontFamily: 'Inter, Segoe UI, Arial, sans-serif',
       padding: '48px 16px',
     }}>
+      <style>
+        {`
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+        `}
+      </style>
       <div style={{ maxWidth: 1100, margin: '0 auto', textAlign: 'center' }}>
         {/* Header Badge */}
         <div style={{ 
@@ -218,15 +227,131 @@ const CorporateHub = () => {
                 {service.description}
               </p>
 
-              {/* Grade */}
-              <div style={{
-                color: '#3b82f6',
-                fontSize: '0.9rem',
-                fontWeight: 600,
-                marginBottom: '24px'
-              }}>
-                {service.grade}
-              </div>
+              {/* Who Needs to Register Section */}
+              {service.id === 'vat-id-application' && (
+                <div style={{
+                  background: '#1a1b36',
+                  border: '1px solid #2e2f50',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  marginBottom: '24px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setExpandedVatInfo(!expandedVatInfo);
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#3b82f6';
+                  e.currentTarget.style.background = '#232448';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = '#2e2f50';
+                  e.currentTarget.style.background = '#1a1b36';
+                }}
+                >
+                  <div style={{
+                    color: '#3b82f6',
+                    fontSize: '1rem',
+                    fontWeight: 700,
+                    marginBottom: expandedVatInfo ? '12px' : '0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span>📋</span>
+                      Who Needs to Register?
+                    </div>
+                    <div style={{
+                      transform: expandedVatInfo ? 'rotate(180deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.3s ease',
+                      fontSize: '1.2rem',
+                      color: '#3b82f6'
+                    }}>
+                      ▼
+                    </div>
+                  </div>
+                  {expandedVatInfo && (
+                    <div style={{
+                      color: '#ffffff',
+                      fontSize: '0.95rem',
+                      lineHeight: 1.6,
+                      animation: 'fadeIn 0.3s ease',
+                      marginTop: '12px',
+                      paddingTop: '12px',
+                      borderTop: '1px solid #2e2f50'
+                    }}>
+                      <div style={{
+                        fontWeight: 600,
+                        marginBottom: '8px',
+                        color: '#3b82f6'
+                      }}>
+                        You must register for VAT if:
+                      </div>
+                      <ul style={{
+                        margin: '8px 0 0 16px',
+                        color: '#ffffff',
+                        fontSize: '0.9rem',
+                        listStyle: 'none'
+                      }}>
+                        <li style={{ 
+                          marginBottom: '6px',
+                          paddingLeft: '16px',
+                          position: 'relative'
+                        }}>
+                          <span style={{
+                            position: 'absolute',
+                            left: '0',
+                            color: '#22c55e',
+                            fontWeight: 'bold'
+                          }}>•</span>
+                          You provide goods/services as a business within the Netherlands
+                        </li>
+                        <li style={{ 
+                          marginBottom: '6px',
+                          paddingLeft: '16px',
+                          position: 'relative'
+                        }}>
+                          <span style={{
+                            position: 'absolute',
+                            left: '0',
+                            color: '#22c55e',
+                            fontWeight: 'bold'
+                          }}>•</span>
+                          You are a foreign entrepreneur with taxable activities in NL
+                        </li>
+                        <li style={{ 
+                          marginBottom: '6px',
+                          paddingLeft: '16px',
+                          position: 'relative'
+                        }}>
+                          <span style={{
+                            position: 'absolute',
+                            left: '0',
+                            color: '#22c55e',
+                            fontWeight: 'bold'
+                          }}>•</span>
+                          You open a Dutch branch, subsidiary, or representative office
+                        </li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Grade for other services */}
+              {service.id !== 'vat-id-application' && (
+                <div style={{
+                  color: '#3b82f6',
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                  marginBottom: '24px'
+                }}>
+                  {service.grade}
+                </div>
+              )}
 
               {/* Action Button or Coming Soon */}
               {service.comingSoon ? (
@@ -264,6 +389,10 @@ const CorporateHub = () => {
                     gap: '8px',
                     boxShadow: '0 2px 8px rgba(239, 74, 123, 0.10)'
                   }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    service.onClick();
+                  }}
                   onMouseEnter={(e) => {
                     e.target.style.transform = 'translateY(-2px)';
                     e.target.style.boxShadow = '0 8px 25px rgba(239, 74, 123, 0.18)';
@@ -284,4 +413,4 @@ const CorporateHub = () => {
   );
 };
 
-export default CorporateHub; 
+export default CorporateHub;

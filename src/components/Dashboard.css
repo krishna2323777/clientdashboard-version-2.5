@@ -662,20 +662,8 @@
 }
 
 .compliance-notification-action {
-  background: rgba(255, 255, 255, 0.9);
-  border: 2px solid #FFFFFF;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #2563EB;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-  font-weight: bold;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+ background-color: #ebf1f3;
+  
 }
 
 .compliance-notification-action:hover {
@@ -685,10 +673,9 @@
 }
 
 .compliance-notification-action svg {
+  width: 28px;
+  height: 28px;
   stroke: #2563EB;
-  stroke-width: 3;
-  width: 20px;
-  height: 20px;
 }
 
 .x-symbol {

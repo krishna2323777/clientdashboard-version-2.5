@@ -143,6 +143,12 @@ const validateDrivingLicense = (expiryDateStr) => {
     // Convert 2-digit year to 4-digit year (assuming 20XX for years 00-99)
     const fullYear = year < 100 ? 2000 + year : year;
     const expiryDate = new Date(fullYear, month - 1, day);
+    
+    // Check if the parsed date is valid
+    if (isNaN(expiryDate.getTime())) {
+      throw new Error('Invalid date format');
+    }
+    
     const currentDate = new Date();
     
     // Reset time part for accurate date comparison
@@ -218,26 +224,80 @@ export default function DocumentUploadModal({ open, onClose, selectedType, onDoc
 
   useEffect(() => {
     const fetchDirectors = async () => {
-      if (open && selectedType === 'customKYC') {
+      if (open && (selectedType === 'customKYC' || localSelectedType === 'kyc')) {
         setLoadingDirectors(true);
         try {
           const { data: sessionData } = await supabase.auth.getSession();
           if (!sessionData?.session?.user) throw new Error('No user session');
           const userId = sessionData.session.user.id;
-          const { data: companyData, error } = await supabase
+          
+          console.log('Fetching directors for user:', userId);
+          
+          // Try to fetch from company_info first
+          let { data: companyData, error } = await supabase
             .from('company_info')
             .select('directors')
             .eq('user_id', userId)
             .single();
-          if (error) throw error;
+          
           let directorsArr = [];
-          if (companyData?.directors) {
-            directorsArr = typeof companyData.directors === 'string'
-              ? JSON.parse(companyData.directors)
-              : companyData.directors;
+          
+          if (error) {
+            console.log('No company_info found, trying user_profiles...');
+            // If company_info doesn't exist, try user_profiles
+            const { data: userProfile, error: profileError } = await supabase
+              .from('user_profiles')
+              .select('directors')
+              .eq('user_id', userId)
+              .single();
+            
+            if (profileError) {
+              console.log('No user_profiles found, trying target_companies...');
+              // If user_profiles doesn't exist, try target_companies
+              const { data: targetCompanies, error: targetError } = await supabase
+                .from('target_companies')
+                .select('directors')
+                .eq('user_id', userId);
+              
+              if (targetError) {
+                console.error('Error fetching from target_companies:', targetError);
+                throw targetError;
+              }
+              
+              console.log('Target companies data received:', targetCompanies);
+              
+              if (targetCompanies && targetCompanies.length > 0) {
+                // Use the first company's directors
+                const firstCompany = targetCompanies[0];
+                if (firstCompany?.directors) {
+                  directorsArr = typeof firstCompany.directors === 'string'
+                    ? JSON.parse(firstCompany.directors)
+                    : firstCompany.directors;
+                }
+              }
+            } else {
+              console.log('User profile data received:', userProfile);
+              
+              if (userProfile?.directors) {
+                directorsArr = typeof userProfile.directors === 'string'
+                  ? JSON.parse(userProfile.directors)
+                  : userProfile.directors;
+              }
+            }
+          } else {
+            console.log('Company data received:', companyData);
+            
+            if (companyData?.directors) {
+              directorsArr = typeof companyData.directors === 'string'
+                ? JSON.parse(companyData.directors)
+                : companyData.directors;
+            }
           }
+          
+          console.log('Parsed directors:', directorsArr);
           setDirectors(directorsArr);
         } catch (err) {
+          console.error('Error in fetchDirectors:', err);
           setDirectors([]);
         } finally {
           setLoadingDirectors(false);
@@ -245,7 +305,7 @@ export default function DocumentUploadModal({ open, onClose, selectedType, onDoc
       }
     };
     fetchDirectors();
-  }, [open, selectedType]);
+  }, [open, selectedType, localSelectedType]);
 
   // Fetch existing documents when modal opens
   useEffect(() => {
@@ -417,29 +477,53 @@ export default function DocumentUploadModal({ open, onClose, selectedType, onDoc
 
       // For address proof
       if (documentType === 'addressProof') {
-        validation = validateAddressProof(result.data.document_date);
-        
-        formattedData = {
-          address: result.data.address,
-          document_date: result.data.document_date,
-          issuing_authority: result.data.issuing_authority,
-          resident_name: result.data.name,
-          validation_status: validation.status,
-          validation_message: validation.message,
-          months_since_issue: validation.monthsDiff
-        };
+        if (!result.data.document_date) {
+          throw new Error('No document date found in extracted data');
+        }
+        try {
+          validation = validateAddressProof(result.data.document_date);
+          
+          formattedData = {
+            address: result.data.address,
+            document_date: result.data.document_date,
+            issuing_authority: result.data.issuing_authority,
+            resident_name: result.data.name,
+            validation_status: validation.status,
+            validation_message: validation.message,
+            months_since_issue: validation.monthsDiff
+          };
+        } catch (error) {
+          console.error('Address proof validation error:', error);
+          formattedData = {
+            ...result.data,
+            verification_status: 'rejected',
+            validation_message: 'Document rejected - validation error'
+          };
+        }
       }
 
       // For utility bill
       if (documentType === 'utilityBill') {
-        validation = validateUtilityBill(result.data.bill_date);
-        
-        formattedData = {
-          ...result.data,
-          verification_status: validation.status,
-          validation_message: validation.message,
-          months_since_issue: validation.monthsDiff
-        };
+        if (!result.data.bill_date) {
+          throw new Error('No bill date found in extracted data');
+        }
+        try {
+          validation = validateUtilityBill(result.data.bill_date);
+          
+          formattedData = {
+            ...result.data,
+            verification_status: validation.status,
+            validation_message: validation.message,
+            months_since_issue: validation.monthsDiff
+          };
+        } catch (error) {
+          console.error('Utility bill validation error:', error);
+          formattedData = {
+            ...result.data,
+            verification_status: 'rejected',
+            validation_message: 'Document rejected - validation error'
+          };
+        }
       }
 
       // For driving license
@@ -447,14 +531,27 @@ export default function DocumentUploadModal({ open, onClose, selectedType, onDoc
         console.log('Processing driving license document');
         console.log('Raw API data:', result.data);
         
-        validation = validateDrivingLicense(result.data.date_of_expiry);
-        console.log('Validation result:', validation);
+        if (!result.data.date_of_expiry) {
+          throw new Error('No expiry date found in extracted data');
+        }
         
-        formattedData = {
-          ...result.data,
-          verification_status: validation.status,
-          validation_message: validation.message
-        };
+        try {
+          validation = validateDrivingLicense(result.data.date_of_expiry);
+          console.log('Validation result:', validation);
+          
+          formattedData = {
+            ...result.data,
+            verification_status: validation.status,
+            validation_message: validation.message
+          };
+        } catch (error) {
+          console.error('Driving license validation error:', error);
+          formattedData = {
+            ...result.data,
+            verification_status: 'rejected',
+            validation_message: 'Document rejected - validation error'
+          };
+        }
       }
 
       // For passport
@@ -463,10 +560,14 @@ export default function DocumentUploadModal({ open, onClose, selectedType, onDoc
         let expiryDate;
         
         // Handle different date formats
-        if (expiryDateStr.includes('-')) {
+        if (expiryDateStr && expiryDateStr.includes('-')) {
           const [day, month, year] = expiryDateStr.split('-');
           expiryDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-        } else if (expiryDateStr.includes(' ')) {
+        } else if (expiryDateStr && expiryDateStr.includes('/')) {
+          // Handle DD/MM/YYYY format
+          const [day, month, year] = expiryDateStr.split('/');
+          expiryDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        } else if (expiryDateStr && expiryDateStr.includes(' ')) {
           const [day, month, year] = expiryDateStr.split(' ');
           const monthMap = {
             'JAN': 0, 'FEB': 1, 'MAR': 2, 'APR': 3, 'MAY': 4, 'JUN': 5,
@@ -478,7 +579,6 @@ export default function DocumentUploadModal({ open, onClose, selectedType, onDoc
 
         const currentDate = new Date();
         currentDate.setHours(0, 0, 0, 0);
-        expiryDate.setHours(0, 0, 0, 0);
         
         let documentStatus;
         let statusMessage;
@@ -486,12 +586,17 @@ export default function DocumentUploadModal({ open, onClose, selectedType, onDoc
         if (!expiryDate || isNaN(expiryDate.getTime())) {
           documentStatus = 'rejected';
           statusMessage = 'Document rejected - invalid expiry date format';
-        } else if (expiryDate <= currentDate) {
-          documentStatus = 'rejected';
-          statusMessage = 'Document rejected - passport expired';
         } else {
-          documentStatus = 'approved';
-          statusMessage = 'Document approved - valid passport';
+          // Only call setHours if expiryDate is valid
+          expiryDate.setHours(0, 0, 0, 0);
+          
+          if (expiryDate <= currentDate) {
+            documentStatus = 'rejected';
+            statusMessage = 'Document rejected - passport expired';
+          } else {
+            documentStatus = 'approved';
+            statusMessage = 'Document approved - valid passport';
+          }
         }
 
         formattedData = {
@@ -1042,47 +1147,117 @@ export default function DocumentUploadModal({ open, onClose, selectedType, onDoc
           <div className="doc-modal-title">Upload Documents</div>
           <button className="doc-modal-close" onClick={onClose}>×</button>
         </div>
-        <div className="doc-modal-content">
-          {/* Flex row for card selection and user flow, visually balanced */}
-          <div className="doc-modal-flex-row" style={{ marginBottom: '2rem' }}>
-            {/* Card selection box (left half) */}
-            <div className="doc-modal-option-box">
-              <div className="doc-modal-question">
-                What are you uploading documents for?
-              </div>
-              <div className="doc-modal-cards-row">
-                <div
-                  className={`doc-modal-card ${localSelectedType === 'kyc' ? 'selected' : ''}`}
-                  onClick={() => { setLocalSelectedType('kyc'); setStep(1); setUserFlowType('kyc'); }}
-                >
-                  <div className="doc-modal-card-title">KYB Verification</div>
-                  <div className="doc-modal-card-desc">Documents for Know Your Customer verification</div>
-                </div>
-                <div
-                  className={`doc-modal-card ${localSelectedType === 'financial' ? 'selected' : ''}`}
-                  onClick={() => { setLocalSelectedType('financial'); setStep(1); setUserFlowType('financial'); }}
-                >
-                  <div className="doc-modal-card-title">Financial Documents</div>
-                  <div className="doc-modal-card-desc">Documents for financial reporting and analysis</div>
-                </div>
-              </div>
+        
+        {/* Flow Steps at the Top */}
+        {userFlowType && (
+          <div style={{
+            background: '#1a1b36',
+            borderBottom: '1px solid #2e2f50',
+            padding: '20px 24px',
+            marginBottom: '24px'
+          }}>
+            <div style={{
+              fontWeight: 700,
+              fontSize: '1.1rem',
+              color: '#FF4D80',
+              marginBottom: '16px',
+              textAlign: 'center'
+            }}>
+              {userFlowType === 'kyc' ? 'KYB Verification Flow' : 'Financial Documents Flow'}
             </div>
-            {/* Divider */}
-            <div className="doc-modal-divider" />
-            {/* User Flow Box (right half) */}
-            <div className="doc-modal-userflow-box" style={{ display: userFlowType ? 'block' : 'none' }}>
-              {userFlowType === 'kyc' && (
-                <>
-                  <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#FF4D80', marginBottom: 10 }}>KYB Verification User Flow</div>
-                  <CurvedTimeline steps={kycUserFlowSteps} colors={timelineColors} />
-                </>
-              )}
-              {userFlowType === 'financial' && (
-                <>
-                  <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#FF4D80', marginBottom: 10 }}>Financial Documents User Flow</div>
-                  <CurvedTimeline steps={financialUserFlowSteps} colors={timelineColors} />
-                </>
-              )}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '8px',
+              flexWrap: 'wrap'
+            }}>
+              {userFlowType === 'kyc' ? kycUserFlowSteps.slice(0, 4).map((step, idx) => (
+                <div key={idx} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: '#232448',
+                  border: '1px solid #2e2f50',
+                  borderRadius: '8px',
+                  padding: '8px 12px',
+                  fontSize: '0.85rem',
+                  color: '#D1D5DB',
+                  minWidth: '120px',
+                  textAlign: 'center'
+                }}>
+                  <div style={{
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    background: '#FF4D80',
+                    color: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.75rem',
+                    fontWeight: 'bold'
+                  }}>
+                    {idx + 1}
+                  </div>
+                  <span style={{ fontSize: '0.75rem' }}>{step.split(' ').slice(0, 3).join(' ')}...</span>
+                </div>
+              )) : financialUserFlowSteps.slice(0, 4).map((step, idx) => (
+                <div key={idx} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: '#232448',
+                  border: '1px solid #2e2f50',
+                  borderRadius: '8px',
+                  padding: '8px 12px',
+                  fontSize: '0.85rem',
+                  color: '#D1D5DB',
+                  minWidth: '120px',
+                  textAlign: 'center'
+                }}>
+                  <div style={{
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    background: '#3366FF',
+                    color: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.75rem',
+                    fontWeight: 'bold'
+                  }}>
+                    {idx + 1}
+                  </div>
+                  <span style={{ fontSize: '0.75rem' }}>{step.split(' ').slice(0, 3).join(' ')}...</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        <div className="doc-modal-content">
+          {/* Card selection */}
+          <div style={{ marginBottom: '2rem' }}>
+            <div className="doc-modal-question">
+              What are you uploading documents for?
+            </div>
+            <div className="doc-modal-cards-row">
+              <div
+                className={`doc-modal-card ${localSelectedType === 'kyc' ? 'selected' : ''}`}
+                onClick={() => { setLocalSelectedType('kyc'); setStep(1); setUserFlowType('kyc'); }}
+              >
+                <div className="doc-modal-card-title">KYB Verification</div>
+                <div className="doc-modal-card-desc">Documents for Know Your Customer verification</div>
+              </div>
+              <div
+                className={`doc-modal-card ${localSelectedType === 'financial' ? 'selected' : ''}`}
+                onClick={() => { setLocalSelectedType('financial'); setStep(1); setUserFlowType('financial'); }}
+              >
+                <div className="doc-modal-card-title">Financial Documents</div>
+                <div className="doc-modal-card-desc">Documents for financial reporting and analysis</div>
+              </div>
             </div>
           </div>
           {/* Content below cards (upload forms, etc.) remains unchanged */}
@@ -1171,28 +1346,47 @@ export default function DocumentUploadModal({ open, onClose, selectedType, onDoc
                     {loadingDirectors ? (
                       <div style={{ color: '#F59E0B' }}>Loading directors...</div>
                     ) : directors.length === 0 ? (
-                      <div style={{ color: '#EF4444' }}>No directors found.</div>
+                      <div style={{ color: '#EF4444' }}>
+                        No directors found. 
+                        <div style={{ fontSize: '12px', marginTop: '4px', color: '#9CA3AF' }}>
+                          Please add directors in your company profile first.
+                        </div>
+                      </div>
                     ) : (
-                      <select
-                        value={selectedKycRepresentative}
-                        onChange={(e) => setSelectedKycRepresentative(e.target.value)}
-                        style={{
+                      <>
+                        <select
+                          value={selectedKycRepresentative}
+                          onChange={(e) => setSelectedKycRepresentative(e.target.value)}
+                          style={{
+                            background: '#232448',
+                            color: '#fff',
+                            border: '1px solid #2e2f50',
+                            borderRadius: '6px',
+                            padding: '8px 12px',
+                            fontSize: '14px',
+                            width: '100%'
+                          }}
+                        >
+                          <option value="">Select representative...</option>
+                          {directors.map((director, idx) => (
+                            <option key={idx} value={director.email || director.name}>
+                              {director.name} ({director.email})
+                            </option>
+                          ))}
+                        </select>
+                        
+                        {/* Debug info */}
+                        <div style={{ 
+                          fontSize: '11px', 
+                          color: '#9CA3AF', 
+                          marginTop: '4px',
                           background: '#232448',
-                          color: '#fff',
-                          border: '1px solid #2e2f50',
-                          borderRadius: '6px',
-                          padding: '8px 12px',
-                          fontSize: '14px',
-                          width: '100%'
-                        }}
-                      >
-                        <option value="">Select representative...</option>
-                        {directors.map((director, idx) => (
-                          <option key={idx} value={director.email || director.name}>
-                            {director.name} ({director.email})
-                          </option>
-                        ))}
-                      </select>
+                          padding: '4px 8px',
+                          borderRadius: '4px'
+                        }}>
+                          Found {directors.length} director(s)
+                        </div>
+                      </>
                     )}
                   </div>
                 )}
@@ -1506,7 +1700,7 @@ export default function DocumentUploadModal({ open, onClose, selectedType, onDoc
               fontSize: '14px'
             }}>
               {uploadError}
-        </div>
+            </div>
           )}
         </div>
       </div>

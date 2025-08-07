@@ -50,6 +50,7 @@ import ComprehensiveTaxDashboard from './components/ComprehensiveTaxDashboard';
 import CorporateIncomeTax from './components/CorporateIncomeTax';
 import Invoices from './components/Invoices';
 import BranchRegistrationRequirements from './components/BranchRegistrationRequirements';
+import VatRequirement from './components/VatRequirement';
 
 
 function App() { 
@@ -121,6 +122,7 @@ function App() {
                   <Route path="/corporate-tax-analysis" element={<CorporateTaxAnalysis />} />
                   <Route path="/target-company/:id" element={<TargetCompanyDetails />} />
                   <Route path="/invoices" element={<Invoices />} />
+                  <Route path="/vat-requirement" element={<VatRequirement />} />
                 </Route>
               </Route>
             </Route>

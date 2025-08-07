@@ -2,7 +2,7 @@
   padding: 24px;
   max-width: 1200px;
   margin: 0 auto;
-  background-color:#220938; /* Dark blue background */
+  background: linear-gradient(135deg, #1A1A4A 0%, #12123A 100%);
   color: #ffffff;
   min-height: 100vh;
 }
@@ -10,7 +10,14 @@
 .tasks-header {
   margin-bottom: 24px;
 }
-
+.form-group input, .form-group textarea {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  color: #333;
+}
 .tasks-header h2 {
   font-size: 28px;
   font-weight: 700;
@@ -376,19 +383,20 @@
 
 .deadline-form-container {
   background: #2e2e5e;
-  border-radius: 8px;
-  padding: 14px;
+  border-radius: 12px;
+  padding: 24px;
   width: 90%;
-  max-width: 480px;
+  max-width: 520px;
   margin: 0 auto;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
   color: #ffffff;
   position: fixed;
-  top: 48%; /* Position slightly higher to ensure buttons are visible */
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   max-height: 85vh;
-  overflow-y: auto; /* Enable scrolling if needed */
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Ensure the form container has some padding at the bottom for better scrolling */
@@ -397,114 +405,125 @@
 }
 
 .deadline-form-container h3 {
-  font-size: 16px;
-  font-weight: 600;
-  margin: 0 0 10px 0;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 20px 0;
   color: #ffffff;
+  text-align: center;
 }
 
-.form-group {
-  margin-bottom: 7px;
+    .form-group 1 {
+  margin-bottom: 16px;
 }
 
-.form-group label {
+.form-group 1 label {
   display: block;
-  font-size: 12px;
-  font-weight: 500;
-  margin-bottom: 2px;
-  color: #a8b1ff;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-  width: 100%;
-  padding: 5px 8px;
-
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
   color: #ffffff;
-  font-size: 12px;
-  height: 30px;
 }
 
-.form-group input::placeholder,
-.form-group textarea::placeholder {
+.form-group 1 input,
+.form-group 1 select,
+.form-group 1 textarea {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 14px;
+  height: 44px;
+  transition: all 0.2s ease;
+}
+
+.form-group 1 input::placeholder,
+.form-group 1 textarea::placeholder {
   color: rgba(255, 255, 255, 0.5);
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
+.form-group 1 input:focus,
+.form-group 1 select:focus,
+.form-group 1 textarea:focus {
   outline: none;
-  border-color: rgba(255, 255, 255, 0.5);
+  border-color: #f43f5e;
+  box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.2);
+  background: rgba(255, 255, 255, 0.08);
 }
 
-.form-group textarea {
-  min-height: 45px;
+.form-group 1 textarea {
+  min-height: 80px;
   height: auto;
   resize: vertical;
+  line-height: 1.5;
 }
 
 /* Two column layout for smaller form fields */
 .form-row {
   display: flex;
-  gap: 10px;
+  gap: 16px;
 }
 
-.form-row .form-group {
+.form-row .form-group 1 {
   flex: 1;
 }
 
 /* Company Tags Styling */
 .company-tags {
-  margin-top: 5px;
+  margin-top: 8px;
 }
 
 .company-tags label {
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 
 .tags-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 8px;
 }
 
 .tag {
-  padding: 3px 7px;
-  border-radius: 12px;
-  font-size: 10px;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 12px;
   background: rgba(50, 50, 120, 0.5);
   color: #ffffff;
   cursor: pointer;
   transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .tag:hover {
   background: rgba(80, 80, 160, 0.5);
+  transform: translateY(-1px);
 }
 
 .tag.selected {
   background: #f43f5e;
   color: white;
+  border-color: #f43f5e;
 }
 
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 10px;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .cancel-button, 
 .submit-button {
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 13px;
-  font-weight: 500;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  min-width: 100px;
 }
 
 .cancel-button {
@@ -515,6 +534,7 @@
 
 .cancel-button:hover {
   background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
 }
 
 .submit-button {
@@ -525,6 +545,7 @@
 
 .submit-button:hover {
   background: #e11d48;
+  transform: translateY(-1px);
 }
 
 /* Make form more responsive */
@@ -535,13 +556,13 @@
     margin: 0 10px;
   }
   
-  .form-group label {
+  .form-group 1 label {
     font-size: 13px;
   }
   
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
+  .form-group 1 input,
+  .form-group 1 select,
+  .form-group 1 textarea {
     padding: 8px 10px;
     font-size: 13px;
   }
@@ -580,7 +601,7 @@
     margin-bottom: 16px;
   }
   
-  .form-group {
+  .form-group 1 {
     margin-bottom: 12px;
   }
   
@@ -657,4 +678,155 @@
 
 .status-wrapper .task-status-dropdown {
   padding-left: 24px;
+}
+
+/* Unique modal styles for Calendar create task */
+.calendar-task-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(20, 20, 40, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.calendar-task-modal-container {
+  background: #23234a;
+  border-radius: 16px;
+  padding: 32px 28px 24px 28px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  color: #fff;
+  animation: fadeInModal 0.3s;
+}
+
+@keyframes fadeInModal {
+  from { opacity: 0; transform: translateY(40px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+
+.calendar-task-modal-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 22px;
+  text-align: center;
+  color: #fff;
+}
+
+.calendar-task-modal-group {
+  margin-bottom: 16px;
+}
+
+.calendar-task-modal-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #bfc6e0;
+}
+
+.calendar-task-modal-group input,
+.calendar-task-modal-group select,
+.calendar-task-modal-group textarea {
+  width: 100%;
+  padding: 10px 14px;
+  background: #18183a;
+  border: 1px solid #2e2e5e;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+  margin-top: 2px;
+  transition: border 0.2s;
+}
+
+.calendar-task-modal-group input:focus,
+.calendar-task-modal-group select:focus,
+.calendar-task-modal-group textarea:focus {
+  border-color: #3b82f6;
+  outline: none;
+}
+
+.calendar-task-modal-row {
+  display: flex;
+  gap: 16px;
+}
+
+.calendar-task-modal-row .calendar-task-modal-group {
+  flex: 1;
+}
+
+.calendar-task-modal-tags-container {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.calendar-task-modal-tag {
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 12px;
+  background: #2e2e5e;
+  color: #bfc6e0;
+  cursor: pointer;
+  border: 1px solid #2e2e5e;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+}
+
+.calendar-task-modal-tag.selected,
+.calendar-task-modal-tag:hover {
+  background: #3b82f6;
+  color: #fff;
+  border-color: #3b82f6;
+}
+
+.calendar-task-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.calendar-task-modal-cancel,
+.calendar-task-modal-submit {
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s, color 0.2s;
+}
+
+.calendar-task-modal-cancel {
+  background: transparent;
+  color: #bfc6e0;
+  border: 1px solid #3b82f6;
+}
+
+.calendar-task-modal-cancel:hover {
+  background: #23234a;
+  color: #fff;
+}
+
+.calendar-task-modal-submit {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.calendar-task-modal-submit:hover {
+  background: #2563eb;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .calendar-task-modal-container {
+    padding: 16px 6px;
+    max-width: 98vw;
+  }
+  .calendar-task-modal-row {
+    flex-direction: column;
+    gap: 0;
+  }
 }

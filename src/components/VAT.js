@@ -5,17 +5,123 @@ import { supabase } from '../supabaseClient'; // Make sure this path is correct
 import './vat.css';
 
 function VAT() {
-  const { register, handleSubmit, watch } = useForm();
+  const { register, handleSubmit, watch, setValue } = useForm();
   const [isProcessing, setIsProcessing] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState(null);
   const [error, setError] = useState(null);
   const [formData, setFormData] = useState(null);
   const [submissions, setSubmissions] = useState([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [vatRegistrationData, setVatRegistrationData] = useState(null);
+  const [isLoadingVatData, setIsLoadingVatData] = useState(true);
 
-  // Add this useEffect to fetch submissions when component mounts
+  // Function to fetch VAT registration data
+  const fetchVatRegistrationData = async () => {
+    try {
+      setIsLoadingVatData(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('vat_registrations')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (error) {
+        console.error('Error fetching VAT registration data:', error);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        setVatRegistrationData(data[0]);
+        console.log('Found VAT registration data:', data[0]);
+        
+        // Pre-fill form with VAT registration data
+        prefillFormWithVatData(data[0]);
+      }
+    } catch (error) {
+      console.error('Error fetching VAT registration data:', error);
+    } finally {
+      setIsLoadingVatData(false);
+    }
+  };
+
+  // Function to pre-fill form with VAT registration data
+  const prefillFormWithVatData = (vatData) => {
+    if (!vatData) return;
+
+    // Company Details
+    if (vatData.company_name) setValue('legalName', vatData.company_name);
+    if (vatData.trade_name) setValue('tradeName', vatData.trade_name);
+    if (vatData.legal_form) setValue('legalForm', vatData.legal_form);
+    if (vatData.registered_address) setValue('address', vatData.registered_address);
+    if (vatData.base_location) setValue('country', vatData.base_location);
+    
+    // Contact Information
+    if (vatData.contact_person) setValue('signerName', vatData.contact_person);
+    if (vatData.contact_email) setValue('email', vatData.contact_email);
+    if (vatData.contact_phone) setValue('telephone', vatData.contact_phone);
+    
+    // Business Activity
+    if (vatData.business_activity) setValue('businessSector', vatData.business_activity);
+    if (vatData.special_activities) setValue('activitiesNetherlands', vatData.special_activities);
+    
+    // VAT Information
+    if (vatData.vat_number_existing) setValue('foreignVatNumber', vatData.vat_number_existing);
+    if (vatData.vat_id_own_country) setValue('foreignVatNumber', vatData.vat_id_own_country);
+    
+    // Registration Reasons (map to form fields)
+    if (vatData.registration_reasons && Array.isArray(vatData.registration_reasons)) {
+      vatData.registration_reasons.forEach(reason => {
+        switch (reason) {
+          case 'VAT refund':
+            setValue('sellToPrivateIndividuals', 'yes');
+            break;
+          case 'VAT return filing':
+            setValue('chargeVATServices', 'yes');
+            break;
+          case 'One Stop Shop':
+            setValue('sellToEUCustomers', 'yes');
+            break;
+          case 'Corporation tax':
+            setValue('sellToEntrepreneurs', 'yes');
+            break;
+          case 'Payroll taxes':
+            setValue('haveDeliveries', 'yes');
+            break;
+          case 'Transfer tax':
+            setValue('bringGoodsToEU', 'yes');
+            break;
+          case 'Dividend tax refund':
+            setValue('sellToCustomersOutsideEU', 'yes');
+            break;
+        }
+      });
+    }
+
+    // Set default values for required fields
+    setValue('correspondenceType', 'business');
+    setValue('language', 'english');
+    setValue('registeredBefore', 'no');
+    setValue('hasIBAN', 'yes');
+    setValue('servicesProvidedTo', 'both');
+    setValue('oneManBusiness', 'no');
+    setValue('hasAuthRep', 'no');
+
+    // Set current date for signature
+    const today = new Date();
+    setValue('signatureDateDay', today.getDate());
+    setValue('signatureDateMonth', today.getMonth() + 1);
+    setValue('signatureDateYear', today.getFullYear());
+  };
+
+  // Add this useEffect to fetch submissions and VAT data when component mounts
   useEffect(() => {
     fetchVatSubmissions();
+    fetchVatRegistrationData();
   }, []);
 
   const fetchVatSubmissions = async () => {
@@ -620,6 +726,8 @@ function VAT() {
           <h1>Application for VAT Registration</h1>
         </div>
       </div>
+
+
 
       {/* Add this new section */}
       <div className="previous-submissions">

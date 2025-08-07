@@ -697,13 +697,6 @@ const Dataroom = () => {
   return (
     <div className="dru-main-container">
       <div className="dru-upload-card">
-        <div className="dru-upload-header">
-          <span className="dru-upload-icon"> <svg width="28" height="28" fill="none" viewBox="0 0 28 28"><path d="M14 22V6M14 6l-5 5M14 6l5 5" stroke="#FF4D80" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg></span>
-          <div>
-            <div className="dru-upload-title">Upload Documents</div>
-            <div className="dru-upload-subtitle">Upload documents to your data room for processing and analysis</div>
-          </div>
-        </div>
         <div className="dru-doc-row" style={{ justifyContent: 'center', gap: '4rem' }}>
           {docTypes.map((doc) => (
             <div
@@ -743,6 +736,29 @@ const Dataroom = () => {
           ))}
         </div>
 
+        {/* Upload Documents Header - Now positioned in the middle */}
+        <div className="dru-upload-header" style={{ 
+          marginTop: '32px', 
+          marginBottom: '24px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          textAlign: 'center'
+        }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '12px'
+          }}>
+            <span className="dru-upload-icon"> <svg width="28" height="28" fill="none" viewBox="0 0 28 28"><path d="M14 22V6M14 6l-5 5M14 6l5 5" stroke="#FF4D80" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg></span>
+            <div style={{ textAlign: 'center' }}>
+              <div className="dru-upload-title">Upload Documents</div>
+              <div className="dru-upload-subtitle">Upload documents to your data room for processing and analysis</div>
+            </div>
+          </div>
+        </div>
+
         {/* Tooltip */}
         {tooltip.show && (
           <div 
@@ -771,7 +787,7 @@ const Dataroom = () => {
             <div className="dru-upload-dashed-icon">
               <svg width="40" height="40" fill="none" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#18143a"/><path d="M20 28V14M20 14l-5 5M20 14l5 5" stroke="#FF4D80" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
-            <div className="dru-upload-dashed-title">Custom Document Upload</div>
+            <div className="dru-upload-dashed-title">Click Here</div>
             <div className="dru-upload-dashed-subtitle">Upload any document type without specific requirements. Supports PDF, DOCX, XLSX, JPG, PNG, and more.</div>
             <div className="dru-upload-dashed-action"> <span className="dru-upload-dashed-action-link">Click or drag files here to begin</span></div>
           </div>
@@ -786,7 +802,7 @@ const Dataroom = () => {
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="#FF4D80" strokeWidth="2"/>
               <polyline points="14,2 14,8 20,8" stroke="#FF4D80" strokeWidth="2"/>
             </svg>
-            Documents
+            Uploaded Documents
           </div>
           <div className="dru-documents-subtitle">Browse and search through your uploaded documents</div>
         </div>

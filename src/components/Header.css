@@ -706,13 +706,13 @@
     color: #fff;
     border: none;
     border-radius: 16px;
-    padding: 0.75rem 2rem;
+    padding: 0.3rem 1rem;
     font-weight: 500;
-    font-size: 1.1rem;
+    font-size: 0.75rem;
     cursor: pointer;
     transition: background 0.2s, box-shadow 0.2s;
     box-shadow: 0 2px 8px rgba(234,58,112,0.08);
-    min-width: 140px;
+    min-width: 90px;
     flex-direction: row;
 }
 .onboarding-btn:hover {

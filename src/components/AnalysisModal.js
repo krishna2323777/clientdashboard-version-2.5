@@ -1,45 +1,58 @@
 import React, { useRef } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { useNavigate } from 'react-router-dom';
 
 
 const AnalysisModal = ({ isOpen, onClose, analysisData }) => {
   const modalContentRef = useRef(null);
+  const navigate = useNavigate();
 
   if (!isOpen || !analysisData) {
     return null;
   }
-// Helper to format the date for deadlines (e.g., 12/15/2023)
+// Helper to format the date for deadlines (e.g., "June 1, 2021" or "12/15/2023")
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     try {
-      const date = new Date(dateString);
-       if (!isNaN(date.getTime())) {
-           return date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
-       } else {
-           // Fallback if date parsing fails
-           return dateString;
-       }
-    } catch (e) {
-        console.error("Error formatting date:", e);
+      // If the date is already in a readable format like "June 1, 2021", return it as is
+      if (dateString.includes(',') && dateString.match(/[A-Za-z]+ \d+, \d{4}/)) {
         return dateString;
+      }
+      
+      const date = new Date(dateString);
+      if (!isNaN(date.getTime())) {
+        return date.toLocaleDateString('en-US', { 
+          month: 'long', 
+          day: 'numeric', 
+          year: 'numeric' 
+        });
+      } else {
+        // Fallback if date parsing fails
+        return dateString;
+      }
+    } catch (e) {
+      console.error("Error formatting date:", e);
+      return dateString;
     }
   };
 
-  // Assuming deadlines are stored as an array of objects like [{ date: 'YYYY-MM-DD', description: '...' }]
+  // Render deadlines in the format [{"date": "June 1, 2021", "type": "Tax Return Submission"}]
   const renderDeadlines = (deadlines) => {
     if (!deadlines || deadlines.length === 0) {
-      return <p style={{ color: '#ccc', fontSize: '0.9rem' }}>No deadlines found.</p>; // Adjusted font size
+      return <p style={{ color: '#ccc', fontSize: '0.9rem' }}>No deadlines found.</p>;
     }
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {deadlines.map((deadline, index) => (
           <div key={index} style={deadlineItemStyle}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.95rem' }}> {/* Adjusted font size */}
-              <span style={{ fontSize: '1.2rem' }}>{(deadline.description && deadline.description.includes('Payment')) ? '⚠️' : '📅'}</span>
-              {deadline.description || 'N/A'}
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.95rem' }}>
+              <span style={{ fontSize: '1.2rem' }}>{(deadline.type && deadline.type.includes('Payment')) ? '⚠️' : '📅'}</span>
+              {deadline.type || deadline.description || 'N/A'}
             </span>
-            <span style={deadlineDateStyle((deadline.description && deadline.description.includes('Payment')))}>{formatDate(deadline.date)}</span> {/* Pass boolean for style */}
+            <span style={deadlineDateStyle((deadline.type && deadline.type.includes('Payment')))}>
+              {deadline.date ? formatDate(deadline.date) : 'N/A'}
+            </span>
           </div>
         ))}
       </div>
@@ -83,6 +96,88 @@ const AnalysisModal = ({ isOpen, onClose, analysisData }) => {
     });
   };
 
+
+
+  // Function to handle creating a task
+  const handleCreateTask = () => {
+    // Prepare the task data from analysis
+    const taskData = {
+      title: analysisData.document_type || 'Document Analysis Task',
+      description: analysisData.summary || 'Document analysis task created from mailbox',
+      type: getTaskTypeFromDocument(analysisData.document_type),
+      due_date: getEarliestDeadline(analysisData.deadlines),
+      priority: getPriorityFromDeadlines(analysisData.deadlines),
+      status: 'Pending',
+      assigned_to: '',
+      deadlines: analysisData.deadlines,
+      recommendations: analysisData.recommendations
+    };
+
+    // Store the task data in sessionStorage for the calendar component to access
+    sessionStorage.setItem('pendingTaskData', JSON.stringify(taskData));
+    
+    // Close the modal
+    onClose();
+    
+    // Navigate to calendar route
+    navigate('/calendar');
+  };
+
+  // Helper function to determine task type from document type
+  const getTaskTypeFromDocument = (documentType) => {
+    if (!documentType) return 'Company';
+    
+    const lowerType = documentType.toLowerCase();
+    if (lowerType.includes('tax') || lowerType.includes('vat')) return 'Tax';
+    if (lowerType.includes('finance') || lowerType.includes('invoice')) return 'Finance';
+    if (lowerType.includes('legal') || lowerType.includes('agreement')) return 'Legal Agreements';
+    if (lowerType.includes('shipment') || lowerType.includes('mail')) return 'Shipments';
+    if (lowerType.includes('kyc') || lowerType.includes('verification')) return 'KYC';
+    
+    return 'Company';
+  };
+
+  // Helper function to get the earliest deadline
+  const getEarliestDeadline = (deadlines) => {
+    if (!deadlines || deadlines.length === 0) {
+      // Default to 7 days from now if no deadlines
+      const defaultDate = new Date();
+      defaultDate.setDate(defaultDate.getDate() + 7);
+      return defaultDate.toISOString().split('T')[0];
+    }
+
+    // Find the earliest deadline
+    const validDeadlines = deadlines.filter(d => d.date);
+    if (validDeadlines.length === 0) {
+      const defaultDate = new Date();
+      defaultDate.setDate(defaultDate.getDate() + 7);
+      return defaultDate.toISOString().split('T')[0];
+    }
+
+    const earliest = validDeadlines.reduce((earliest, current) => {
+      const earliestDate = new Date(earliest.date);
+      const currentDate = new Date(current.date);
+      return earliestDate < currentDate ? earliest : current;
+    });
+
+    return new Date(earliest.date).toISOString().split('T')[0];
+  };
+
+  // Helper function to determine priority based on deadlines
+  const getPriorityFromDeadlines = (deadlines) => {
+    if (!deadlines || deadlines.length === 0) return 'Medium';
+
+    const now = new Date();
+    const urgentDeadlines = deadlines.filter(d => {
+      if (!d.date) return false;
+      const deadlineDate = new Date(d.date);
+      const daysUntilDeadline = (deadlineDate - now) / (1000 * 60 * 60 * 24);
+      return daysUntilDeadline <= 7; // High priority if deadline is within 7 days
+    });
+
+    return urgentDeadlines.length > 0 ? 'High' : 'Medium';
+  };
+
   return (
     <div className="modal-overlay" style={modalOverlayStyle}>
       <div className="modal-content" style={modalContentStyle} ref={modalContentRef}>
@@ -108,17 +203,7 @@ const AnalysisModal = ({ isOpen, onClose, analysisData }) => {
           <p style={{ color: '#ccc', fontSize: '0.95rem', margin: 0 }}>{analysisData.summary}</p>
         </div>
 
-        {/* Key Information Section */}
-        <div style={sectionStyle}>
-           <h3 style={sectionTitleStyle}>Key Information</h3>
-           {/* Placeholder data based on image - replace with actual data fetching if needed */}
-           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-               <div style={infoCardStyle}><p style={infoLabelStyle}>Tax Year</p><p style={infoValueStyle}>2023</p></div>
-               <div style={infoCardStyle}><p style={infoLabelStyle}>Total Due</p><p style={infoValueStyle}>€1,245.00</p></div>
-               <div style={infoCardStyle}><p style={infoLabelStyle}>Reference Number</p><p style={infoValueStyle}>TAX-2023-78901</p></div>
-               <div style={infoCardStyle}><p style={infoLabelStyle}>Filing Status</p><p style={infoValueStyle}>Completed</p></div>
-           </div>
-        </div>
+
 
         {/* Important Deadlines Section */}
         <div style={sectionStyle}>
@@ -136,8 +221,7 @@ const AnalysisModal = ({ isOpen, onClose, analysisData }) => {
          {/* Functionality for these buttons is not implemented */}
          <div style={{ display: 'flex', justifyContent: 'flex-start', gap: '15px', marginTop: '30px' }}>
              <button style={buttonStyle('#6C5DD3', true)} onClick={handleDownloadAnalysis}><span style={{marginRight: '8px'}}>⬇️</span> Download Analysis</button>
-             <button style={buttonStyle('#6C5DD3')}>Create Task</button>
-             <button style={buttonStyle('#FF4B7E')}>Add to Calendar</button>
+             <button style={buttonStyle('#FF4B7E')} onClick={handleCreateTask}>Create Task</button>
          </div>
 
       </div>

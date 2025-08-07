@@ -227,15 +227,31 @@ const Mailbox = () => {
     // Fetch detailed analysis data from Supabase
     const { data, error } = await supabase
       .from('incoming_mails')
-      .select('document_type, summary, deadlines, recommendations')
+      .select('document_type, summary, deadlines, recommendations, document_name, created_at')
       .eq('id', mail.id)
       .limit(1);
 
     if (error) {
-      console.error('Error fetching analysis data from Supabase:', error); // More detailed log
+      console.error('Error fetching analysis data from Supabase:', error);
       alert('Failed to fetch analysis data.');
     } else if (data && data.length > 0) {
-      setAnalyzedMail(data[0]);
+      // Parse deadlines if it's a JSON string
+      let parsedDeadlines = [];
+      if (data[0].deadlines) {
+        try {
+          parsedDeadlines = typeof data[0].deadlines === 'string' 
+            ? JSON.parse(data[0].deadlines) 
+            : data[0].deadlines;
+        } catch (e) {
+          console.error('Error parsing deadlines:', e);
+          parsedDeadlines = [];
+        }
+      }
+
+              setAnalyzedMail({
+          ...data[0],
+          deadlines: parsedDeadlines
+        });
       setIsModalOpen(true);
     } else {
        console.log('No analysis data found for mail ID:', mail.id);
@@ -307,7 +323,7 @@ const Mailbox = () => {
       // Fetch detailed analysis data from document_uploads table
       const { data, error } = await supabase
         .from('document_uploads')
-        .select('document_type, summary, deadlines, recommendations')
+        .select('document_type, summary, deadlines, recommendations, document_name, created_at')
         .eq('id', email.id)
         .limit(1);
 
@@ -315,7 +331,23 @@ const Mailbox = () => {
         console.error('Error fetching analysis data from document_uploads:', error);
         alert('Failed to fetch analysis data.');
       } else if (data && data.length > 0) {
-        setAnalyzedMail(data[0]);
+        // Parse deadlines if it's a JSON string
+        let parsedDeadlines = [];
+        if (data[0].deadlines) {
+          try {
+            parsedDeadlines = typeof data[0].deadlines === 'string' 
+              ? JSON.parse(data[0].deadlines) 
+              : data[0].deadlines;
+          } catch (e) {
+            console.error('Error parsing deadlines:', e);
+            parsedDeadlines = [];
+          }
+        }
+
+        setAnalyzedMail({
+          ...data[0],
+          deadlines: parsedDeadlines
+        });
         setIsModalOpen(true);
       } else {
         console.log('No analysis data found for document ID:', email.id);
@@ -552,6 +584,8 @@ const Mailbox = () => {
         return '#6C5DD3';
     }
   };
+
+
 
   // Add these functions before the return statement
   const handleViewShipmentDoc = async (doc) => {
