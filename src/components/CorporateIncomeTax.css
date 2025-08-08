@@ -3,6 +3,7 @@
   max-width: 1200px;
   margin: 0 auto;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #0f172a; /* Updated to match dashboard */
 }
 
 .cit-header {
@@ -11,7 +12,7 @@
   align-items: center;
   margin-bottom: 30px;
   padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #0f172a; /* Updated to match dashboard */
   border-radius: 12px;
   color: white;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -73,11 +74,646 @@
   transform: translateY(-2px);
 }
 
+/* Step Indicators */
+.cit-step-indicators {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+
+.cit-step-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  opacity: 1;
+  transition: all 0.3s ease;
+}
+
+.cit-step-indicator.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cit-step-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 2px solid rgba(255,255,255,0.3);
+  margin-bottom: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.cit-step-circle.current {
+  background: #8b5cf6;
+  color: #fff;
+  border-color: #8b5cf6;
+}
+
+.cit-step-circle.completed {
+  background: #10b981;
+  color: #fff;
+  border-color: #10b981;
+}
+
+.cit-step-circle.inactive {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: rgba(255,255,255,0.3);
+}
+
+.cit-step-label {
+  text-align: center;
+  max-width: 120px;
+}
+
+.cit-step-label-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.cit-step-label-text.current {
+  color: #8b5cf6;
+}
+
+.cit-step-label-text.completed {
+  color: #10b981;
+}
+
+.cit-step-label-text.inactive {
+  color: rgba(255,255,255,0.7);
+}
+
+.cit-step-description {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.6);
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Step Content */
+.cit-step-content {
+  background: #0f172a;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  margin-bottom: 2rem;
+}
+
+/* Step 1: Required Documents */
+.cit-required-docs-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.cit-required-docs-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.cit-required-docs-subtitle {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
+}
+
+.cit-docs-overview {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.cit-docs-overview-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 1rem;
+}
+
+.cit-docs-overview-text {
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.cit-docs-overview-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.cit-docs-overview-list li {
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 0.5rem;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.cit-docs-overview-list li:before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #8b5cf6;
+}
+
+.cit-docs-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.cit-doc-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  color: #fff;
+}
+
+.cit-doc-card:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.cit-doc-card.primary {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.cit-doc-card.primary:hover {
+  background: rgba(139, 92, 246, 0.2);
+}
+
+.cit-doc-icon {
+  font-size: 2rem;
+  color: #8b5cf6;
+  margin-bottom: 1rem;
+}
+
+.cit-doc-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #fff;
+}
+
+.cit-doc-description {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Step 2: Upload Documents */
+.cit-upload-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.cit-upload-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.cit-year-selector {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cit-year-label {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+.cit-year-select {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.cit-upload-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.cit-upload-option {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #fff;
+}
+
+.cit-upload-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.cit-upload-option.importing {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.cit-upload-icon {
+  font-size: 2.5rem;
+  color: #8b5cf6;
+  margin-bottom: 1rem;
+}
+
+.cit-upload-title-text {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #fff;
+}
+
+.cit-upload-description {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.cit-upload-action {
+  background: rgba(139, 92, 246, 0.2);
+  color: #8b5cf6;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.cit-upload-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #8b5cf6;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.cit-uploaded-files {
+  margin-top: 2rem;
+}
+
+.cit-uploaded-file {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+}
+
+.cit-file-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cit-file-icon {
+  color: #8b5cf6;
+  font-size: 1.2rem;
+}
+
+.cit-file-details {
+  flex: 1;
+}
+
+.cit-file-name {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: #fff;
+}
+
+.cit-file-type {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+}
+
+.cit-file-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.cit-file-action-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.8rem;
+}
+
+.cit-file-action-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.cit-file-action-btn.delete {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.cit-file-action-btn.delete:hover {
+  background: rgba(239, 68, 68, 0.3);
+}
+
+.cit-navigation {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+}
+
+.cit-nav-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cit-nav-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.cit-nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cit-nav-btn.primary {
+  background: #8b5cf6;
+  border-color: #8b5cf6;
+  color: #fff;
+}
+
+.cit-nav-btn.primary:hover:not(:disabled) {
+  background: #7c3aed;
+  transform: translateY(-1px);
+}
+
+/* Step 3: Processing */
+.cit-processing {
+  text-align: center;
+  padding: 3rem 2rem;
+}
+
+.cit-processing-spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  border-top-color: #8b5cf6;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 2rem;
+}
+
+.cit-processing-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 1rem;
+}
+
+.cit-processing-subtitle {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
+  margin-bottom: 2rem;
+}
+
+.cit-progress-container {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  height: 8px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.cit-progress-bar {
+  background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+.cit-progress-text {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+/* Step 4: Report */
+.cit-report-container {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.cit-report-section {
+  margin-bottom: 2rem;
+}
+
+.cit-report-section:last-child {
+  margin-bottom: 0;
+}
+
+.cit-report-section-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cit-report-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.cit-report-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 1rem;
+  color: #fff;
+}
+
+.cit-report-label {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 0.5rem;
+}
+
+.cit-report-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.cit-report-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.cit-report-list li {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cit-report-list li:last-child {
+  margin-bottom: 0;
+}
+
+.cit-error-container {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid #ef4444;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.cit-error-title {
+  color: #ef4444;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.cit-error-message {
+  color: #fff;
+  line-height: 1.5;
+}
+
+.cit-error-solutions {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: rgba(239, 68, 68, 0.05);
+  border-radius: 6px;
+}
+
+.cit-error-solutions-title {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+}
+
+.cit-error-solutions-list {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  margin: 0.5rem 0 0 1rem;
+}
+
+.cit-error-solutions-list li {
+  margin-bottom: 0.25rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .cit-upload-options {
+    grid-template-columns: 1fr;
+  }
+  
+  .cit-uploaded-file {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .cit-file-actions {
+    justify-content: center;
+  }
+  
+  .cit-navigation {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .cit-nav-btn {
+    width: 100%;
+  }
+  
+  .cit-report-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .cit-step-indicators {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .cit-step-indicator {
+    min-width: 80px;
+  }
+  
+  .cit-upload-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .cit-year-selector {
+    justify-content: center;
+  }
+}
+
 .cit-nav-tabs {
   display: flex;
   gap: 5px;
   margin-bottom: 30px;
-  background: #f8f9fa;
+  background: #0f172a; /* Updated to match dashboard */
   padding: 5px;
   border-radius: 10px;
   overflow-x: auto;
@@ -92,18 +728,18 @@
   font-weight: 500;
   transition: all 0.3s ease;
   white-space: nowrap;
-  color: #666;
+  color: #ccc;
 }
 
 .cit-nav-tab.active {
-  background: #667eea;
+  background: #0f172a; /* Updated to match dashboard */
   color: white;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.3);
 }
 
 .cit-nav-tab:hover:not(.active) {
-  background: #e9ecef;
-  color: #333;
+  background: #0f172a; /* Updated to match dashboard */
+  color: #fff;
 }
 
 .cit-content {
@@ -123,12 +759,13 @@
 }
 
 .cit-card {
-  background: white;
+  background: #0f172a; /* Updated to match dashboard */
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e9ecef;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
+  color: white;
 }
 
 .cit-card:hover {
@@ -137,7 +774,7 @@
 }
 
 .cit-card.primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #0f172a; /* Updated to match dashboard */
   color: white;
 }
 
@@ -147,10 +784,10 @@
   justify-content: center;
   width: 48px;
   height: 48px;
-  background: rgba(102, 126, 234, 0.1);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   margin-bottom: 15px;
-  color: #667eea;
+  color: white;
 }
 
 .cit-card.primary .cit-card-icon {
@@ -162,7 +799,7 @@
   margin: 0 0 10px 0;
   font-size: 16px;
   font-weight: 600;
-  color: #666;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .cit-card.primary .cit-card-content h3 {
@@ -172,7 +809,7 @@
 .cit-amount {
   font-size: 28px;
   font-weight: 700;
-  color: #333;
+  color: white;
   margin-bottom: 8px;
 }
 
@@ -182,7 +819,7 @@
 
 .cit-tax-rate, .cit-status, .cit-due-date {
   font-size: 14px;
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .cit-card.primary .cit-tax-rate {
@@ -200,7 +837,7 @@
 }
 
 .cit-status-badge.early-prep {
-  background: #e8f5e8;
+  background: #0f172a; /* Updated to match dashboard */
   color: #28a745;
 }
 
@@ -212,29 +849,30 @@
 }
 
 .cit-action-card {
-  background: white;
+  background: #0f172a; /* Updated to match dashboard */
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e9ecef;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   gap: 20px;
+  color: white;
 }
 
 .cit-action-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
-  border-color: #667eea;
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .cit-action-icon {
   flex-shrink: 0;
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #0f172a; /* Updated to match dashboard */
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -251,19 +889,19 @@
   margin: 0 0 8px 0;
   font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: white;
 }
 
 .cit-action-content p {
   margin: 0;
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
   font-size: 14px;
   line-height: 1.4;
 }
 
 .cit-action-arrow {
   flex-shrink: 0;
-  color: #667eea;
+  color: white;
   font-size: 20px;
   transition: transform 0.3s ease;
 }
@@ -285,12 +923,12 @@
 .cit-prep-header h3 {
   font-size: 28px;
   font-weight: 600;
-  color: #333;
+  color: white;
   margin-bottom: 10px;
 }
 
 .cit-prep-header p {
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
   font-size: 16px;
   max-width: 600px;
   margin: 0 auto;
@@ -308,34 +946,35 @@
   display: flex;
   gap: 20px;
   padding: 24px;
-  background: white;
+  background: #0f172a; /* Updated to match dashboard */
   border-radius: 12px;
-  border: 2px solid #e9ecef;
+  border: 2px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
+  color: white;
 }
 
 .cit-prep-step.completed {
   border-color: #28a745;
-  background: #f8fff8;
+  background: #0f172a; /* Updated to match dashboard */
 }
 
 .cit-prep-step.active {
-  border-color: #667eea;
-  background: #f8f9ff;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  background: #0f172a; /* Updated to match dashboard */
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
 }
 
 .cit-step-number {
   flex-shrink: 0;
   width: 40px;
   height: 40px;
-  background: #e9ecef;
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  color: #666;
+  color: white;
 }
 
 .cit-prep-step.completed .cit-step-number {
@@ -344,7 +983,7 @@
 }
 
 .cit-prep-step.active .cit-step-number {
-  background: #667eea;
+  background: #0f172a; /* Updated to match dashboard */
   color: white;
 }
 
@@ -356,12 +995,12 @@
   margin: 0 0 10px 0;
   font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: white;
 }
 
 .cit-step-content p {
   margin: 0 0 15px 0;
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
   line-height: 1.5;
 }
 
@@ -372,7 +1011,7 @@
 }
 
 .cit-step-button {
-  background: #667eea;
+  background: #0f172a; /* Updated to match dashboard */
   color: white;
   border: none;
   padding: 10px 20px;
@@ -383,13 +1022,14 @@
 }
 
 .cit-step-button:hover {
-  background: #5a6fd8;
+  background: #0f172a; /* Updated to match dashboard */
   transform: translateY(-2px);
 }
 
 /* Analysis Section */
 .cit-analysis {
   padding: 20px 0;
+  background: #0f172a; /* Updated to match dashboard */
 }
 
 .cit-analysis-header {
@@ -400,12 +1040,12 @@
 .cit-analysis-header h3 {
   font-size: 28px;
   font-weight: 600;
-  color: #333;
+  color: white;
   margin-bottom: 10px;
 }
 
 .cit-analysis-header p {
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
   font-size: 16px;
   max-width: 600px;
   margin: 0 auto;
@@ -419,12 +1059,13 @@
 }
 
 .cit-opt-card {
-  background: white;
+  background: #0f172a; /* Updated to match dashboard */
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e9ecef;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
+  color: white;
 }
 
 .cit-opt-card:hover {
@@ -436,18 +1077,19 @@
   font-size: 32px;
   margin-bottom: 15px;
   display: block;
+  color: white;
 }
 
 .cit-opt-content h4 {
   margin: 0 0 10px 0;
   font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: white;
 }
 
 .cit-opt-content p {
   margin: 0 0 15px 0;
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
   line-height: 1.5;
 }
 
@@ -455,7 +1097,7 @@
   font-size: 16px;
   font-weight: 600;
   color: #28a745;
-  background: #e8f5e8;
+  background: #0f172a; /* Updated to match dashboard */
   padding: 8px 12px;
   border-radius: 6px;
   display: inline-block;
@@ -483,23 +1125,23 @@
 }
 
 .cit-primary-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #0f172a; /* Updated to match dashboard */
   color: white;
 }
 
 .cit-primary-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.3);
 }
 
 .cit-secondary-button {
-  background: white;
-  color: #667eea;
-  border: 2px solid #667eea;
+  background: #0f172a; /* Updated to match dashboard */
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .cit-secondary-button:hover {
-  background: #667eea;
+  background: #0f172a; /* Updated to match dashboard */
   color: white;
   transform: translateY(-2px);
 }
@@ -590,7 +1232,7 @@
 } 
 
 .cit-success-banner {
-  background-color: #f0fdf4;
+  background-color: #0f172a; /* Updated to match dashboard */
   color: #064e3b;
   padding: 1rem;
   border-radius: 8px;
@@ -602,6 +1244,7 @@
 .cit-required-docs h3 {
   margin-bottom: 1rem;
   font-size: 1.1rem;
+  color: white;
 }
 
 .cit-docs-grid {
@@ -614,15 +1257,17 @@
 .cit-doc-item {
   display: flex;
   align-items: center;
-  border: 1px solid #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 1rem;
   gap: 1rem;
+  background: #0f172a; /* Updated to match dashboard */
+  color: white;
 }
 
 .cit-doc-icon {
-  background-color: #f1f5f9;
-  color: #64748b;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
   width: 48px;
   height: 48px;
   display: flex;
@@ -638,10 +1283,11 @@
 .cit-doc-title {
   font-weight: 600;
   margin-bottom: 0.25rem;
+  color: white;
 }
 
 .cit-doc-description {
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.8);
   font-size: 0.9rem;
 }
 
@@ -654,19 +1300,19 @@
 }
 
 .cit-doc-status.required {
-  background-color: #fef3c7;
+  background-color: #0f172a; /* Updated to match dashboard */
   color: #92400e;
 }
 
 .cit-doc-status.optional {
-  background-color: #f0f9ff;
+  background-color: #0f172a; /* Updated to match dashboard */
   color: #1d4ed8;
 }
 
 .cit-doc-upload {
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
-  color: #3b82f6;
+  background-color: #0f172a; /* Updated to match dashboard */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
   padding: 0.5rem 1rem;
   border-radius: 6px;
   display: flex;
@@ -677,16 +1323,17 @@
 }
 
 .cit-doc-upload:hover {
-  background-color: #f1f5f9;
+  background-color: #0f172a; /* Updated to match dashboard */
 }
 
 .cit-bulk-upload {
-  border: 2px dashed #e2e8f0;
+  border: 2px dashed rgba(255, 255, 255, 0.2);
   border-radius: 12px;
   padding: 2rem;
   text-align: center;
   margin-bottom: 1.5rem;
   cursor: pointer;
+  background: #0f172a; /* Updated to match dashboard */
 }
 
 .cit-bulk-upload-label {
@@ -702,13 +1349,14 @@
 }
 
 .cit-uploaded-doc-item {
-  background-color: #f1f5f9;
+  background-color: #0f172a; /* Updated to match dashboard */
   padding: 0.5rem 1rem;
   border-radius: 6px;
   margin-bottom: 0.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: white;
 }
 
 @media (max-width: 768px) {
@@ -734,10 +1382,10 @@
 
 @keyframes iconPulse {
   0%, 100% { 
-    box-shadow: 0 6px 15px rgba(30, 58, 138, 0.4);
+    box-shadow: 0 6px 15px rgba(15, 23, 42, 0.4);
   }
   50% { 
-    box-shadow: 0 8px 20px rgba(30, 58, 138, 0.6);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.6);
   }
 }
 
@@ -749,18 +1397,20 @@
 /* Enhanced document card styles */
 .document-card {
   position: relative;
+  background: #0f172a !important; /* Updated to match dashboard */
+  color: #fff;
 }
 
 .document-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(30, 58, 138, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  border: 2px solid rgba(30, 58, 138, 0.6);
+  box-shadow: 0 8px 25px rgba(15, 23, 42, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .document-card:hover .click-indicator {
   opacity: 1 !important;
   transform: scale(1.05);
-  background: rgba(30, 58, 138, 0.7) !important;
+  background: rgba(15, 23, 42, 0.7) !important;
 }
 
 /* Active click animation */
@@ -859,5 +1509,11 @@
   
   .document-card p {
     font-size: 0.75rem !important;
+  }
+
+  /* Grid layout adjustment for small mobile */
+  [style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+    gap: 0.8rem !important;
   }
 } 
